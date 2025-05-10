@@ -1,11 +1,20 @@
 import {
+  CircleBackslashIcon,
+  EnterIcon,
   GearIcon,
   InfoCircledIcon,
   MixIcon,
   MobileIcon,
   PlusIcon,
 } from "@radix-ui/react-icons";
-import { Box, DropdownMenu, IconButton, Text } from "@radix-ui/themes";
+import {
+  Box,
+  DropdownMenu,
+  Flex,
+  IconButton,
+  Spinner,
+  Text,
+} from "@radix-ui/themes";
 import { Tabs } from "@sinm/react-chrome-tabs";
 import { useTranslation } from "react-i18next";
 import clsx from "clsx";
@@ -13,8 +22,10 @@ import type { AdbDaemonWebUsbDevice } from "@yume-chan/adb-daemon-webusb";
 import type { TabProperties } from "@sinm/react-chrome-tabs/dist/chrome-tabs";
 import ScreenWelcome from "@/screen/Welcome";
 import { ContentTypeProperties, type ContentType } from "@/types/content";
-import Locales from "@/locales/list";
 import cls from "@/scss/Main.module.scss";
+import useDialog from "./dialog/Dialog";
+import About from "./About";
+import LangSelector from "./LangSelector";
 
 export default function Container({
   listDevices,
@@ -22,8 +33,8 @@ export default function Container({
   tabs,
   content,
   handleAddDevice,
-  handleOpenNewTab,
   handleGetDevice,
+  handleOpenNewTab,
   close,
   reorder,
   active,
@@ -35,15 +46,16 @@ export default function Container({
   tabs: TabProperties[];
   content: ContentType[];
   handleAddDevice: () => void;
-  handleOpenNewTab: (content: ContentType, stackNo: number) => void;
   handleGetDevice: () => void;
+  handleOpenNewTab: (content: ContentType, stackNo: number) => void;
   close: (id: string) => void;
   reorder: (id: string, _: number, toIndex: number, stackNo: number) => void;
   active: (id: string, stackNo: number) => void;
   stackController: React.ReactNode;
   shouldShowWelcome: boolean;
 }) {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
+  const dialog = useDialog();
 
   return (
     <>
@@ -102,39 +114,12 @@ export default function Container({
                       <MixIcon />
                       {t("change_language")}
                     </DropdownMenu.SubTrigger>
-                    <DropdownMenu.SubContent>
-                      {Locales.map((lc) => (
-                        <DropdownMenu.Item
-                          key={lc.code}
-                          onClick={() => {
-                            i18n.changeLanguage(lc.code);
-                          }}
-                        >
-                          <Text
-                            weight={
-                              i18n.language === lc.code ? "bold" : "regular"
-                            }
-                          >
-                            {lc.flag} {lc.name}{" "}
-                            {lc.english.length > 0 && `(${lc.english})`}
-                          </Text>
-                        </DropdownMenu.Item>
-                      ))}
-                    </DropdownMenu.SubContent>
+                    <LangSelector />
                   </DropdownMenu.Sub>
                   <DropdownMenu.Item
-                    onClick={() =>
-                      handleOpenNewTab(
-                        {
-                          id: "about",
-                          title: t("about_nyaadenwa"),
-                          type: ContentTypeProperties.About,
-                          content: () => <div>About</div>,
-                          stackNo: stackNo,
-                        },
-                        stackNo
-                      )
-                    }
+                    onClick={() => {
+                      dialog.alert(t("about_nyaadenwa"), <About />);
+                    }}
                   >
                     <InfoCircledIcon />
                     {t("about_nyaadenwa")}
@@ -146,7 +131,7 @@ export default function Container({
                     </DropdownMenu.Item>
                   ) : (
                     listDevices.map((device) => (
-                      <DropdownMenu.Sub>
+                      <DropdownMenu.Sub key={device.name + device.serial}>
                         <DropdownMenu.SubTrigger>
                           <MobileIcon />
                           {device.name}
@@ -159,16 +144,37 @@ export default function Container({
                           </Text>
                         </DropdownMenu.SubTrigger>
                         <DropdownMenu.SubContent>
-                          <DropdownMenu.Item>
-                            {t("open_this_device")}
+                          <DropdownMenu.Item
+                            onClick={() => {
+                              dialog.alert(
+                                <Flex align="center" gap="2">
+                                  <Spinner size="3" /> Connecting
+                                </Flex>,
+                                "Please wait while we connect to your device..." +
+                                  ` (${device.raw.manufacturerName} ${device.name} - ${device.serial})`,
+                                undefined,
+                                null
+                              );
+                            }}
+                          >
+                            <EnterIcon />
+                            {t("open")}
                           </DropdownMenu.Item>
                           <DropdownMenu.Item
                             onClick={() => {
-                              device.raw.forget();
-                              handleGetDevice();
+                              dialog.confirm(
+                                t("forget_device"),
+                                t("forget_device_description") +
+                                  ` (${device.raw.manufacturerName} ${device.name} - ${device.serial})`,
+                                () => {
+                                  device.raw.forget();
+                                  handleGetDevice();
+                                }
+                              );
                             }}
                           >
-                            {t("forget_this_device")}
+                            <CircleBackslashIcon />
+                            {t("forget")}
                           </DropdownMenu.Item>
                         </DropdownMenu.SubContent>
                       </DropdownMenu.Sub>

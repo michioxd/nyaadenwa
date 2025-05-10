@@ -10,6 +10,8 @@ import "@fontsource/inter/500.css";
 import "@fontsource/inter/700.css";
 import "@/scss/tabs.scss";
 import "@/main.scss";
+import DialogProvider from "./components/dialog/DialogProvider";
+import { Toaster } from "sonner";
 
 // will make it better later :)
 const isWebUSBSupported = "usb" in navigator;
@@ -20,6 +22,27 @@ if (!isWebUSBSupported) {
 
 createRoot(document.getElementById("root")!).render(
   <Theme appearance="dark" accentColor="cyan">
-    <App />
+    <Toaster
+      position="bottom-center"
+      richColors
+      duration={5000}
+      theme="dark"
+      style={
+        {
+          "--toast-bg": "var(--color-panel-solid)",
+          "--toast-border": "var(--gray-a5)",
+          "--toast-text": "var(--gray-12)",
+          "--toast-success-bg": "var(--green-3)",
+          "--toast-success-border": "var(--green-5)",
+          "--toast-success-text": "var(--green-11)",
+          "--toast-error-bg": "var(--red-3)",
+          "--toast-error-border": "var(--red-5)",
+          "--toast-error-text": "var(--red-11)",
+        } as React.CSSProperties
+      }
+    />
+    <DialogProvider>
+      <App />
+    </DialogProvider>
   </Theme>
 );

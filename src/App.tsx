@@ -9,6 +9,7 @@ import cls from "./scss/Main.module.scss";
 import { IconButton, Text } from "@radix-ui/themes";
 import { DividerHorizontalIcon, PlusIcon } from "@radix-ui/react-icons";
 import clsx from "clsx";
+import { toast } from "sonner";
 
 function App() {
   const [listDevices, setListDevices] = useState<AdbDaemonWebUsbDevice[]>([]);
@@ -109,6 +110,9 @@ function App() {
       const dv = await DeviceManager?.getDevices();
       setListDevices(dv ?? []);
     } catch (error) {
+      toast.error(
+        "Failed to get devices, please check console for more details"
+      );
       console.error(error);
     }
   }, []);
@@ -116,23 +120,21 @@ function App() {
   const handleAddDevice = useCallback(async () => {
     try {
       await DeviceManager?.requestDevice();
-      handleGetDevice();
     } catch (error) {
+      toast.error(
+        "Failed to add device, please check console for more details"
+      );
       console.error(error);
+    } finally {
+      handleGetDevice();
     }
   }, [handleGetDevice]);
 
   useEffect(() => {
-    DeviceManagerTrackDevices.onDeviceAdd(() => {
-      handleAddDevice();
-    });
+    DeviceManagerTrackDevices.onDeviceAdd(handleGetDevice);
+    DeviceManagerTrackDevices.onDeviceRemove(handleGetDevice);
 
-    DeviceManagerTrackDevices.onDeviceRemove(() => {
-      handleAddDevice();
-    });
-
-    handleAddDevice();
-
+    handleGetDevice();
     const handleResize = () => {
       setCurrentWindowWidth(window.innerWidth);
     };
@@ -141,6 +143,7 @@ function App() {
 
     return () => {
       window.removeEventListener("resize", handleResize);
+      DeviceManagerTrackDevices.stop();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -148,16 +151,15 @@ function App() {
   return (
     <div className={clsx(cls.Stack, stackNum > 0 && cls.enabledStack)}>
       {Array.from({ length: stackNum + 1 }).map((_, index) => (
-        <div className={cls.StackContainer}>
+        <div className={cls.StackContainer} key={index}>
           <Container
-            key={index}
             listDevices={listDevices}
             stackNo={index}
             tabs={tabs}
             content={content}
             handleAddDevice={handleAddDevice}
-            handleOpenNewTab={handleOpenNewTab}
             handleGetDevice={handleGetDevice}
+            handleOpenNewTab={handleOpenNewTab}
             close={tabClose}
             reorder={tabReorder}
             active={tabActive}
@@ -168,25 +170,27 @@ function App() {
                 content.find((c) => c.stackNo === index - 1) !== undefined)
             }
             stackController={
-              <div className={cls.StackController}>
-                <IconButton
-                  variant="soft"
-                  size="1"
-                  onClick={() => setStackNum(stackNum - 1)}
-                  disabled={stackNum === 0}
-                >
-                  <DividerHorizontalIcon />
-                </IconButton>
-                <Text>{index + 1}</Text>
-                <IconButton
-                  variant="soft"
-                  size="1"
-                  disabled={currentWindowWidth / (stackNum + 1) <= 700}
-                  onClick={() => setStackNum(stackNum + 1)}
-                >
-                  <PlusIcon />
-                </IconButton>
-              </div>
+              currentWindowWidth > 700 && (
+                <div className={cls.StackController}>
+                  <IconButton
+                    variant="soft"
+                    size="1"
+                    onClick={() => setStackNum(stackNum - 1)}
+                    disabled={stackNum === 0}
+                  >
+                    <DividerHorizontalIcon />
+                  </IconButton>
+                  <Text>{index + 1}</Text>
+                  <IconButton
+                    variant="soft"
+                    size="1"
+                    disabled={currentWindowWidth / (stackNum + 1) <= 700}
+                    onClick={() => setStackNum(stackNum + 1)}
+                  >
+                    <PlusIcon />
+                  </IconButton>
+                </div>
+              )
             }
           />
         </div>
