@@ -1,8 +1,8 @@
-.chrome-tabs {
+.tabs {
     box-sizing: border-box;
     position: relative;
     font-size: 12px;
-    height: 40px;
+    height: 36px;
     background: var(--gray-3);
     overflow: hidden;
 
@@ -11,14 +11,14 @@
         font: inherit;
     }
 
-    .chrome-tabs-content {
+    .tabs-content {
         position: relative;
         width: 100%;
         height: 100%;
         transition: transform 0.2s ease;
     }
 
-    .chrome-tab {
+    .tab {
         position: absolute;
         left: 0;
         height: 36px;
@@ -34,7 +34,7 @@
             cursor: default;
         }
 
-        .chrome-tab-dividers {
+        .tab-dividers {
             position: absolute;
             top: 7px;
             bottom: 7px;
@@ -69,12 +69,12 @@
             }
         }
 
-        &:first-child .chrome-tab-dividers::before,
-        &:last-child .chrome-tab-dividers::after {
+        &:first-child .tab-dividers::before,
+        &:last-child .tab-dividers::after {
             opacity: 0;
         }
 
-        .chrome-tab-background {
+        .tab-background {
             display: none;
 
             >svg {
@@ -85,17 +85,17 @@
         &[active] {
             z-index: 5;
 
-            .chrome-tab-background>svg .chrome-tab-geometry {
+            .tab-background>svg .tab-geometry {
                 fill: var(--color-background);
             }
         }
 
-        &:not([active]) .chrome-tab-background {
+        &:not([active]) .tab-background {
             transition: opacity 0.2s ease;
             opacity: 0;
         }
 
-        .chrome-tab-content {
+        .tab-content {
             position: absolute;
             display: flex;
             top: 0;
@@ -112,20 +112,20 @@
             }
         }
 
-        &[active] .chrome-tab-content {
+        &[active] .tab-content {
             background-color: var(--gray-1);
         }
 
-        &[is-mini] .chrome-tab-content {
+        &[is-mini] .tab-content {
             padding-left: 2px;
             padding-right: 2px;
         }
 
-        .chrome-tab-favicon {
+        .tab-favicon {
             display: none;
         }
 
-        .chrome-tab-title {
+        .tab-title {
             flex: 1;
             vertical-align: top;
             overflow: hidden;
@@ -142,15 +142,15 @@
                     transparent);
         }
 
-        &[is-small] .chrome-tab-title {
+        &[is-small] .tab-title {
             margin-left: 0;
         }
 
-        &[active] .chrome-tab-title {
+        &[active] .tab-title {
             color: #f1f3f4;
         }
 
-        .chrome-tab-drag-handle {
+        .tab-drag-handle {
             position: absolute;
             top: 0;
             bottom: 0;
@@ -158,9 +158,13 @@
             left: 0;
             border-top-left-radius: 8px;
             border-top-right-radius: 8px;
+
+            &:active {
+                cursor: grabbing;
+            }
         }
 
-        .chrome-tab-close {
+        .tab-close {
             flex-grow: 0;
             flex-shrink: 0;
             position: relative;
@@ -173,47 +177,41 @@
             background-size: 8px 8px;
         }
 
-        &[is-smaller] .chrome-tab-close {
+        &[is-smaller] .tab-close {
             margin-left: auto;
         }
 
-        &[is-mini]:not([active]) .chrome-tab-close {
+        &[is-mini]:not([active]) .tab-close {
             display: none;
         }
 
-        &[is-mini][active] .chrome-tab-close {
+        &[is-mini][active] .tab-close {
             margin-left: auto;
             margin-right: auto;
         }
 
-        &.chrome-tab-was-just-added {
+        &.tab-was-just-added {
             top: 10px;
-            animation: chrome-tab-was-just-added 120ms forwards ease-in-out;
+            animation: tab-was-just-added 120ms forwards ease-in-out;
             transition: none;
         }
     }
 
-    &.chrome-tabs-is-sorting .chrome-tab:not(.chrome-tab-is-dragging),
-    &:not(.chrome-tabs-is-sorting) .chrome-tab.chrome-tab-was-just-dragged {
+    &.tabs-is-sorting .tab:not(.tab-is-dragging),
+    &:not(.tabs-is-sorting) .tab.tab-was-just-dragged {
         transition: transform 120ms ease-in-out;
     }
 
-    .chrome-tabs-bottom-bar {
-        position: absolute;
-        bottom: 0;
-        height: 4px;
-        left: 0;
-        width: 100%;
-        background: var(--color-background);
-        z-index: 10;
+    .tabs-bottom-bar {
+        display: none;
     }
 }
 
-.chrome-tab-no-close .chrome-tab-close {
+.tab-no-close .tab-close {
     display: none;
 }
 
-.chrome-tabs-optional-shadow-below-bottom-bar {
+.tabs-optional-shadow-below-bottom-bar {
     position: relative;
     height: 1px;
     width: 100%;
@@ -224,16 +222,16 @@
 }
 
 @media (hover: hover) {
-    .chrome-tabs .chrome-tab {
+    .tabs .tab {
         &:not([active]):hover {
             z-index: 2;
 
-            .chrome-tab-background {
+            .tab-background {
                 opacity: 1;
             }
         }
 
-        .chrome-tab-close {
+        .tab-close {
             &:hover {
                 background-color: #5f6368;
                 background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'><path stroke='rgba(255, 255, 255, .7)' stroke-linecap='square' stroke-width='1.5' d='M0 0 L8 8 M8 0 L0 8'></path></svg>");
@@ -245,14 +243,14 @@
             }
         }
 
-        &:not([active]) .chrome-tab-close:not(:hover):not(:active) {
+        &:not([active]) .tab-close:not(:hover):not(:active) {
             opacity: 0.8;
         }
     }
 }
 
 @media not all and (hover: hover) {
-    .chrome-tabs .chrome-tab .chrome-tab-close:active {
+    .tabs .tab .tab-close:active {
         background-color: #80868b;
         background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'><path stroke='rgba(255, 255, 255, .9)' stroke-linecap='square' stroke-width='1.5' d='M0 0 L8 8 M8 0 L0 8'></path></svg>");
     }
@@ -264,12 +262,12 @@ only screen and (-o-min-device-pixel-ratio: 2/1),
 only screen and (min-device-pixel-ratio: 2),
 only screen and (min-resolution: 192dpi),
 only screen and (min-resolution: 2dppx) {
-    .chrome-tabs-optional-shadow-below-bottom-bar {
+    .tabs-optional-shadow-below-bottom-bar {
         background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='2' height='2' viewBox='0 0 2 2'><rect x='0' y='0' width='2' height='1' fill='rgba(0, 0, 0, .27)'></rect></svg>");
     }
 }
 
-@keyframes chrome-tab-was-just-added {
+@keyframes tab-was-just-added {
     to {
         top: 0;
     }

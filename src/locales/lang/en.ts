@@ -10,6 +10,9 @@ const Locale: LocaleResourcesType = {
     settings: "Settings",
     change_language: "Change language",
     about_nyaadenwa: "About nyaadenwa",
+    no_device_connected: "No device connected",
+    forget_this_device: "Forget this device",
+    open_this_device: "Open this device",
   },
 };
 

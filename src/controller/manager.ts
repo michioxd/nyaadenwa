@@ -3,18 +3,18 @@ import {
   AdbDaemonWebUsbDeviceObserver,
 } from "@yume-chan/adb-daemon-webusb";
 
-const Manager: AdbDaemonWebUsbDeviceManager | undefined =
+const DeviceManager: AdbDaemonWebUsbDeviceManager | undefined =
   AdbDaemonWebUsbDeviceManager.BROWSER;
 
-if (!Manager) {
+if (!DeviceManager) {
   const e = document.getElementById("notSupported");
   if (e) e.style.display = "flex";
   throw new Error("WebUSB is not supported in this browser");
 }
 
-const ManagerObserver: AdbDaemonWebUsbDeviceObserver =
-  await Manager.trackDevices();
+const DeviceManagerTrackDevices: AdbDaemonWebUsbDeviceObserver =
+  await DeviceManager.trackDevices();
 
-export default Manager;
-
-export { ManagerObserver };
+export default DeviceManager;
+DeviceManager.getDevices();
+export { DeviceManagerTrackDevices };
