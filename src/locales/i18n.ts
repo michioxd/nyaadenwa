@@ -13,7 +13,7 @@ i18n
       resources,
       fallbackLng: "en",
       detection: {
-        lookupLocalStorage: "RBZ:LANGUAGE",
+        lookupLocalStorage: "lang",
         lookupQuerystring: "lang",
         order: ["querystring", "localStorage", "navigator"],
       },
