@@ -13,16 +13,23 @@
     "prettier:check": "prettier --check ."
   },
   "dependencies": {
+    "@fontsource/inter": "^5.2.5",
     "@radix-ui/themes": "^3.2.1",
+    "@yume-chan/adb": "^2.0.1",
+    "@yume-chan/adb-daemon-webusb": "^2.0.1",
     "clsx": "^2.1.1",
+    "i18next": "^25.1.2",
+    "i18next-browser-languagedetector": "^8.1.0",
     "react": "^19.1.0",
-    "react-dom": "^19.1.0"
+    "react-dom": "^19.1.0",
+    "react-i18next": "^15.5.1"
   },
   "devDependencies": {
     "@eslint/js": "^9.25.0",
     "@types/node": "^22.15.17",
     "@types/react": "^19.1.2",
     "@types/react-dom": "^19.1.2",
+    "@types/w3c-web-usb": "^1.0.10",
     "@vitejs/plugin-react-swc": "^3.9.0",
     "eslint": "^9.25.0",
     "eslint-plugin-react-hooks": "^5.2.0",
