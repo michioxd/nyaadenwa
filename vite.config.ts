@@ -1,5 +1,6 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
+import path from "path";
 
 let counter = 0;
 const nameMap = new Map<string, string>();
@@ -7,13 +8,18 @@ const nameMap = new Map<string, string>();
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react()],
+  resolve: {
+    alias: {
+      "@": path.resolve(__dirname, "./src"),
+    },
+  },
   css:
     process.env.NODE_ENV === "production"
       ? {
           modules: {
             generateScopedName: (
               localName: string,
-              filename: string,
+              filename: string
             ): string => {
               const key = `${filename}|${localName}`;
               return (
@@ -29,7 +35,7 @@ export default defineConfig({
                         n = Math.floor(n / 26) - 1;
                       } while (n >= 0);
                       return name;
-                    })(),
+                    })()
                   )
                   .get(key)!
               );
