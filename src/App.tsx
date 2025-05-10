@@ -17,7 +17,7 @@ function App() {
   const [tabs, setTabs] = useState<TabProperties[]>([]);
   const [stackNum, setStackNum] = useState(0);
   const [currentWindowWidth, setCurrentWindowWidth] = useState(
-    window.innerWidth
+    window.innerWidth,
   );
 
   const handleOpenNewTab = useCallback(
@@ -32,8 +32,8 @@ function App() {
               : {
                   ...tab,
                   active: tab.id === existing.id,
-                }
-          )
+                },
+          ),
         );
         return;
       }
@@ -49,7 +49,7 @@ function App() {
       ]);
       setTabs((p) => [
         ...p.map((tab) =>
-          tab.stackNo === stackNo ? { ...tab, active: false } : tab
+          tab.stackNo === stackNo ? { ...tab, active: false } : tab,
         ),
         {
           id: content.id,
@@ -59,7 +59,7 @@ function App() {
         },
       ]);
     },
-    [tabs]
+    [tabs],
   );
 
   const tabActive = (id: string, stackNo: number) => {
@@ -70,8 +70,8 @@ function App() {
               ...tab,
               active: id === tab.id,
             }
-          : tab
-      )
+          : tab,
+      ),
     );
   };
 
@@ -79,7 +79,7 @@ function App() {
     const filteredTabs = tabs.filter((tab) => tab.id !== id);
     const newIndex = Math.min(
       tabs.findIndex((tab) => tab.id === id),
-      filteredTabs.length - 1
+      filteredTabs.length - 1,
     );
 
     setContent(content.filter((c) => c.id !== id));
@@ -90,16 +90,16 @@ function App() {
     tabId: string,
     _: number,
     toIndex: number,
-    stackNo: number
+    stackNo: number,
   ) => {
     const beforeTab = tabs.find(
-      (tab) => tab.id === tabId && tab.stackNo === stackNo
+      (tab) => tab.id === tabId && tab.stackNo === stackNo,
     );
     if (!beforeTab) {
       return;
     }
     const newTabs = tabs.filter(
-      (tab) => tab.id !== tabId && tab.stackNo === stackNo
+      (tab) => tab.id !== tabId && tab.stackNo === stackNo,
     );
     newTabs.splice(toIndex, 0, beforeTab);
     setTabs(newTabs);
@@ -111,7 +111,7 @@ function App() {
       setListDevices(dv ?? []);
     } catch (error) {
       toast.error(
-        "Failed to get devices, please check console for more details"
+        "Failed to get devices, please check console for more details",
       );
       console.error(error);
     }
@@ -122,7 +122,7 @@ function App() {
       await DeviceManager?.requestDevice();
     } catch (error) {
       toast.error(
-        "Failed to add device, please check console for more details"
+        "Failed to add device, please check console for more details",
       );
       console.error(error);
     } finally {

@@ -1,274 +1,278 @@
 .tabs {
-    box-sizing: border-box;
+  box-sizing: border-box;
+  position: relative;
+  font-size: 12px;
+  height: 36px;
+  background: var(--gray-3);
+  overflow: hidden;
+
+  * {
+    box-sizing: inherit;
+    font: inherit;
+  }
+
+  .tabs-content {
     position: relative;
-    font-size: 12px;
+    width: 100%;
+    height: 100%;
+    transition: transform 0.2s ease;
+  }
+
+  .tab {
+    position: absolute;
+    left: 0;
     height: 36px;
-    background: var(--gray-3);
-    overflow: hidden;
+    width: 240px;
+    border: 0;
+    margin: 0;
+    z-index: 1;
+    pointer-events: none;
 
+    &,
     * {
-        box-sizing: inherit;
-        font: inherit;
+      user-select: none;
+      cursor: default;
     }
 
-    .tabs-content {
-        position: relative;
-        width: 100%;
-        height: 100%;
-        transition: transform 0.2s ease;
-    }
+    .tab-dividers {
+      position: absolute;
+      top: 7px;
+      bottom: 7px;
+      left: var(--tab-content-margin);
+      right: var(--tab-content-margin);
 
-    .tab {
-        position: absolute;
-        left: 0;
-        height: 36px;
-        width: 240px;
-        border: 0;
-        margin: 0;
-        z-index: 1;
+      &,
+      &::before,
+      &::after {
         pointer-events: none;
+      }
 
-        &,
-        * {
-            user-select: none;
-            cursor: default;
-        }
+      &::before,
+      &::after {
+        content: "";
+        display: block;
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        width: 1px;
+        background: #4a4d51;
+        opacity: 1;
+        transition: opacity 0.2s ease;
+      }
 
-        .tab-dividers {
-            position: absolute;
-            top: 7px;
-            bottom: 7px;
-            left: var(--tab-content-margin);
-            right: var(--tab-content-margin);
+      &::before {
+        left: 0;
+      }
 
-            &,
-            &::before,
-            &::after {
-                pointer-events: none;
-            }
-
-            &::before,
-            &::after {
-                content: "";
-                display: block;
-                position: absolute;
-                top: 0;
-                bottom: 0;
-                width: 1px;
-                background: #4a4d51;
-                opacity: 1;
-                transition: opacity 0.2s ease;
-            }
-
-            &::before {
-                left: 0;
-            }
-
-            &::after {
-                right: 0;
-            }
-        }
-
-        &:first-child .tab-dividers::before,
-        &:last-child .tab-dividers::after {
-            opacity: 0;
-        }
-
-        .tab-background {
-            display: none;
-
-            >svg {
-                display: none;
-            }
-        }
-
-        &[active] {
-            z-index: 5;
-
-            .tab-background>svg .tab-geometry {
-                fill: var(--color-background);
-            }
-        }
-
-        &:not([active]) .tab-background {
-            transition: opacity 0.2s ease;
-            opacity: 0;
-        }
-
-        .tab-content {
-            position: absolute;
-            display: flex;
-            top: 0;
-            bottom: 0;
-            left: var(--tab-content-margin);
-            right: var(--tab-content-margin);
-            padding: 9px 8px;
-            overflow: hidden;
-            pointer-events: all;
-            transition: background-color 0.2s ease;
-
-            &:hover {
-                background-color: var(--gray-2);
-            }
-        }
-
-        &[active] .tab-content {
-            background-color: var(--gray-1);
-        }
-
-        &[is-mini] .tab-content {
-            padding-left: 2px;
-            padding-right: 2px;
-        }
-
-        .tab-favicon {
-            display: none;
-        }
-
-        .tab-title {
-            flex: 1;
-            vertical-align: top;
-            overflow: hidden;
-            white-space: nowrap;
-            margin-left: 4px;
-            color: #9ca1a7;
-            -webkit-mask-image: linear-gradient(90deg,
-                    #000 0%,
-                    #000 calc(100% - 24px),
-                    transparent);
-            mask-image: linear-gradient(90deg,
-                    #000 0%,
-                    #000 calc(100% - 24px),
-                    transparent);
-        }
-
-        &[is-small] .tab-title {
-            margin-left: 0;
-        }
-
-        &[active] .tab-title {
-            color: #f1f3f4;
-        }
-
-        .tab-drag-handle {
-            position: absolute;
-            top: 0;
-            bottom: 0;
-            right: 0;
-            left: 0;
-            border-top-left-radius: 8px;
-            border-top-right-radius: 8px;
-
-            &:active {
-                cursor: grabbing;
-            }
-        }
-
-        .tab-close {
-            flex-grow: 0;
-            flex-shrink: 0;
-            position: relative;
-            width: 16px;
-            height: 16px;
-            border-radius: 50%;
-            background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'><path stroke='rgba(154, 160, 166, .8)' stroke-linecap='square' stroke-width='1.5' d='M0 0 L8 8 M8 0 L0 8'></path></svg>");
-            background-position: center center;
-            background-repeat: no-repeat;
-            background-size: 8px 8px;
-        }
-
-        &[is-smaller] .tab-close {
-            margin-left: auto;
-        }
-
-        &[is-mini]:not([active]) .tab-close {
-            display: none;
-        }
-
-        &[is-mini][active] .tab-close {
-            margin-left: auto;
-            margin-right: auto;
-        }
-
-        &.tab-was-just-added {
-            top: 10px;
-            animation: tab-was-just-added 120ms forwards ease-in-out;
-            transition: none;
-        }
+      &::after {
+        right: 0;
+      }
     }
 
-    &.tabs-is-sorting .tab:not(.tab-is-dragging),
-    &:not(.tabs-is-sorting) .tab.tab-was-just-dragged {
-        transition: transform 120ms ease-in-out;
+    &:first-child .tab-dividers::before,
+    &:last-child .tab-dividers::after {
+      opacity: 0;
     }
 
-    .tabs-bottom-bar {
+    .tab-background {
+      display: none;
+
+      > svg {
         display: none;
+      }
     }
+
+    &[active] {
+      z-index: 5;
+
+      .tab-background > svg .tab-geometry {
+        fill: var(--color-background);
+      }
+    }
+
+    &:not([active]) .tab-background {
+      transition: opacity 0.2s ease;
+      opacity: 0;
+    }
+
+    .tab-content {
+      position: absolute;
+      display: flex;
+      top: 0;
+      bottom: 0;
+      left: var(--tab-content-margin);
+      right: var(--tab-content-margin);
+      padding: 9px 8px;
+      overflow: hidden;
+      pointer-events: all;
+      transition: background-color 0.2s ease;
+
+      &:hover {
+        background-color: var(--gray-2);
+      }
+    }
+
+    &[active] .tab-content {
+      background-color: var(--gray-1);
+    }
+
+    &[is-mini] .tab-content {
+      padding-left: 2px;
+      padding-right: 2px;
+    }
+
+    .tab-favicon {
+      display: none;
+    }
+
+    .tab-title {
+      flex: 1;
+      vertical-align: top;
+      overflow: hidden;
+      white-space: nowrap;
+      margin-left: 4px;
+      color: #9ca1a7;
+      -webkit-mask-image: linear-gradient(
+        90deg,
+        #000 0%,
+        #000 calc(100% - 24px),
+        transparent
+      );
+      mask-image: linear-gradient(
+        90deg,
+        #000 0%,
+        #000 calc(100% - 24px),
+        transparent
+      );
+    }
+
+    &[is-small] .tab-title {
+      margin-left: 0;
+    }
+
+    &[active] .tab-title {
+      color: #f1f3f4;
+    }
+
+    .tab-drag-handle {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      right: 0;
+      left: 0;
+      border-top-left-radius: 8px;
+      border-top-right-radius: 8px;
+
+      &:active {
+        cursor: grabbing;
+      }
+    }
+
+    .tab-close {
+      flex-grow: 0;
+      flex-shrink: 0;
+      position: relative;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'><path stroke='rgba(154, 160, 166, .8)' stroke-linecap='square' stroke-width='1.5' d='M0 0 L8 8 M8 0 L0 8'></path></svg>");
+      background-position: center center;
+      background-repeat: no-repeat;
+      background-size: 8px 8px;
+    }
+
+    &[is-smaller] .tab-close {
+      margin-left: auto;
+    }
+
+    &[is-mini]:not([active]) .tab-close {
+      display: none;
+    }
+
+    &[is-mini][active] .tab-close {
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    &.tab-was-just-added {
+      top: 10px;
+      animation: tab-was-just-added 120ms forwards ease-in-out;
+      transition: none;
+    }
+  }
+
+  &.tabs-is-sorting .tab:not(.tab-is-dragging),
+  &:not(.tabs-is-sorting) .tab.tab-was-just-dragged {
+    transition: transform 120ms ease-in-out;
+  }
+
+  .tabs-bottom-bar {
+    display: none;
+  }
 }
 
 .tab-no-close .tab-close {
-    display: none;
+  display: none;
 }
 
 .tabs-optional-shadow-below-bottom-bar {
-    position: relative;
-    height: 1px;
-    width: 100%;
-    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='1' height='1' viewBox='0 0 1 1'><rect x='0' y='0' width='1' height='1' fill='rgba(0, 0, 0, .17)'></rect></svg>");
-    background-size: 1px 1px;
-    background-repeat: repeat-x;
-    background-position: 0% 0%;
+  position: relative;
+  height: 1px;
+  width: 100%;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='1' height='1' viewBox='0 0 1 1'><rect x='0' y='0' width='1' height='1' fill='rgba(0, 0, 0, .17)'></rect></svg>");
+  background-size: 1px 1px;
+  background-repeat: repeat-x;
+  background-position: 0% 0%;
 }
 
 @media (hover: hover) {
-    .tabs .tab {
-        &:not([active]):hover {
-            z-index: 2;
+  .tabs .tab {
+    &:not([active]):hover {
+      z-index: 2;
 
-            .tab-background {
-                opacity: 1;
-            }
-        }
-
-        .tab-close {
-            &:hover {
-                background-color: #5f6368;
-                background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'><path stroke='rgba(255, 255, 255, .7)' stroke-linecap='square' stroke-width='1.5' d='M0 0 L8 8 M8 0 L0 8'></path></svg>");
-            }
-
-            &:hover:active {
-                background-color: #80868b;
-                background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'><path stroke='rgba(255, 255, 255, .9)' stroke-linecap='square' stroke-width='1.5' d='M0 0 L8 8 M8 0 L0 8'></path></svg>");
-            }
-        }
-
-        &:not([active]) .tab-close:not(:hover):not(:active) {
-            opacity: 0.8;
-        }
+      .tab-background {
+        opacity: 1;
+      }
     }
+
+    .tab-close {
+      &:hover {
+        background-color: #5f6368;
+        background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'><path stroke='rgba(255, 255, 255, .7)' stroke-linecap='square' stroke-width='1.5' d='M0 0 L8 8 M8 0 L0 8'></path></svg>");
+      }
+
+      &:hover:active {
+        background-color: #80868b;
+        background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'><path stroke='rgba(255, 255, 255, .9)' stroke-linecap='square' stroke-width='1.5' d='M0 0 L8 8 M8 0 L0 8'></path></svg>");
+      }
+    }
+
+    &:not([active]) .tab-close:not(:hover):not(:active) {
+      opacity: 0.8;
+    }
+  }
 }
 
 @media not all and (hover: hover) {
-    .tabs .tab .tab-close:active {
-        background-color: #80868b;
-        background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'><path stroke='rgba(255, 255, 255, .9)' stroke-linecap='square' stroke-width='1.5' d='M0 0 L8 8 M8 0 L0 8'></path></svg>");
-    }
+  .tabs .tab .tab-close:active {
+    background-color: #80868b;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'><path stroke='rgba(255, 255, 255, .9)' stroke-linecap='square' stroke-width='1.5' d='M0 0 L8 8 M8 0 L0 8'></path></svg>");
+  }
 }
 
 @media only screen and (-webkit-min-device-pixel-ratio: 2),
-only screen and (min--moz-device-pixel-ratio: 2),
-only screen and (-o-min-device-pixel-ratio: 2/1),
-only screen and (min-device-pixel-ratio: 2),
-only screen and (min-resolution: 192dpi),
-only screen and (min-resolution: 2dppx) {
-    .tabs-optional-shadow-below-bottom-bar {
-        background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='2' height='2' viewBox='0 0 2 2'><rect x='0' y='0' width='2' height='1' fill='rgba(0, 0, 0, .27)'></rect></svg>");
-    }
+  only screen and (min--moz-device-pixel-ratio: 2),
+  only screen and (-o-min-device-pixel-ratio: 2/1),
+  only screen and (min-device-pixel-ratio: 2),
+  only screen and (min-resolution: 192dpi),
+  only screen and (min-resolution: 2dppx) {
+  .tabs-optional-shadow-below-bottom-bar {
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='2' height='2' viewBox='0 0 2 2'><rect x='0' y='0' width='2' height='1' fill='rgba(0, 0, 0, .27)'></rect></svg>");
+  }
 }
 
 @keyframes tab-was-just-added {
-    to {
-        top: 0;
-    }
+  to {
+    top: 0;
+  }
 }

@@ -44,5 +44,5 @@ createRoot(document.getElementById("root")!).render(
     <DialogProvider>
       <App />
     </DialogProvider>
-  </Theme>
+  </Theme>,
 );

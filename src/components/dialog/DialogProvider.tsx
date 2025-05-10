@@ -9,14 +9,14 @@ export interface DialogContextType {
       title: React.ReactNode,
       content: React.ReactNode,
       onConfirm?: () => void,
-      buttons?: DialogCustomButtons
+      buttons?: DialogCustomButtons,
     ) => void;
     confirm: (
       title: React.ReactNode,
       content: React.ReactNode,
       onConfirm?: () => void,
       onCancel?: () => void,
-      buttons?: DialogCustomButtons
+      buttons?: DialogCustomButtons,
     ) => void;
     prompt: (
       title: React.ReactNode,
@@ -24,7 +24,7 @@ export interface DialogContextType {
       inputs: DialogField[],
       onConfirm?: (value: string[]) => void,
       onCancel?: () => void,
-      buttons?: DialogCustomButtons
+      buttons?: DialogCustomButtons,
     ) => void;
     show: (data: DialogData) => void;
     close: () => void;
@@ -94,7 +94,7 @@ export default function DialogProvider({
       title: React.ReactNode,
       content: React.ReactNode,
       onConfirm?: () => void,
-      buttons?: DialogCustomButtons
+      buttons?: DialogCustomButtons,
     ) => {
       setData({
         type: DialogType.Alert,
@@ -110,7 +110,7 @@ export default function DialogProvider({
       content: React.ReactNode,
       onConfirm?: () => void,
       onCancel?: () => void,
-      buttons?: DialogCustomButtons
+      buttons?: DialogCustomButtons,
     ) => {
       setData({
         type: DialogType.Confirm,
@@ -128,7 +128,7 @@ export default function DialogProvider({
       inputs: DialogField[],
       onConfirm?: (value: string[]) => void,
       onCancel?: () => void,
-      buttons?: DialogCustomButtons
+      buttons?: DialogCustomButtons,
     ) => {
       setData({
         type: DialogType.Prompt,
@@ -201,7 +201,7 @@ export default function DialogProvider({
                       : () => {},
                     "onCancel" in data && typeof data.onCancel === "function"
                       ? data.onCancel
-                      : () => {}
+                      : () => {},
                   )}
                 </Flex>
               ) : (

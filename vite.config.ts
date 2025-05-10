@@ -19,7 +19,7 @@ export default defineConfig({
           modules: {
             generateScopedName: (
               localName: string,
-              filename: string
+              filename: string,
             ): string => {
               const key = `${filename}|${localName}`;
               return (
@@ -35,7 +35,7 @@ export default defineConfig({
                         n = Math.floor(n / 26) - 1;
                       } while (n >= 0);
                       return name;
-                    })()
+                    })(),
                   )
                   .get(key)!
               );

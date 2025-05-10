@@ -102,7 +102,7 @@ export default function Container({
                           content: () => <div>Settings</div>,
                           stackNo: stackNo,
                         },
-                        stackNo
+                        stackNo,
                       )
                     }
                   >
@@ -153,7 +153,7 @@ export default function Container({
                                 "Please wait while we connect to your device..." +
                                   ` (${device.raw.manufacturerName} ${device.name} - ${device.serial})`,
                                 undefined,
-                                null
+                                null,
                               );
                             }}
                           >
@@ -169,7 +169,7 @@ export default function Container({
                                 () => {
                                   device.raw.forget();
                                   handleGetDevice();
-                                }
+                                },
                               );
                             }}
                           >
@@ -196,8 +196,8 @@ export default function Container({
                 cls.content,
                 tabs.find(
                   (tab) =>
-                    tab.id === c.id && tab.stackNo === stackNo && tab.active
-                ) && cls.active
+                    tab.id === c.id && tab.stackNo === stackNo && tab.active,
+                ) && cls.active,
               )}
             >
               <c.content />
