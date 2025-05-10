@@ -9,14 +9,14 @@ export type LocaleResourcesType = {
 
 const Locales = [
   {
-    code: "vi",
-    name: "Tiếng Việt",
-    flag: "🇻🇳",
-  },
-  {
     code: "en",
     name: "English",
     flag: "🇺🇸",
+  },
+  {
+    code: "vi",
+    name: "Tiếng Việt",
+    flag: "🇻🇳",
   },
 ];
 

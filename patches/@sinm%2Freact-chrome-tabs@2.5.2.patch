@@ -1,0 +1,12 @@
+diff --git a/dist/chrome-tabs.js b/dist/chrome-tabs.js
+index f02aedcaf07ad7cca15d98101aed64519f3669ca..03f1e31335ee31f307a842ca444110e537dc406e 100644
+--- a/dist/chrome-tabs.js
++++ b/dist/chrome-tabs.js
+@@ -347,7 +347,6 @@ var ChromeTabs = /** @class */ (function () {
+             _this.emit("contextmenu", { tabEl: tabEl, event: event });
+         };
+         tabEl.addEventListener("mousedown", function () {
+-            console.log("-- tabCLick");
+             _this.emit("tabClick", { tabEl: tabEl });
+         });
+         if (animate) {

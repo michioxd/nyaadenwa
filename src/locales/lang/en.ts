@@ -5,7 +5,12 @@ import type { LocaleResourcesType } from "@/locales/list";
  * @author michioxd
  */
 const Locale: LocaleResourcesType = {
-  translation: {},
+  translation: {
+    add_device: "Add device",
+    settings: "Settings",
+    change_language: "Change language",
+    about_nyaadenwa: "About nyaadenwa",
+  },
 };
 
 export default Locale;
