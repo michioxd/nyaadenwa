@@ -1,8 +1,45 @@
-.Main {
+.Stack {
     display: flex;
+    flex-direction: row;
     width: 100%;
     height: 100%;
     flex: 1;
+    position: relative;
+    overflow: hidden;
+
+    .StackContainer {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        height: 100%;
+        flex: 1;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .StackController {
+        display: flex;
+        align-items: center;
+        gap: 0.2rem;
+        margin-top: 6px;
+        margin-left: 2px;
+    }
+
+    &.enabledStack {
+        .StackContainer {
+            border-right: 1px solid var(--gray-5);
+
+            &:last-child {
+                border-right: none;
+            }
+        }
+    }
+}
+
+.Main {
+    display: flex;
+    width: 100%;
+    height: calc(100dvh - 36px);
     position: relative;
     overflow: hidden;
 
@@ -11,7 +48,7 @@
         height: 100%;
         visibility: hidden;
         opacity: 0;
-        transition: 0.3s;
+        transition: 0.2s;
         position: absolute;
         top: 0;
         left: 0;

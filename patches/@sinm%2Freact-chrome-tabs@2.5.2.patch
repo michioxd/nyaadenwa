@@ -1,7 +1,13 @@
+diff --git a/node_modules/@sinm/react-chrome-tabs/.bun-tag-10b643a38e64ec9f b/.bun-tag-10b643a38e64ec9f
+new file mode 100644
+index 0000000000000000000000000000000000000000..e69de29bb2d1d6434b8b29ae775ad8c2e48c5391
 diff --git a/node_modules/@sinm/react-chrome-tabs/.bun-tag-466b8370b55a78c b/.bun-tag-466b8370b55a78c
 new file mode 100644
 index 0000000000000000000000000000000000000000..e69de29bb2d1d6434b8b29ae775ad8c2e48c5391
 diff --git a/node_modules/@sinm/react-chrome-tabs/.bun-tag-60b54a52d4775ddd b/.bun-tag-60b54a52d4775ddd
+new file mode 100644
+index 0000000000000000000000000000000000000000..e69de29bb2d1d6434b8b29ae775ad8c2e48c5391
+diff --git a/node_modules/@sinm/react-chrome-tabs/.bun-tag-b524687d9a14eedd b/.bun-tag-b524687d9a14eedd
 new file mode 100644
 index 0000000000000000000000000000000000000000..e69de29bb2d1d6434b8b29ae775ad8c2e48c5391
 diff --git a/node_modules/@sinm/react-chrome-tabs/.bun-tag-b5ac58868db71255 b/.bun-tag-b5ac58868db71255
@@ -13,6 +19,18 @@ index 0000000000000000000000000000000000000000..e69de29bb2d1d6434b8b29ae775ad8c2
 diff --git a/node_modules/@sinm/react-chrome-tabs/.bun-tag-cd653b478f2cdc1d b/.bun-tag-cd653b478f2cdc1d
 new file mode 100644
 index 0000000000000000000000000000000000000000..e69de29bb2d1d6434b8b29ae775ad8c2e48c5391
+diff --git a/dist/chrome-tabs.d.ts b/dist/chrome-tabs.d.ts
+index e19056516ae86370b5d564f78f310d7d7131abd5..cd6241ce94a8e6374a9cf08f36b07e3297703c53 100644
+--- a/dist/chrome-tabs.d.ts
++++ b/dist/chrome-tabs.d.ts
+@@ -6,6 +6,7 @@ export interface TabProperties {
+     favicon?: boolean | string;
+     faviconClass?: string;
+     isCloseIconVisible?: boolean;
++    stackNo?: number;
+ }
+ export interface ChromeTabsOptions {
+     draggable?: boolean;
 diff --git a/dist/chrome-tabs.js b/dist/chrome-tabs.js
 index f02aedcaf07ad7cca15d98101aed64519f3669ca..80cef5e25631c81e3725d8083a31bbf1710157c9 100644
 --- a/dist/chrome-tabs.js
