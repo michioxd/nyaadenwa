@@ -5,7 +5,7 @@
  */
 
 /**
- * PCM player with modifications
+ * PCM player with some modifications by michioxd
  * @author @yume-chan
  * @license MIT
  * @see https://github.com/yume-chan/ya-webadb/blob/main/libraries/pcm-player/src/index.ts

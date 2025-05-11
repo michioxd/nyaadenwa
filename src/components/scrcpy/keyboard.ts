@@ -4,6 +4,12 @@
  * Repository: https://github.com/michioxd/nyaadenwa
  */
 
+/**
+ * Original keyboard injector with some modifications by michioxd
+ * @author @yume-chan
+ * @license MIT
+ * @see https://github.com/tango-adb/old-demo/blob/475465e612d2241a2802c23e19538e89ea2c4924/packages/demo/src/components/scrcpy/input.ts
+ */
 import type { AdbScrcpyClient, AdbScrcpyOptionsLatest } from "@yume-chan/adb-scrcpy";
 import { AndroidKeyCode, AndroidKeyEventMeta, AndroidMotionEventAction } from "@yume-chan/scrcpy";
 

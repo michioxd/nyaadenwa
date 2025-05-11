@@ -5,7 +5,7 @@
  */
 
 /**
- * Opus decode stream with modifications
+ * Opus decode stream with some modifications by michioxd
  * @author @yume-chan
  * @license MIT
  * @see https://github.com/tango-adb/old-demo/blob/475465e612d2241a2802c23e19538e89ea2c4924/packages/demo/src/components/scrcpy/audio-decode-stream.ts

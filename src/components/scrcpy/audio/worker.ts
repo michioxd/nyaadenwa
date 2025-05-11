@@ -5,6 +5,7 @@
  */
 
 /**
+ * Modified by michioxd from @yume-chan/pcm-player
  * @author @yume-chan
  * @license MIT
  * @see https://github.com/yume-chan/ya-webadb/blob/main/libraries/pcm-player/worker/worker.ts
