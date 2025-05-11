@@ -4,27 +4,27 @@
  * Repository: https://github.com/michioxd/nyaadenwa
  */
 
-import type { ScrcpyVideoCodecId, ScrcpyMediaStreamPacket } from '@yume-chan/scrcpy'
-import { WebGLVideoFrameRenderer, WebCodecsVideoDecoder } from '@yume-chan/scrcpy-decoder-webcodecs'
+import type { ScrcpyVideoCodecId, ScrcpyMediaStreamPacket } from "@yume-chan/scrcpy";
+import { WebGLVideoFrameRenderer, WebCodecsVideoDecoder } from "@yume-chan/scrcpy-decoder-webcodecs";
 
-self.addEventListener('message', async (e) => {
+self.addEventListener("message", async (e) => {
     const { codec, canvas, stream } = e.data as {
-        codec: ScrcpyVideoCodecId
-        canvas: OffscreenCanvas
-        stream: ReadableStream<ScrcpyMediaStreamPacket>
-    }
+        codec: ScrcpyVideoCodecId;
+        canvas: OffscreenCanvas;
+        stream: ReadableStream<ScrcpyMediaStreamPacket>;
+    };
 
-    const renderer = new WebGLVideoFrameRenderer(canvas)
-    const decoder = new WebCodecsVideoDecoder({ codec, renderer })
+    const renderer = new WebGLVideoFrameRenderer(canvas);
+    const decoder = new WebCodecsVideoDecoder({ codec, renderer });
 
     decoder.sizeChanged(({ width, height }) => {
-        postMessage({ width, height })
-    })
+        postMessage({ width, height });
+    });
 
     try {
-        await stream.pipeTo(decoder.writable)
+        await stream.pipeTo(decoder.writable);
     } catch (e) {
-        console.error('Stream pipe error:', e)
-        postMessage({ error: e instanceof Error ? e.message : 'Unknown error occurred' })
+        console.error("Stream pipe error:", e);
+        postMessage({ error: e instanceof Error ? e.message : "Unknown error occurred" });
     }
-})
+});

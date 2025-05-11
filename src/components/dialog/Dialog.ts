@@ -4,8 +4,8 @@
  * Repository: https://github.com/michioxd/nyaadenwa
  */
 
-import { createContext, useContext } from 'react'
-import type { DialogContextType } from './DialogProvider'
+import { createContext, useContext } from "react";
+import type { DialogContextType } from "./DialogProvider";
 
 export const DialogContext = createContext<DialogContextType>({
     dialog: {
@@ -13,12 +13,12 @@ export const DialogContext = createContext<DialogContextType>({
         confirm: () => {},
         prompt: () => {},
         show: () => {},
-        close: () => {}
-    }
-})
+        close: () => {},
+    },
+});
 
 export default function useDialog() {
-    const { dialog } = useContext<DialogContextType>(DialogContext)
+    const { dialog } = useContext<DialogContextType>(DialogContext);
 
-    return dialog
+    return dialog;
 }

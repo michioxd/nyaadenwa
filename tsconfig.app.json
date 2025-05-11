@@ -3,11 +3,7 @@
         "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",
         "target": "ES2020",
         "useDefineForClassFields": true,
-        "lib": [
-            "ES2020",
-            "DOM",
-            "DOM.Iterable"
-        ],
+        "lib": ["ES2020", "DOM", "DOM.Iterable"],
         "module": "ESNext",
         "skipLibCheck": true,
         /* Bundler mode */
@@ -25,9 +21,7 @@
         "noFallthroughCasesInSwitch": true,
         "noUncheckedSideEffectImports": true,
         "paths": {
-            "@/*": [
-                "./src/*"
-            ]
+            "@/*": ["./src/*"]
         },
         "types": [
             "@types/audioworklet",
@@ -36,10 +30,8 @@
             "@types/react-dom",
             "@types/uuid",
             "@types/w3c-web-usb",
-            "@types/webaudioapi",
+            "@types/webaudioapi"
         ]
     },
-    "include": [
-        "src"
-    ]
+    "include": ["src"]
 }

@@ -4,15 +4,15 @@
  * Repository: https://github.com/michioxd/nyaadenwa
  */
 
-import objectHash from 'object-hash'
+import objectHash from "object-hash";
 
 export const getDeviceHash = (device: { manufacturerName: string; name: string; serial: string }) => {
     return objectHash(
         {
             manufacturerName: device.manufacturerName,
             name: device.name,
-            serial: device.serial
+            serial: device.serial,
         },
-        { algorithm: 'sha1' }
-    )
-}
+        { algorithm: "sha1" },
+    );
+};

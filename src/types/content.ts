@@ -5,16 +5,16 @@
  */
 
 export enum ContentTypeProperties {
-    Device = 'device',
-    Settings = 'settings',
-    About = 'about'
+    Device = "device",
+    Settings = "settings",
+    About = "about",
 }
 
 export interface ContentType {
-    uuid?: string
-    id: string
-    title: string
-    type: ContentTypeProperties
-    stackNo: number
-    content: ({ close }: { close: () => void }) => React.ReactNode
+    uuid?: string;
+    id: string;
+    title: string;
+    type: ContentTypeProperties;
+    stackNo: number;
+    content: ({ close }: { close: () => void }) => React.ReactNode;
 }
