@@ -7,7 +7,7 @@
 import { AdbDaemonWebUsbDevice } from "@yume-chan/adb-daemon-webusb";
 import { memo, useCallback, useEffect, useMemo, useState } from "react";
 import cls from "./Device.module.scss";
-import { Badge, Card, Flex, Text } from "@radix-ui/themes";
+import { Badge, Card, Flex, Spinner, Text } from "@radix-ui/themes";
 import useDialog from "@/components/dialog/Dialog";
 import { useTranslation } from "react-i18next";
 import { Adb, AdbDaemonTransport } from "@yume-chan/adb";
@@ -152,7 +152,13 @@ function ScreenDevice({ devDetails, close }: { devDetails: DeviceDetails; close:
     return (
         <div className={cls.Device}>
             <DeviceInfo deviceName={deviceName} state={state} t={t} dumpSys={dumpSys} />
-            {state === DeviceState.Connected && adb && <ScrcpyPlayer dev={adb} />}
+            {state === DeviceState.Connecting ? (
+                <Card className={cls.Loading}>
+                    <Spinner size="3" /> <Text size="1">{t("waiting_for_device")}</Text>
+                </Card>
+            ) : (
+                <>{state === DeviceState.Connected && adb && <ScrcpyPlayer dev={adb} />}</>
+            )}
         </div>
     );
 }

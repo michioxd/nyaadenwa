@@ -4,6 +4,17 @@
     display: flex;
     flex-direction: column;
 
+    .Loading {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+
     .DeviceInfo {
         margin: 0.5rem;
     }
@@ -23,15 +34,6 @@
             object-fit: contain;
         }
 
-        .Loading {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-        }
+
     }
 }

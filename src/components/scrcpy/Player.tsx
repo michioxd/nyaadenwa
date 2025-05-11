@@ -8,7 +8,7 @@ import { useEffect, useRef, useState } from "react";
 import ScrcpyStream from "./Stream";
 import type { Adb } from "@yume-chan/adb";
 import cls from "@/screen/Device.module.scss";
-import { Spinner, Text } from "@radix-ui/themes";
+import { Card, Spinner, Text } from "@radix-ui/themes";
 import { useTranslation } from "react-i18next";
 import { AndroidMotionEventAction, AndroidMotionEventButton, clamp } from "@yume-chan/scrcpy";
 import type { AdbScrcpyClient, AdbScrcpyOptionsLatest } from "@yume-chan/adb-scrcpy";
@@ -93,17 +93,35 @@ export default function ScrcpyPlayer({ dev }: { dev: Adb }) {
             });
         }
 
+        function handleMouseScroll(event: WheelEvent) {
+            event.preventDefault();
+            event.stopPropagation();
+
+            const { deltaX, deltaY } = event;
+            client.current?.controller?.injectScroll({
+                pointerX: 100,
+                pointerY: 200,
+                videoWidth: width,
+                videoHeight: height,
+                scrollX: -deltaX,
+                scrollY: -deltaY,
+                buttons: 0,
+            });
+        }
+
         window.addEventListener("resize", resizeCanvas);
         resizeCanvas();
         canvas.addEventListener("pointerdown", handlePointerEvent);
         canvas.addEventListener("pointermove", handlePointerEvent);
         canvas.addEventListener("pointerup", handlePointerEvent);
-
+        canvas.addEventListener("contextmenu", (e) => e.preventDefault());
+        canvas.addEventListener("wheel", handleMouseScroll);
         return () => {
             window.removeEventListener("resize", resizeCanvas);
             canvas.removeEventListener("pointerdown", handlePointerEvent);
             canvas.removeEventListener("pointermove", handlePointerEvent);
             canvas.removeEventListener("pointerup", handlePointerEvent);
+            canvas.removeEventListener("wheel", handleMouseScroll);
         };
     }, [width, height, client]);
 
@@ -144,9 +162,9 @@ export default function ScrcpyPlayer({ dev }: { dev: Adb }) {
     return (
         <div className={cls.Player} ref={playerRef}>
             {loading && (
-                <div className={cls.Loading}>
+                <Card className={cls.Loading}>
                     <Spinner size="3" /> <Text size="1">{t("connecting_to_device")}</Text>
-                </div>
+                </Card>
             )}
             <canvas className={cls.Canvas} ref={canvasRef} />
         </div>

@@ -33,6 +33,7 @@ if (!isWebUSBSupported) {
                 richColors
                 duration={5000}
                 theme="dark"
+                className="toast"
                 style={
                     {
                         "--toast-bg": "var(--color-panel-solid)",

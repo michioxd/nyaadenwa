@@ -53,6 +53,7 @@ const Locale: LocaleResourcesType = {
         CONNECTED: "Connected",
         device_attached: "Device attached",
         connecting_to_device: "Connecting to device...",
+        waiting_for_device: "Waiting for device...",
     },
 };
 

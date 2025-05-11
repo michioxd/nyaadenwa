@@ -68,3 +68,10 @@ html {
 #notSupported h3 {
     font-size: 18px;
 }
+
+.toast * {
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+}
