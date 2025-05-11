@@ -11,7 +11,7 @@
         "format": "prettier --write --ignore-path .prettierignore .",
         "format:check": "prettier --check --ignore-path .prettierignore .",
         "prettier:check": "prettier --check .",
-        "postinstall": "fetch-scrcpy-server 3.2"
+        "postinstall": "fetch-scrcpy-server 3.1"
     },
     "dependencies": {
         "@fontsource/inter": "^5.2.5",
@@ -45,11 +45,13 @@
     },
     "devDependencies": {
         "@eslint/js": "^9.25.0",
+        "@types/audioworklet": "^0.0.75",
         "@types/node": "^22.15.17",
         "@types/react": "^19.1.2",
         "@types/react-dom": "^19.1.2",
         "@types/uuid": "^10.0.0",
         "@types/w3c-web-usb": "^1.0.10",
+        "@types/webaudioapi": "^0.0.27",
         "@vitejs/plugin-react-swc": "^3.9.0",
         "@yume-chan/fetch-scrcpy-server": "^1.0.0",
         "eslint": "^9.25.0",

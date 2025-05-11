@@ -17,6 +17,7 @@ import DeviceHeader from '@/components/device/Header'
 import DeviceManager from '@/controller/manager'
 import { getDeviceHash } from '@/utils/str'
 import { getConnectedDevice, setConnectedDevice } from '@/components/device/connected'
+import ScrcpyPlayer from '@/components/scrcpy/Player'
 
 enum DeviceState {
     Connecting = 'CONNECTING',
@@ -74,10 +75,7 @@ function ScreenDevice({ devDetails, close }: { devDetails: DeviceDetails; close:
     const [adb, setAdb] = useState<Adb | null>(null)
     const dumpSys = useMemo(() => (adb ? new DumpSys(adb) : null), [adb])
 
-    const deviceName = useMemo(
-        () => `${devDetails.manufacturerName} ${devDetails.name}`,
-        [devDetails.manufacturerName, devDetails.name]
-    )
+    const deviceName = useMemo(() => `${devDetails.name}`, [devDetails.name])
 
     const showErrorDialog = useCallback(
         (titleKey: string, descriptionKey: string) => {
@@ -154,6 +152,7 @@ function ScreenDevice({ devDetails, close }: { devDetails: DeviceDetails; close:
     return (
         <div className={cls.Device}>
             <DeviceInfo deviceName={deviceName} state={state} t={t} dumpSys={dumpSys} />
+            {state === DeviceState.Connected && adb && <ScrcpyPlayer dev={adb} />}
         </div>
     )
 }

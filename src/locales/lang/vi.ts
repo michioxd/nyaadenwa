@@ -51,7 +51,8 @@ const Locale: LocaleResourcesType = {
         CONNECTING: 'Đang kết nối',
         DISCONNECTED: 'Đã ngắt kết nối',
         CONNECTED: 'Đã kết nối',
-        device_attached: 'Thiết bị đã được kết nối'
+        device_attached: 'Thiết bị đã được kết nối',
+        connecting_to_device: 'Đang kết nối đến thiết bị...'
     }
 }
 

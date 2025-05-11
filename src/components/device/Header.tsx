@@ -14,7 +14,8 @@ import {
     PiBatteryLowDuotone,
     PiBatteryMediumDuotone,
     PiBatteryWarningDuotone,
-    PiPlugChargingDuotone
+    PiPlugChargingDuotone,
+    PiUsbDuotone
 } from 'react-icons/pi'
 
 export default function DeviceHeader({ dumpSys }: { dumpSys: DumpSys }) {
@@ -77,9 +78,11 @@ export default function DeviceHeader({ dumpSys }: { dumpSys: DumpSys }) {
                                 }}
                             >
                                 {batterStatus.level}%
-                                {(batterStatus.acPowered || batterStatus.usbPowered) && (
+                                {batterStatus.acPowered ? (
                                     <PiPlugChargingDuotone size={15} />
-                                )}
+                                ) : batterStatus.usbPowered ? (
+                                    <PiUsbDuotone size={15} />
+                                ) : null}
                             </Text>
                         </Tooltip>
                     </>

@@ -11,7 +11,7 @@ import { ReadableStream } from '@yume-chan/stream-extra'
 
 export default async function PushServer(adb: Adb): Promise<boolean> {
     try {
-        const bin = await fetch(BIN)
+        const bin = await fetch(new URL(BIN.pathname, import.meta.url))
         await AdbScrcpyClient.pushServer(adb, bin.body as never as ReadableStream<Uint8Array>)
         return true
     } catch (error) {

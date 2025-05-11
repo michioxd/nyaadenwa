@@ -51,7 +51,8 @@ const Locale: LocaleResourcesType = {
         CONNECTING: 'Connecting',
         DISCONNECTED: 'Disconnected',
         CONNECTED: 'Connected',
-        device_attached: 'Device attached'
+        device_attached: 'Device attached',
+        connecting_to_device: 'Connecting to device...'
     }
 }
 
