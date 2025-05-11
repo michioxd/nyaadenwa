@@ -13,6 +13,7 @@ import PushServer from "./PushServer";
 import { OpusDecodeStream } from "./audio/decoder";
 import { WritableStream } from "@yume-chan/stream-extra";
 import StreamWorker from "./video?worker";
+import { ScrcpyKeyboardInjector } from "./keyboard";
 
 export default class ScrcpyStream {
     private device: Adb;
@@ -24,7 +25,7 @@ export default class ScrcpyStream {
     private onResize?: (width: number, height: number) => void;
     private onConnected?: () => void;
     private streamWorker?: Worker;
-
+    public keyboard?: ScrcpyKeyboardInjector;
     constructor({
         device,
         canvas,
@@ -46,6 +47,7 @@ export default class ScrcpyStream {
         this.codec = codec ?? ScrcpyVideoCodecId.H264;
         this.onResize = onResize;
         this.onConnected = onConnected;
+
         if (!WebCodecsVideoDecoder.isSupported) {
             throw new Error("WebCodecs is not supported");
         }
@@ -76,6 +78,16 @@ export default class ScrcpyStream {
             }),
         );
 
+        this.client.output.pipeTo(
+            new WritableStream<string>({
+                write: (line) => {
+                    console.log(`[stream][${this.device.serial}]`, line);
+                },
+            }),
+        );
+
+        this.keyboard = new ScrcpyKeyboardInjector(this.client);
+
         this.initVideo();
         this.initAudio();
 
@@ -88,6 +100,8 @@ export default class ScrcpyStream {
         this.audioPlayer = undefined;
         this.streamWorker?.terminate();
         this.streamWorker = undefined;
+        this.keyboard?.dispose();
+        this.keyboard = undefined;
     }
 
     private async initVideo() {

@@ -4,7 +4,7 @@
  * Repository: https://github.com/michioxd/nyaadenwa
  */
 
-import { useEffect, useRef, useState } from "react";
+import { memo, useEffect, useRef, useState } from "react";
 import ScrcpyStream from "./Stream";
 import type { Adb } from "@yume-chan/adb";
 import cls from "@/screen/Device.module.scss";
@@ -12,6 +12,7 @@ import { Card, Spinner, Text } from "@radix-ui/themes";
 import { useTranslation } from "react-i18next";
 import { AndroidMotionEventAction, AndroidMotionEventButton, clamp } from "@yume-chan/scrcpy";
 import type { AdbScrcpyClient, AdbScrcpyOptionsLatest } from "@yume-chan/adb-scrcpy";
+import type { ScrcpyKeyboardInjector } from "./keyboard";
 
 const PointerEventButtonToAndroidButton = [
     AndroidMotionEventButton.Primary,
@@ -21,30 +22,54 @@ const PointerEventButtonToAndroidButton = [
     AndroidMotionEventButton.Forward,
 ];
 
-export default function ScrcpyPlayer({ dev }: { dev: Adb }) {
+function ScrcpyPlayer({ dev }: { dev: Adb }) {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const playerRef = useRef<HTMLDivElement>(null);
     const [width, setWidth] = useState(0);
     const [height, setHeight] = useState(0);
     const { t } = useTranslation();
     const [loading, setLoading] = useState(true);
+    const [focused, setFocused] = useState(false);
+    const keyboard = useRef<ScrcpyKeyboardInjector | null>(null);
     const client = useRef<AdbScrcpyClient<AdbScrcpyOptionsLatest<boolean>> | null>(null);
 
     useEffect(() => {
         if (!canvasRef.current || !playerRef.current) return;
+
+        const canvas = canvasRef.current;
+        const player = playerRef.current;
 
         const resizeCanvas = () => {
             if (!playerRef.current) return;
             const { clientWidth: windowWidth, clientHeight: windowHeight } = playerRef.current;
             const scale = Math.min(windowWidth / width, windowHeight / height);
 
-            canvasRef.current!.style.width = `${width}px`;
-            canvasRef.current!.style.height = `${height}px`;
-            canvasRef.current!.style.transform = `scale(${scale})`;
-            canvasRef.current!.style.transformOrigin = "center";
+            canvas!.style.width = `${width}px`;
+            canvas!.style.height = `${height}px`;
+            canvas!.style.transform = `scale(${scale})`;
+            canvas!.style.transformOrigin = "center";
         };
 
-        const canvas = canvasRef.current;
+        function handleFocus() {
+            setFocused(true);
+        }
+
+        function handleBlur() {
+            setFocused(false);
+        }
+
+        function handleKeyEvent(e: KeyboardEvent) {
+            if (!client.current || !keyboard.current || !focused) {
+                return;
+            }
+
+            e.preventDefault();
+            e.stopPropagation();
+
+            const { type, code } = e;
+
+            keyboard.current![type === "keydown" ? "down" : "up"](code);
+        }
 
         function handlePointerEvent(event: PointerEvent) {
             event.preventDefault();
@@ -111,19 +136,29 @@ export default function ScrcpyPlayer({ dev }: { dev: Adb }) {
 
         window.addEventListener("resize", resizeCanvas);
         resizeCanvas();
+
         canvas.addEventListener("pointerdown", handlePointerEvent);
         canvas.addEventListener("pointermove", handlePointerEvent);
         canvas.addEventListener("pointerup", handlePointerEvent);
         canvas.addEventListener("contextmenu", (e) => e.preventDefault());
         canvas.addEventListener("wheel", handleMouseScroll);
+        player?.addEventListener("keydown", handleKeyEvent);
+        player?.addEventListener("keyup", handleKeyEvent);
+        player?.addEventListener("focus", handleFocus);
+        player?.addEventListener("blur", handleBlur);
+
         return () => {
             window.removeEventListener("resize", resizeCanvas);
             canvas.removeEventListener("pointerdown", handlePointerEvent);
             canvas.removeEventListener("pointermove", handlePointerEvent);
             canvas.removeEventListener("pointerup", handlePointerEvent);
             canvas.removeEventListener("wheel", handleMouseScroll);
+            player?.removeEventListener("keydown", handleKeyEvent);
+            player?.removeEventListener("keyup", handleKeyEvent);
+            player?.removeEventListener("focus", handleFocus);
+            player?.removeEventListener("blur", handleBlur);
         };
-    }, [width, height, client]);
+    }, [width, height, client, focused, keyboard]);
 
     useEffect(() => {
         if (!canvasRef.current) return;
@@ -149,6 +184,7 @@ export default function ScrcpyPlayer({ dev }: { dev: Adb }) {
 
             try {
                 client.current = await stream.start();
+                keyboard.current = stream.keyboard ?? null;
             } catch (e) {
                 console.error(e);
             }
@@ -160,13 +196,23 @@ export default function ScrcpyPlayer({ dev }: { dev: Adb }) {
         };
     }, [dev]);
     return (
-        <div className={cls.Player} ref={playerRef}>
+        <div className={cls.Player} ref={playerRef} tabIndex={0}>
             {loading && (
                 <Card className={cls.Loading}>
                     <Spinner size="3" /> <Text size="1">{t("connecting_to_device")}</Text>
                 </Card>
             )}
-            <canvas className={cls.Canvas} ref={canvasRef} />
+            <canvas
+                className={cls.Canvas}
+                ref={canvasRef}
+                onClick={() => {
+                    playerRef.current?.focus();
+                    // eslint-disable-next-line @typescript-eslint/no-unused-expressions
+                    !focused && setFocused(true);
+                }}
+            />
         </div>
     );
 }
+
+export default memo(ScrcpyPlayer);

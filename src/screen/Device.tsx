@@ -157,7 +157,7 @@ function ScreenDevice({ devDetails, close }: { devDetails: DeviceDetails; close:
                     <Spinner size="3" /> <Text size="1">{t("waiting_for_device")}</Text>
                 </Card>
             ) : (
-                <>{state === DeviceState.Connected && adb && <ScrcpyPlayer dev={adb} />}</>
+                <>{adb && <ScrcpyPlayer dev={adb} />}</>
             )}
         </div>
     );
