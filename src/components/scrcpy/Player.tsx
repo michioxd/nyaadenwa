@@ -13,6 +13,7 @@ import { useTranslation } from "react-i18next";
 import { AndroidMotionEventAction, AndroidMotionEventButton, clamp } from "@yume-chan/scrcpy";
 import type { AdbScrcpyClient, AdbScrcpyOptionsLatest } from "@yume-chan/adb-scrcpy";
 import type { ScrcpyKeyboardInjector } from "./keyboard";
+import { PiKeyboardDuotone } from "react-icons/pi";
 
 const PointerEventButtonToAndroidButton = [
     AndroidMotionEventButton.Primary,
@@ -211,6 +212,11 @@ function ScrcpyPlayer({ dev }: { dev: Adb }) {
                     !focused && setFocused(true);
                 }}
             />
+            {focused && (
+                <div className={cls.KeyboardIndicator}>
+                    <PiKeyboardDuotone size={60} />
+                </div>
+            )}
         </div>
     );
 }
