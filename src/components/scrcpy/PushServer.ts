@@ -4,21 +4,18 @@
  * Repository: https://github.com/michioxd/nyaadenwa
  */
 
-import type { Adb } from "@yume-chan/adb";
-import { AdbScrcpyClient } from "@yume-chan/adb-scrcpy";
-import { BIN } from "@yume-chan/fetch-scrcpy-server";
-import { ReadableStream } from "@yume-chan/stream-extra";
+import type { Adb } from '@yume-chan/adb'
+import { AdbScrcpyClient } from '@yume-chan/adb-scrcpy'
+import { BIN } from '@yume-chan/fetch-scrcpy-server'
+import { ReadableStream } from '@yume-chan/stream-extra'
 
 export default async function PushServer(adb: Adb): Promise<boolean> {
     try {
-        const bin = await fetch(BIN);
-        await AdbScrcpyClient.pushServer(
-            adb,
-            bin.body as never as ReadableStream<Uint8Array>,
-        );
-        return true;
+        const bin = await fetch(BIN)
+        await AdbScrcpyClient.pushServer(adb, bin.body as never as ReadableStream<Uint8Array>)
+        return true
     } catch (error) {
-        console.error(error);
-        return false;
+        console.error(error)
+        return false
     }
 }
