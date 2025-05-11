@@ -61,5 +61,11 @@ export default defineConfig({
                 comments: false,
             },
         },
+        sourcemap: true,
+        rollupOptions: {
+            output: {
+                sourcemapExcludeSources: true,
+            },
+        },
     },
 });
