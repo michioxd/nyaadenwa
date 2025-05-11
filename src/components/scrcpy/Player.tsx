@@ -42,31 +42,35 @@ export default function ScrcpyPlayer({ dev }: { dev: Adb }) {
 
     useEffect(() => {
         if (!canvasRef.current) return
+
+        const stream = new ScrcpyStream({
+            device: dev,
+            canvas: canvasRef.current,
+            options: {
+                maxSize: 1080,
+                maxFps: 60
+            },
+            onResize: (w, h) => {
+                setWidth(w)
+                setHeight(h)
+            },
+            onConnected: () => {
+                setLoading(false)
+            }
+        })
         ;(async () => {
             if (!canvasRef.current) return
 
             try {
-                const stream = new ScrcpyStream({
-                    device: dev,
-                    canvas: canvasRef.current,
-                    options: {
-                        maxSize: 1080,
-                        maxFps: 60
-                    },
-                    onResize: (w, h) => {
-                        setWidth(w)
-                        setHeight(h)
-                    },
-                    onConnected: () => {
-                        setLoading(false)
-                    }
-                })
-
                 await stream.start()
             } catch (e) {
                 console.error(e)
             }
         })()
+
+        return () => {
+            stream.stop()
+        }
     }, [dev])
     return (
         <div className={cls.Player} ref={playerRef}>

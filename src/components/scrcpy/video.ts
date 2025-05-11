@@ -21,8 +21,6 @@ self.addEventListener('message', async (e) => {
         postMessage({ width, height })
     })
 
-    console.log(stream)
-
     try {
         await stream.pipeTo(decoder.writable)
     } catch (e) {

@@ -23,6 +23,7 @@ export default class ScrcpyStream {
     private audioPlayer?: Float32PcmPlayer
     private onResize?: (width: number, height: number) => void
     private onConnected?: () => void
+    private streamWorker?: Worker
 
     constructor({
         device,
@@ -81,16 +82,20 @@ export default class ScrcpyStream {
 
     public async stop() {
         this.client.close()
+        this.audioPlayer?.stop()
+        this.audioPlayer = undefined
+        this.streamWorker?.terminate()
+        this.streamWorker = undefined
     }
 
     private async initVideo() {
-        const worker = new StreamWorker()
+        this.streamWorker = new StreamWorker()
         const offscreenCanvas = this.canvas.transferControlToOffscreen()
         const stream = await this.client.videoStream
         if (!stream) {
             return
         }
-        worker.postMessage(
+        this.streamWorker.postMessage(
             {
                 codec: this.codec,
                 canvas: offscreenCanvas,
@@ -99,7 +104,7 @@ export default class ScrcpyStream {
             [offscreenCanvas, stream.stream]
         )
 
-        worker.onmessage = (e) => {
+        this.streamWorker.onmessage = (e) => {
             const { width, height, error } = e.data
             this.onConnected?.()
             if (error) {
@@ -110,9 +115,7 @@ export default class ScrcpyStream {
     }
 
     private async initAudio() {
-        console.log('initAudio')
         this.client.audioStream?.then(async (stream) => {
-            console.log('initAudio', stream)
             if (!stream) {
                 console.warn('No audio stream, returned: ', stream)
                 return
@@ -143,8 +146,6 @@ export default class ScrcpyStream {
                         }
                     })
                 )
-
-            console.log('initAudio', audioPlayer)
 
             await audioPlayer.start()
         })

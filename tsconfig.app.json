@@ -30,7 +30,13 @@
             ]
         },
         "types": [
-            "@types/audioworklet"
+            "@types/audioworklet",
+            "@types/node",
+            "@types/react",
+            "@types/react-dom",
+            "@types/uuid",
+            "@types/w3c-web-usb",
+            "@types/webaudioapi",
         ]
     },
     "include": [
