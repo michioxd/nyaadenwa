@@ -78,6 +78,8 @@ export default class ScrcpyStream {
 
         this.initVideo()
         this.initAudio()
+
+        return this.client
     }
 
     public async stop() {
