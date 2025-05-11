@@ -22,9 +22,6 @@ export default function About() {
                     {t("github_repo")}
                 </Flex>
             </Link>
-            <Text mt="1">{t("commit")}: local</Text>
-            <Text>{t("commit_date")}: 00:00:00 1970-01-01</Text>
-
             <Text color="gray" mt="2" size="1">
                 &copy; 2025 michioxd powered. {t("released_under_mit_license")}.{" "}
                 <Link color="gray" href="https://github.com/michioxd/nyaadenwa/graphs/contributors" target="_blank">
