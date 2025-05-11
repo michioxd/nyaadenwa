@@ -16,13 +16,11 @@ import { IconButton, Text } from "@radix-ui/themes";
 import { DividerHorizontalIcon, PlusIcon } from "@radix-ui/react-icons";
 import clsx from "clsx";
 import { toast } from "sonner";
-import useDialog from "./components/dialog/Dialog";
 import { useTranslation } from "react-i18next";
 import { disconnectDevice } from "./components/device/connected";
 import { getDeviceHash } from "./utils/str";
 
 function App() {
-    const dialog = useDialog();
     const { t } = useTranslation();
     const [listDevices, setListDevices] = useState<AdbDaemonWebUsbDevice[]>([]);
     const [content, setContent] = useState<ContentType[]>([]);

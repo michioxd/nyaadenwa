@@ -20,6 +20,7 @@ export default function ScreenWelcome({ shouldShowWelcome }: { shouldShowWelcome
                     <img src={Img} alt="nyaadenwa" />
                     <Text size="7">{t("welcome_title")}</Text>
                     <Text size="1">{t("welcome_description")}</Text>
+                    <Text size="1">still in development aaaaaaaaaaaaaaaaaaaa</Text>
 
                     <Text size="2" className={cls.Manual}>
                         <Trans i18nKey="welcome_manual">

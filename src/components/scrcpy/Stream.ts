@@ -47,7 +47,7 @@ export default class ScrcpyStream {
         this.onResize = onResize;
         this.onConnected = onConnected;
         if (!WebCodecsVideoDecoder.isSupported) {
-            throw new Error("WebCodecsVideoDecoder is not supported");
+            throw new Error("WebCodecs is not supported");
         }
     }
 
