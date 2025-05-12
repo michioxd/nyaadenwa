@@ -8,7 +8,7 @@ import { getDeviceHashFromDev } from "@/utils/str";
 import { Adb, AdbDaemonTransport } from "@yume-chan/adb";
 import AdbWebCredentialStore from "@yume-chan/adb-credential-web";
 import type { AdbDaemonWebUsbDevice } from "@yume-chan/adb-daemon-webusb";
-import { makeAutoObservable } from "mobx";
+import { makeAutoObservable, observable } from "mobx";
 
 interface TConnectedDevice {
     dev: AdbDaemonWebUsbDevice;
@@ -17,7 +17,7 @@ interface TConnectedDevice {
 
 class SessionDevices {
     private readonly credentialStore = new AdbWebCredentialStore();
-    private readonly connectedDevices: Map<string, TConnectedDevice> = new Map();
+    private readonly connectedDevices = observable.map<string, TConnectedDevice>();
 
     constructor() {
         makeAutoObservable(this);
@@ -48,10 +48,15 @@ class SessionDevices {
     public removeDevice(deviceHash: string) {
         const device = this.connectedDevices.get(deviceHash);
         if (device) {
-            device.adb.close();
-            device.dev.raw.close();
+            try {
+                device.dev.raw.close();
+                device.adb.close();
+            } catch (error) {
+                console.error(error);
+            }
         }
         this.connectedDevices.delete(deviceHash);
+        console.log(deviceHash, "Device removed", this.connectedDevices.forEach((d) => d.dev.serial));
     }
 }
 

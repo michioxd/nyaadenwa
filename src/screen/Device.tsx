@@ -87,6 +87,7 @@ const ScreenDevice = observer(({ devDetails, close }: { devDetails: DeviceDetail
 
     const handleConnect = useCallback(async () => {
         const devHash = getDeviceHash(devDetails);
+
         setAdb(null);
         setState(DeviceState.Connecting);
 
@@ -121,7 +122,6 @@ const ScreenDevice = observer(({ devDetails, close }: { devDetails: DeviceDetail
 
             const dvc = await sessionDevices.addDevice(device);
             setAdb(dvc.adb);
-
             setState(DeviceState.Connected);
 
             return device;

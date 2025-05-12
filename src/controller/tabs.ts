@@ -7,12 +7,12 @@
 import connectedDevices from "@/controller/devices";
 import type { ContentType } from "@/types/content";
 import type { TabProperties } from "@sinm/react-chrome-tabs/dist/chrome-tabs";
-import { makeAutoObservable } from "mobx";
+import { makeAutoObservable, observable } from "mobx";
 import { v4 as uuidv4 } from "uuid";
 
 class Tabs {
     public tabs: TabProperties[] = [];
-    public readonly contents: Map<string, ContentType> = new Map();
+    public readonly contents = observable.map<string, ContentType>();
 
     constructor() {
         makeAutoObservable(this);
@@ -35,7 +35,7 @@ class Tabs {
 
         const uuid = uuidv4();
 
-        this.contents.set(uuid, {
+        this.contents.set(content.id, {
             ...content,
             uuid: uuid,
         });
