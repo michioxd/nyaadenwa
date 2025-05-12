@@ -125,6 +125,7 @@ function ScrcpyPlayer({ dev }: { dev: Adb }) {
 
         const canvas = canvasRef.current;
         const player = playerRef.current;
+        let currentPointerX = 0, currentPointerY = 0;
 
         const resizeCanvas = () => {
             if (!playerRef.current) return;
@@ -203,14 +204,14 @@ function ScrcpyPlayer({ dev }: { dev: Adb }) {
             const percentageX = clamp((clientX - rect.x) / rect.width, 0, 1);
             const percentageY = clamp((clientY - rect.y) / rect.height, 0, 1);
 
-            const pointerX = percentageX * width;
-            const pointerY = percentageY * height;
+            currentPointerX = percentageX * width;
+            currentPointerY = percentageY * height;
 
             client.current?.controller?.injectTouch({
                 action,
                 pointerId: BigInt(event.pointerId),
-                pointerX,
-                pointerY,
+                pointerX: currentPointerX,
+                pointerY: currentPointerY,
                 videoWidth: width,
                 videoHeight: height,
                 pressure: buttons === 0 ? 0 : 1,
@@ -225,8 +226,8 @@ function ScrcpyPlayer({ dev }: { dev: Adb }) {
 
             const { deltaX, deltaY } = event;
             client.current?.controller?.injectScroll({
-                pointerX: 100,
-                pointerY: 200,
+                pointerX: currentPointerX,
+                pointerY: currentPointerY,
                 videoWidth: width,
                 videoHeight: height,
                 scrollX: -deltaX,
