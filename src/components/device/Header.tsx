@@ -18,7 +18,7 @@ import {
     PiUsbDuotone,
 } from "react-icons/pi";
 
-export default function DeviceHeader({ dumpSys, close }: { dumpSys: DumpSys, close: () => void }) {
+export default function DeviceHeader({ dumpSys, close }: { dumpSys: DumpSys; close: () => void }) {
     const [androidVersion, setAndroidVersion] = useState("");
     const [batterStatus, setBatterStatus] = useState<DumpSys.Battery.Info | null>(null);
     const interval = useRef<NodeJS.Timeout | null>(null);

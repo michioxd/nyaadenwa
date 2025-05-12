@@ -25,9 +25,9 @@ class Tabs {
             this.tabs = this.tabs.map((tab) =>
                 tab.stackNo === existing.stackNo
                     ? {
-                        ...tab,
-                        active: tab.id === existing.id,
-                    }
+                          ...tab,
+                          active: tab.id === existing.id,
+                      }
                     : tab,
             );
             return;
@@ -44,9 +44,9 @@ class Tabs {
             ...this.tabs.map((tab) =>
                 tab.stackNo === stackNo
                     ? {
-                        ...tab,
-                        active: false,
-                    }
+                          ...tab,
+                          active: false,
+                      }
                     : tab,
             ),
             {
@@ -62,9 +62,9 @@ class Tabs {
         this.tabs = this.tabs.map((tab) =>
             stackNo === tab.stackNo
                 ? {
-                    ...tab,
-                    active: id === tab.id,
-                }
+                      ...tab,
+                      active: id === tab.id,
+                  }
                 : tab,
         );
     }

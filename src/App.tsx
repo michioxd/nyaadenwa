@@ -84,9 +84,7 @@ const App = observer(() => {
                         stackNo={index}
                         handleAddDevice={handleAddDevice}
                         handleGetDevice={handleGetDevice}
-                        shouldShowWelcome={
-                            index === Math.floor(stackNum / 2)
-                        }
+                        shouldShowWelcome={index === Math.floor(stackNum / 2)}
                         stackController={<StackControls stackNum={stackNum} setStackNum={setStackNum} index={index} />}
                     />
                 </div>

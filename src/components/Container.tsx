@@ -206,8 +206,8 @@ const Container = observer(
                                                                         () => {
                                                                             deviceForgot.push(
                                                                                 device.raw.manufacturerName +
-                                                                                device.name +
-                                                                                device.serial,
+                                                                                    device.name +
+                                                                                    device.serial,
                                                                             );
                                                                             try {
                                                                                 device.raw.close();
@@ -240,19 +240,21 @@ const Container = observer(
                     {filteredTabs.length < 1 ? (
                         <ScreenWelcome shouldShowWelcome={shouldShowWelcome} />
                     ) : (
-                        Array.from(tabsController.contents.values()).filter((c) => c.stackNo === stackNo).map((c) => (
-                            <div
-                                key={c.uuid}
-                                className={clsx(
-                                    cls.content,
-                                    tabsController.tabs.find(
-                                        (tab) => tab.id === c.id && tab.stackNo === stackNo && tab.active,
-                                    ) && cls.active,
-                                )}
-                            >
-                                <c.content close={() => tabsController.closeTab(c.id)} />
-                            </div>
-                        ))
+                        Array.from(tabsController.contents.values())
+                            .filter((c) => c.stackNo === stackNo)
+                            .map((c) => (
+                                <div
+                                    key={c.uuid}
+                                    className={clsx(
+                                        cls.content,
+                                        tabsController.tabs.find(
+                                            (tab) => tab.id === c.id && tab.stackNo === stackNo && tab.active,
+                                        ) && cls.active,
+                                    )}
+                                >
+                                    <c.content close={() => tabsController.closeTab(c.id)} />
+                                </div>
+                            ))
                     )}
                 </div>
             </>

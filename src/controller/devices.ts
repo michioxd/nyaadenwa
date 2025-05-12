@@ -56,7 +56,11 @@ class SessionDevices {
             }
         }
         this.connectedDevices.delete(deviceHash);
-        console.log(deviceHash, "Device removed", this.connectedDevices.forEach((d) => d.dev.serial));
+        console.log(
+            deviceHash,
+            "Device removed",
+            this.connectedDevices.forEach((d) => d.dev.serial),
+        );
     }
 }
 
