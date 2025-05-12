@@ -57,12 +57,14 @@ function ScrcpyPlayer({ dev }: { dev: Adb }) {
     const { t } = useTranslation();
     const [loading, setLoading] = useState(true);
     const [focused, setFocused] = useState(false);
+    const [screenshoting, setScreenshoting] = useState(false);
     const keyboard = useRef<ScrcpyKeyboardInjector | null>(null);
     const client = useRef<AdbScrcpyClient<AdbScrcpyOptionsLatest<boolean>> | null>(null);
 
     const handleTakeScreenshot = useCallback(
         async (clipboard?: boolean) => {
             try {
+                setScreenshoting(true);
                 const screenshot = await dev.framebuffer();
                 const canvas = document.createElement("canvas");
 
@@ -100,6 +102,8 @@ function ScrcpyPlayer({ dev }: { dev: Adb }) {
             } catch (e) {
                 toast.error(t("failed_to_take_screenshot"));
                 console.error(e);
+            } finally {
+                setScreenshoting(false);
             }
         },
         [dev, t],
@@ -337,10 +341,10 @@ function ScrcpyPlayer({ dev }: { dev: Adb }) {
                         </Tooltip>
 
                         <ContextMenu.Root>
-                            <ContextMenu.Trigger>
+                            <ContextMenu.Trigger disabled={screenshoting}>
                                 <IconButton variant="soft" color="gray" onClick={() => handleTakeScreenshot(false)}>
                                     <Tooltip content={t("screenshot")}>
-                                        <MdOutlineScreenshot size={18} />
+                                        {screenshoting ? <Spinner size="2" /> : <MdOutlineScreenshot size={18} />}
                                     </Tooltip>
                                 </IconButton>
                             </ContextMenu.Trigger>
