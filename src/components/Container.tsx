@@ -56,7 +56,6 @@ const Container = observer(
 
         const filteredTabs = computed(() => tabsController.tabs.filter((tab) => tab.stackNo === stackNo)).get();
 
-        console.log(tabsController);
         return (
             <>
                 <Tabs
