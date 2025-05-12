@@ -5,106 +5,23 @@
  */
 
 import { useCallback, useEffect, useState } from "react";
-import { v4 as uuidv4 } from "uuid";
 import DeviceManager, { DeviceManagerTrackDevices } from "./controller/manager";
 import type { AdbDaemonWebUsbDevice } from "@yume-chan/adb-daemon-webusb";
-import type { TabProperties } from "@sinm/react-chrome-tabs/dist/chrome-tabs";
-import { ContentTypeProperties, type ContentType } from "./types/content";
+import { ContentTypeProperties } from "./types/content";
 import Container from "./components/Container";
 import cls from "./scss/Main.module.scss";
-import { IconButton, Text } from "@radix-ui/themes";
-import { DividerHorizontalIcon, PlusIcon } from "@radix-ui/react-icons";
 import clsx from "clsx";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
-import { disconnectDevice } from "./components/device/connected";
-import { getDeviceHash } from "./utils/str";
+import { getDeviceHashFromDev } from "./utils/str";
+import { observer } from "mobx-react";
+import tabsController from "./controller/tabs";
+import StackControls from "./components/Stack";
 
-function App() {
+const App = observer(() => {
     const { t } = useTranslation();
     const [listDevices, setListDevices] = useState<AdbDaemonWebUsbDevice[]>([]);
-    const [content, setContent] = useState<ContentType[]>([]);
-    const [tabs, setTabs] = useState<TabProperties[]>([]);
     const [stackNum, setStackNum] = useState(0);
-    const [currentWindowWidth, setCurrentWindowWidth] = useState(window.innerWidth);
-
-    const handleOpenNewTab = useCallback(
-        (content: ContentType, stackNo: number) => {
-            const existing = tabs.find((tab) => tab.id === content.id);
-
-            if (existing) {
-                setTabs(
-                    tabs.map((tab) =>
-                        tab.stackNo !== existing.stackNo
-                            ? tab
-                            : {
-                                  ...tab,
-                                  active: tab.id === existing.id,
-                              },
-                    ),
-                );
-                return;
-            }
-
-            const uuid = uuidv4();
-
-            setContent((p) => [
-                ...p,
-                {
-                    uuid: uuid,
-                    ...content,
-                },
-            ]);
-            setTabs((p) => [
-                ...p.map((tab) => (tab.stackNo === stackNo ? { ...tab, active: false } : tab)),
-                {
-                    id: content.id,
-                    title: content.title,
-                    active: true,
-                    stackNo: stackNo,
-                },
-            ]);
-        },
-        [tabs],
-    );
-
-    const tabActive = (id: string, stackNo: number) => {
-        setTabs(
-            tabs.map((tab) =>
-                stackNo === tab.stackNo
-                    ? {
-                          ...tab,
-                          active: id === tab.id,
-                      }
-                    : tab,
-            ),
-        );
-    };
-
-    const tabClose = (id: string) => {
-        const filteredTabs = tabs.filter((tab) => tab.id !== id);
-        const newIndex = Math.min(
-            tabs.findIndex((tab) => tab.id === id),
-            filteredTabs.length - 1,
-        );
-
-        if (id.length === 40) {
-            disconnectDevice(id);
-        }
-
-        setContent(content.filter((c) => c.id !== id));
-        setTabs(filteredTabs.map((tab, i) => ({ ...tab, active: i === newIndex })));
-    };
-
-    const tabReorder = (tabId: string, _: number, toIndex: number, stackNo: number) => {
-        const beforeTab = tabs.find((tab) => tab.id === tabId && tab.stackNo === stackNo);
-        if (!beforeTab) {
-            return;
-        }
-        const newTabs = tabs.filter((tab) => tab.id !== tabId && tab.stackNo === stackNo);
-        newTabs.splice(toIndex, 0, beforeTab);
-        setTabs(newTabs);
-    };
 
     const handleGetDevice = useCallback(async () => {
         try {
@@ -128,30 +45,21 @@ function App() {
     }, [handleGetDevice]);
 
     useEffect(() => {
-        if (content.length < 1) return;
+        if (tabsController.contents.size < 1) return;
         const deviceDisconnected: string[] = [];
 
-        content
-            .filter((c) => c.type === ContentTypeProperties.Device)
-            .map((c) => {
-                const device = listDevices.find(
-                    (d) =>
-                        getDeviceHash({
-                            manufacturerName: d.raw.manufacturerName ?? "",
-                            name: d.name,
-                            serial: d.serial,
-                        }) === c.id,
-                );
-                if (!device) {
-                    tabClose(c.id);
-                    deviceDisconnected.push(c.title);
-                }
-            });
+        tabsController.contents.forEach((c) => {
+            const device = listDevices.find((d) => getDeviceHashFromDev(d) === c.id);
+            if (!device) {
+                tabsController.closeTab(c.id);
+                deviceDisconnected.push(c.title);
+            }
+        });
 
         if (deviceDisconnected.length > 0)
             toast.error(t("device_disconnected_description") + " " + deviceDisconnected.join(", "));
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [content, listDevices]);
+    }, [listDevices, tabsController.contents]);
 
     useEffect(() => {
         DeviceManagerTrackDevices.onDeviceAdd(() => {
@@ -161,14 +69,8 @@ function App() {
         DeviceManagerTrackDevices.onDeviceRemove(handleGetDevice);
 
         handleGetDevice();
-        const handleResize = () => {
-            setCurrentWindowWidth(window.innerWidth);
-        };
-
-        window.addEventListener("resize", handleResize);
 
         return () => {
-            window.removeEventListener("resize", handleResize);
             DeviceManagerTrackDevices.stop();
         };
         // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -181,50 +83,17 @@ function App() {
                     <Container
                         listDevices={listDevices}
                         stackNo={index}
-                        tabs={tabs}
-                        content={content}
                         handleAddDevice={handleAddDevice}
                         handleGetDevice={handleGetDevice}
-                        handleOpenNewTab={handleOpenNewTab}
-                        close={tabClose}
-                        reorder={tabReorder}
-                        active={tabActive}
                         shouldShowWelcome={
-                            (content.length === 0 && index === Math.floor(stackNum / 2)) ||
-                            (index > 0 &&
-                                content.find((c) => c.stackNo === index) === undefined &&
-                                content.find((c) => c.stackNo === index - 1) !== undefined)
+                            index === Math.floor(stackNum / 2)
                         }
-                        stackController={
-                            currentWindowWidth > 700 && (
-                                <div className={cls.StackController}>
-                                    <IconButton
-                                        variant="soft"
-                                        size="1"
-                                        onClick={() => setStackNum(stackNum - 1)}
-                                        disabled={stackNum === 0}
-                                        color="gray"
-                                    >
-                                        <DividerHorizontalIcon />
-                                    </IconButton>
-                                    <Text>{index + 1}</Text>
-                                    <IconButton
-                                        variant="soft"
-                                        size="1"
-                                        disabled={currentWindowWidth / (stackNum + 1) <= 700}
-                                        onClick={() => setStackNum(stackNum + 1)}
-                                        color="gray"
-                                    >
-                                        <PlusIcon />
-                                    </IconButton>
-                                </div>
-                            )
-                        }
+                        stackController={<StackControls stackNum={stackNum} setStackNum={setStackNum} index={index} />}
                     />
                 </div>
             ))}
         </div>
     );
-}
+});
 
 export default App;

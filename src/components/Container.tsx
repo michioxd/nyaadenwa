@@ -21,247 +21,244 @@ import { Tabs } from "@sinm/react-chrome-tabs";
 import { useTranslation } from "react-i18next";
 import clsx from "clsx";
 import type { AdbDaemonWebUsbDevice } from "@yume-chan/adb-daemon-webusb";
-import type { TabProperties } from "@sinm/react-chrome-tabs/dist/chrome-tabs";
 import ScreenWelcome from "@/screen/Welcome";
-import { ContentTypeProperties, type ContentType } from "@/types/content";
+import { ContentTypeProperties } from "@/types/content";
 import cls from "@/scss/Main.module.scss";
 import About from "./About";
 import LangSelector from "./LangSelector";
 import ScreenDevice from "@/screen/Device";
 import useDialog from "./dialog/Dialog";
-import { memo, useMemo } from "react";
-import { getDeviceHash } from "@/utils/str";
+import { getDeviceHashFromDev } from "@/utils/str";
+import tabsController from "@/controller/tabs";
+import { observer } from "mobx-react";
+import { computed } from "mobx";
 
 const deviceForgot: string[] = [];
 
-function Container({
-    listDevices,
-    stackNo,
-    tabs,
-    content,
-    handleAddDevice,
-    handleGetDevice,
-    handleOpenNewTab,
-    close,
-    reorder,
-    active,
-    stackController,
-    shouldShowWelcome,
-}: {
-    listDevices: AdbDaemonWebUsbDevice[];
-    stackNo: number;
-    tabs: TabProperties[];
-    content: ContentType[];
-    handleAddDevice: () => void;
-    handleGetDevice: () => void;
-    handleOpenNewTab: (content: ContentType, stackNo: number) => void;
-    close: (id: string) => void;
-    reorder: (id: string, _: number, toIndex: number, stackNo: number) => void;
-    active: (id: string, stackNo: number) => void;
-    stackController: React.ReactNode;
-    shouldShowWelcome: boolean;
-}) {
-    const { t } = useTranslation();
-    const dialog = useDialog();
+const Container = observer(
+    ({
+        listDevices,
+        stackNo,
+        handleAddDevice,
+        handleGetDevice,
+        stackController,
+        shouldShowWelcome,
+    }: {
+        listDevices: AdbDaemonWebUsbDevice[];
+        stackNo: number;
+        handleAddDevice: () => void;
+        handleGetDevice: () => void;
+        stackController: React.ReactNode;
+        shouldShowWelcome: boolean;
+    }) => {
+        const { t } = useTranslation();
+        const dialog = useDialog();
 
-    const filteredTabs = useMemo(() => tabs.filter((tab) => tab.stackNo === stackNo), [tabs, stackNo]);
+        const filteredTabs = computed(() => tabsController.tabs.filter((tab) => tab.stackNo === stackNo)).get();
 
-    const contentComponents = useMemo(() => {
-        if (filteredTabs.length === 0) {
-            return (
-                <div className={clsx(cls.content, cls.active)}>
-                    <ScreenWelcome shouldShowWelcome={shouldShowWelcome} />
-                </div>
-            );
-        }
-
-        return content.map((c) => {
-            const isActive = tabs.find((tab) => tab.id === c.id && tab.stackNo === stackNo && tab.active);
-            return (
-                <div key={c.uuid} className={clsx(cls.content, isActive && cls.active)}>
-                    <c.content close={() => close(c.id)} />
-                </div>
-            );
-        });
-    }, [filteredTabs.length, content, shouldShowWelcome, tabs, stackNo, close]);
-
-    return (
-        <>
-            <Tabs
-                draggable
-                onTabClose={(id) => close(id)}
-                onTabReorder={(id, from, toIndex) => reorder(id, from, toIndex, stackNo)}
-                onTabActive={(id) => active(id, stackNo)}
-                tabs={filteredTabs}
-                i18nIsDynamicList
-                pinnedRight={
-                    <>
-                        <Box
-                            style={{
-                                display: "flex",
-                                alignItems: "center",
-                                gap: "0.2rem",
-                            }}
-                        >
-                            <DropdownMenu.Root>
-                                <DropdownMenu.Trigger>
-                                    <IconButton style={{ margin: "6px 0 0 6px" }} size="1" color="cyan" variant="soft">
-                                        <HamburgerMenuIcon />
-                                    </IconButton>
-                                </DropdownMenu.Trigger>
-                                <DropdownMenu.Content size="1" variant="soft">
-                                    <DropdownMenu.Item onClick={handleAddDevice}>
-                                        <PlusIcon />
-                                        {t("add_device")}
-                                    </DropdownMenu.Item>
-                                    <DropdownMenu.Item
-                                        onClick={() =>
-                                            handleOpenNewTab(
-                                                {
-                                                    id: "settings",
-                                                    title: t("settings"),
-                                                    type: ContentTypeProperties.Settings,
-                                                    content: () => <div>Settings</div>,
-                                                    stackNo: stackNo,
-                                                },
-                                                stackNo,
-                                            )
-                                        }
-                                    >
-                                        <GearIcon />
-                                        {t("settings")}
-                                    </DropdownMenu.Item>
-                                    <DropdownMenu.Sub>
-                                        <DropdownMenu.SubTrigger>
-                                            <MixIcon />
-                                            {t("change_language")}
-                                        </DropdownMenu.SubTrigger>
-                                        <LangSelector />
-                                    </DropdownMenu.Sub>
-                                    <DropdownMenu.Item
-                                        onClick={() => {
-                                            dialog.alert(t("about_nyaadenwa"), <About />);
-                                        }}
-                                    >
-                                        <InfoCircledIcon />
-                                        {t("about_nyaadenwa")}
-                                    </DropdownMenu.Item>
-                                    <DropdownMenu.Separator />
-                                    {listDevices.length < 1 ? (
-                                        <DropdownMenu.Item disabled>{t("no_device_connected")}</DropdownMenu.Item>
-                                    ) : (
-                                        listDevices.map((device) => {
-                                            const isForgot = deviceForgot.includes(
-                                                device.raw.manufacturerName + device.name + device.serial,
-                                            );
-                                            return (
-                                                <DropdownMenu.Sub key={device.name + device.serial}>
-                                                    <DropdownMenu.SubTrigger>
-                                                        {isForgot ? <ExclamationTriangleIcon /> : <MobileIcon />}
-                                                        {device.name}
-                                                        <Text
-                                                            size="1"
-                                                            color="gray"
-                                                            style={{
-                                                                fontSize: "10px",
-                                                            }}
-                                                        >
-                                                            {device.serial}
-                                                        </Text>
-                                                    </DropdownMenu.SubTrigger>
-                                                    <DropdownMenu.SubContent>
-                                                        {isForgot && (
-                                                            <DropdownMenu.Item onClick={() => window.location.reload()}>
-                                                                <ReloadIcon />
-                                                                {t("device_forgot")}
-                                                            </DropdownMenu.Item>
-                                                        )}
-                                                        <DropdownMenu.Item
-                                                            disabled={isForgot}
-                                                            onClick={() => {
-                                                                if (isForgot) return;
-                                                                handleOpenNewTab(
-                                                                    {
-                                                                        id: getDeviceHash({
-                                                                            manufacturerName:
-                                                                                device.raw.manufacturerName ?? "",
-                                                                            name: device.name,
-                                                                            serial: device.serial,
-                                                                        }),
-                                                                        title: device.name + " (" + device.serial + ")",
-                                                                        type: ContentTypeProperties.Device,
-                                                                        content: ({ close }) => (
-                                                                            <ScreenDevice
-                                                                                devDetails={{
-                                                                                    manufacturerName:
-                                                                                        device.raw.manufacturerName ??
-                                                                                        "",
-                                                                                    name: device.name,
-                                                                                    serial: device.serial,
-                                                                                }}
-                                                                                close={close}
-                                                                            />
-                                                                        ),
-                                                                        stackNo: stackNo,
-                                                                    },
-                                                                    stackNo,
-                                                                );
-                                                            }}
-                                                        >
-                                                            <EnterIcon />
-                                                            {t("open")}
-                                                        </DropdownMenu.Item>
-                                                        <DropdownMenu.Item
-                                                            onClick={() => {
-                                                                dialog.confirm(
-                                                                    t("forget_device"),
-                                                                    <>
-                                                                        {t("forget_device_description", {
-                                                                            device:
-                                                                                device.raw.manufacturerName +
-                                                                                " " +
+        console.log(tabsController);
+        return (
+            <>
+                <Tabs
+                    draggable
+                    onTabClose={(id) => tabsController.closeTab(id)}
+                    onTabReorder={(id, from, toIndex) => tabsController.tabReorder(id, from, toIndex, stackNo)}
+                    onTabActive={(id) => tabsController.makeTabActive(id, stackNo)}
+                    tabs={filteredTabs}
+                    i18nIsDynamicList
+                    pinnedRight={
+                        <>
+                            <Box
+                                style={{
+                                    display: "flex",
+                                    alignItems: "center",
+                                    gap: "0.2rem",
+                                }}
+                            >
+                                <DropdownMenu.Root>
+                                    <DropdownMenu.Trigger>
+                                        <IconButton
+                                            style={{ margin: "6px 0 0 6px" }}
+                                            size="1"
+                                            color="cyan"
+                                            variant="soft"
+                                        >
+                                            <HamburgerMenuIcon />
+                                        </IconButton>
+                                    </DropdownMenu.Trigger>
+                                    <DropdownMenu.Content size="1" variant="soft">
+                                        <DropdownMenu.Item onClick={handleAddDevice}>
+                                            <PlusIcon />
+                                            {t("add_device")}
+                                        </DropdownMenu.Item>
+                                        <DropdownMenu.Item
+                                            onClick={() =>
+                                                tabsController.openTab(
+                                                    {
+                                                        id: "settings",
+                                                        title: t("settings"),
+                                                        type: ContentTypeProperties.Settings,
+                                                        content: () => <div>Settings</div>,
+                                                        stackNo: stackNo,
+                                                    },
+                                                    stackNo,
+                                                )
+                                            }
+                                        >
+                                            <GearIcon />
+                                            {t("settings")}
+                                        </DropdownMenu.Item>
+                                        <DropdownMenu.Sub>
+                                            <DropdownMenu.SubTrigger>
+                                                <MixIcon />
+                                                {t("change_language")}
+                                            </DropdownMenu.SubTrigger>
+                                            <LangSelector />
+                                        </DropdownMenu.Sub>
+                                        <DropdownMenu.Item
+                                            onClick={() => {
+                                                dialog.alert(t("about_nyaadenwa"), <About />);
+                                            }}
+                                        >
+                                            <InfoCircledIcon />
+                                            {t("about_nyaadenwa")}
+                                        </DropdownMenu.Item>
+                                        <DropdownMenu.Separator />
+                                        {listDevices.length < 1 ? (
+                                            <DropdownMenu.Item disabled>{t("no_device_connected")}</DropdownMenu.Item>
+                                        ) : (
+                                            listDevices.map((device) => {
+                                                const isForgot = deviceForgot.includes(
+                                                    device.raw.manufacturerName + device.name + device.serial,
+                                                );
+                                                return (
+                                                    <DropdownMenu.Sub key={device.name + device.serial}>
+                                                        <DropdownMenu.SubTrigger>
+                                                            {isForgot ? <ExclamationTriangleIcon /> : <MobileIcon />}
+                                                            {device.name}
+                                                            <Text
+                                                                size="1"
+                                                                color="gray"
+                                                                style={{
+                                                                    fontSize: "10px",
+                                                                }}
+                                                            >
+                                                                {device.serial}
+                                                            </Text>
+                                                        </DropdownMenu.SubTrigger>
+                                                        <DropdownMenu.SubContent>
+                                                            {isForgot && (
+                                                                <DropdownMenu.Item
+                                                                    onClick={() => window.location.reload()}
+                                                                >
+                                                                    <ReloadIcon />
+                                                                    {t("device_forgot")}
+                                                                </DropdownMenu.Item>
+                                                            )}
+                                                            <DropdownMenu.Item
+                                                                disabled={isForgot}
+                                                                onClick={() => {
+                                                                    if (isForgot) return;
+                                                                    tabsController.openTab(
+                                                                        {
+                                                                            id: getDeviceHashFromDev(device),
+                                                                            title:
                                                                                 device.name +
                                                                                 " (" +
                                                                                 device.serial +
                                                                                 ")",
-                                                                        })}
-                                                                    </>,
-                                                                    () => {
-                                                                        deviceForgot.push(
-                                                                            device.raw.manufacturerName +
+                                                                            type: ContentTypeProperties.Device,
+                                                                            content: ({ close }) => (
+                                                                                <ScreenDevice
+                                                                                    devDetails={{
+                                                                                        manufacturerName:
+                                                                                            device.raw
+                                                                                                .manufacturerName ?? "",
+                                                                                        name: device.name,
+                                                                                        serial: device.serial,
+                                                                                    }}
+                                                                                    close={close}
+                                                                                />
+                                                                            ),
+                                                                            stackNo: stackNo,
+                                                                        },
+                                                                        stackNo,
+                                                                    );
+                                                                }}
+                                                            >
+                                                                <EnterIcon />
+                                                                {t("open")}
+                                                            </DropdownMenu.Item>
+                                                            <DropdownMenu.Item
+                                                                onClick={() => {
+                                                                    dialog.confirm(
+                                                                        t("forget_device"),
+                                                                        <>
+                                                                            {t("forget_device_description", {
+                                                                                device:
+                                                                                    device.raw.manufacturerName +
+                                                                                    " " +
+                                                                                    device.name +
+                                                                                    " (" +
+                                                                                    device.serial +
+                                                                                    ")",
+                                                                            })}
+                                                                        </>,
+                                                                        () => {
+                                                                            deviceForgot.push(
+                                                                                device.raw.manufacturerName +
                                                                                 device.name +
                                                                                 device.serial,
-                                                                        );
-                                                                        try {
-                                                                            device.raw.close();
-                                                                            device.raw.forget();
-                                                                        } catch (error) {
-                                                                            console.error(error);
-                                                                        } finally {
-                                                                            handleGetDevice();
-                                                                        }
-                                                                    },
-                                                                );
-                                                            }}
-                                                        >
-                                                            <TrashIcon />
-                                                            {t("forget_device")}
-                                                        </DropdownMenu.Item>
-                                                    </DropdownMenu.SubContent>
-                                                </DropdownMenu.Sub>
-                                            );
-                                        })
-                                    )}
-                                </DropdownMenu.Content>
-                            </DropdownMenu.Root>
-                            {stackController}
-                        </Box>
-                    </>
-                }
-            />
-            <div className={cls.Main}>{contentComponents}</div>
-        </>
-    );
-}
+                                                                            );
+                                                                            try {
+                                                                                device.raw.close();
+                                                                                device.raw.forget();
+                                                                            } catch (error) {
+                                                                                console.error(error);
+                                                                            } finally {
+                                                                                handleGetDevice();
+                                                                            }
+                                                                        },
+                                                                    );
+                                                                }}
+                                                            >
+                                                                <TrashIcon />
+                                                                {t("forget_device")}
+                                                            </DropdownMenu.Item>
+                                                        </DropdownMenu.SubContent>
+                                                    </DropdownMenu.Sub>
+                                                );
+                                            })
+                                        )}
+                                    </DropdownMenu.Content>
+                                </DropdownMenu.Root>
+                                {stackController}
+                            </Box>
+                        </>
+                    }
+                />
+                <div className={cls.Main}>
+                    {filteredTabs.length < 1 ? (
+                        <ScreenWelcome shouldShowWelcome={shouldShowWelcome} />
+                    ) : (
+                        Array.from(tabsController.contents.values()).filter((c) => c.stackNo === stackNo).map((c) => (
+                            <div
+                                key={c.uuid}
+                                className={clsx(
+                                    cls.content,
+                                    tabsController.tabs.find(
+                                        (tab) => tab.id === c.id && tab.stackNo === stackNo && tab.active,
+                                    ) && cls.active,
+                                )}
+                            >
+                                <c.content close={() => tabsController.closeTab(c.id)} />
+                            </div>
+                        ))
+                    )}
+                </div>
+            </>
+        );
+    },
+);
 
-export default memo(Container);
+export default Container;

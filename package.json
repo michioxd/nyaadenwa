@@ -36,6 +36,8 @@
         "hash-object": "^5.0.1",
         "i18next": "^25.1.2",
         "i18next-browser-languagedetector": "^8.1.0",
+        "mobx": "^6.13.7",
+        "mobx-react": "^9.2.0",
         "object-hash": "^3.0.0",
         "react": "^19.1.0",
         "react-dom": "^19.1.0",

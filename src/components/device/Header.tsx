@@ -18,14 +18,20 @@ import {
     PiUsbDuotone,
 } from "react-icons/pi";
 
-export default function DeviceHeader({ dumpSys }: { dumpSys: DumpSys }) {
+export default function DeviceHeader({ dumpSys, close }: { dumpSys: DumpSys, close: () => void }) {
     const [androidVersion, setAndroidVersion] = useState("");
     const [batterStatus, setBatterStatus] = useState<DumpSys.Battery.Info | null>(null);
     const interval = useRef<NodeJS.Timeout | null>(null);
 
     const getBatterStatus = async () => {
-        const batterStatus = await dumpSys.battery();
-        setBatterStatus(batterStatus);
+        try {
+            const batterStatus = await dumpSys.battery();
+            setBatterStatus(batterStatus);
+        } catch (error) {
+            if (error instanceof Error && error.message.includes("device is not connected")) {
+                close();
+            }
+        }
     };
 
     useEffect(() => {

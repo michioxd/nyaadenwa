@@ -4,7 +4,16 @@
  * Repository: https://github.com/michioxd/nyaadenwa
  */
 
+import type { AdbDaemonWebUsbDevice } from "@yume-chan/adb-daemon-webusb";
 import objectHash from "object-hash";
+
+export const getDeviceHashFromDev = (dev: AdbDaemonWebUsbDevice) => {
+    return getDeviceHash({
+        manufacturerName: dev.raw.manufacturerName ?? "",
+        name: dev.name,
+        serial: dev.serial,
+    });
+};
 
 export const getDeviceHash = (device: { manufacturerName: string; name: string; serial: string }) => {
     return objectHash(

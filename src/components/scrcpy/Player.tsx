@@ -125,7 +125,8 @@ function ScrcpyPlayer({ dev }: { dev: Adb }) {
 
         const canvas = canvasRef.current;
         const player = playerRef.current;
-        let currentPointerX = 0, currentPointerY = 0;
+        let currentPointerX = 0,
+            currentPointerY = 0;
 
         const resizeCanvas = () => {
             if (!playerRef.current) return;
@@ -134,7 +135,7 @@ function ScrcpyPlayer({ dev }: { dev: Adb }) {
 
             const menuPos = (width * scale) / 2;
             const finalMenuPos = windowWidth / 2 + menuPos + 8;
-            if (finalMenuPos + 56 > windowWidth) {
+            if (finalMenuPos + 56 + 8 > windowWidth) {
                 setMenuPosition({
                     pos: windowWidth - 8 - 56,
                     overflow: true,

@@ -10,22 +10,20 @@ import cls from "./Device.module.scss";
 import { Badge, Card, Flex, Spinner, Text } from "@radix-ui/themes";
 import useDialog from "@/components/dialog/Dialog";
 import { useTranslation } from "react-i18next";
-import { Adb, AdbDaemonTransport } from "@yume-chan/adb";
-import AdbWebCredentialStore from "@yume-chan/adb-credential-web";
+import { Adb } from "@yume-chan/adb";
 import { DumpSys } from "@yume-chan/android-bin";
 import DeviceHeader from "@/components/device/Header";
 import DeviceManager from "@/controller/manager";
 import { getDeviceHash } from "@/utils/str";
-import { getConnectedDevice, setConnectedDevice } from "@/components/device/connected";
 import ScrcpyPlayer from "@/components/scrcpy/Player";
+import sessionDevices from "@/controller/devices";
+import { observer } from "mobx-react";
 
 enum DeviceState {
     Connecting = "CONNECTING",
     Disconnected = "DISCONNECTED",
     Connected = "CONNECTED",
 }
-
-const CredentialStore = new AdbWebCredentialStore();
 
 interface DeviceDetails {
     manufacturerName: string;
@@ -39,11 +37,13 @@ const DeviceInfo = memo(
         state,
         t,
         dumpSys,
+        close,
     }: {
         deviceName: string;
         state: DeviceState;
         t: (key: string) => string;
         dumpSys: DumpSys | null;
+        close: () => void;
     }) => {
         const badgeColor = useMemo(
             () => (state === DeviceState.Connected ? "green" : state === DeviceState.Disconnected ? "red" : "gray"),
@@ -59,7 +59,7 @@ const DeviceInfo = memo(
                     <Badge size="1" color={badgeColor}>
                         {t(state)}
                     </Badge>
-                    {dumpSys && <DeviceHeader dumpSys={dumpSys} />}
+                    {dumpSys && <DeviceHeader dumpSys={dumpSys} close={close} />}
                 </Flex>
             </Card>
         );
@@ -68,7 +68,7 @@ const DeviceInfo = memo(
 
 DeviceInfo.displayName = "DeviceInfo";
 
-function ScreenDevice({ devDetails, close }: { devDetails: DeviceDetails; close: () => void }) {
+const ScreenDevice = observer(({ devDetails, close }: { devDetails: DeviceDetails; close: () => void }) => {
     const [state, setState] = useState<DeviceState>(DeviceState.Connecting);
     const dialog = useDialog();
     const { t } = useTranslation();
@@ -91,13 +91,14 @@ function ScreenDevice({ devDetails, close }: { devDetails: DeviceDetails; close:
         setState(DeviceState.Connecting);
 
         if (devHash) {
-            const dev = getConnectedDevice(devHash);
+            const dev = sessionDevices.getDevice(devHash);
             if (dev && dev.adb) {
                 setAdb(dev.adb);
                 setState(DeviceState.Connected);
                 return;
             }
         }
+
         try {
             const whichDev = await DeviceManager?.getDevices({
                 filters: [{ serialNumber: devDetails.serial }],
@@ -118,16 +119,11 @@ function ScreenDevice({ devDetails, close }: { devDetails: DeviceDetails; close:
                 throw Error("Device not found");
             }
 
-            const dvc = await device.connect();
-            const transport = await AdbDaemonTransport.authenticate({
-                serial: device.serial,
-                connection: dvc,
-                credentialStore: CredentialStore,
-            });
-            const createdAdb = new Adb(transport);
-            setAdb(createdAdb);
-            setConnectedDevice(devHash, device, createdAdb);
+            const dvc = await sessionDevices.addDevice(device);
+            setAdb(dvc.adb);
+
             setState(DeviceState.Connected);
+
             return device;
         } catch (error) {
             if (String(error).includes("Access denied")) {
@@ -146,12 +142,13 @@ function ScreenDevice({ devDetails, close }: { devDetails: DeviceDetails; close:
 
     useEffect(() => {
         handleConnect();
+
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     return (
         <div className={cls.Device}>
-            <DeviceInfo deviceName={deviceName} state={state} t={t} dumpSys={dumpSys} />
+            <DeviceInfo deviceName={deviceName} state={state} t={t} dumpSys={dumpSys} close={close} />
             {state === DeviceState.Connecting ? (
                 <Card className={cls.Loading}>
                     <Spinner size="3" /> <Text size="1">{t("waiting_for_device")}</Text>
@@ -161,6 +158,6 @@ function ScreenDevice({ devDetails, close }: { devDetails: DeviceDetails; close:
             )}
         </div>
     );
-}
+});
 
 export default memo(ScreenDevice);
