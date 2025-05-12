@@ -203,6 +203,7 @@ function App() {
                                         size="1"
                                         onClick={() => setStackNum(stackNum - 1)}
                                         disabled={stackNum === 0}
+                                        color="gray"
                                     >
                                         <DividerHorizontalIcon />
                                     </IconButton>
@@ -212,6 +213,7 @@ function App() {
                                         size="1"
                                         disabled={currentWindowWidth / (stackNum + 1) <= 700}
                                         onClick={() => setStackNum(stackNum + 1)}
+                                        color="gray"
                                     >
                                         <PlusIcon />
                                     </IconButton>

@@ -11,7 +11,8 @@
         "format": "prettier --write --ignore-path .prettierignore .",
         "format:check": "prettier --check --ignore-path .prettierignore .",
         "prettier:check": "prettier --check .",
-        "postinstall": "fetch-scrcpy-server 3.1"
+        "postinstall": "fetch-scrcpy-server 3.1",
+        "cpserver": "cp \"node_modules/@yume-chan/fetch-scrcpy-server/server.bin\" \"node_modules/.vite/deps/server.bin\""
     },
     "dependencies": {
         "@fontsource/inter": "^5.2.5",

@@ -35,6 +35,22 @@
             object-fit: contain;
         }
 
+        .Controls {
+            position: absolute;
+            top: 0;
+            left: var(--position);
+            z-index: 9;
+            transition: opacity 0.2s ease-in-out;
+
+            &.Overflow {
+                opacity: 0.5;
+
+                &:hover {
+                    opacity: 1;
+                }
+            }
+        }
+
         .KeyboardIndicator {
             position: absolute;
             right: 1rem;

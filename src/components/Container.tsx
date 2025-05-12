@@ -8,6 +8,7 @@ import {
     EnterIcon,
     ExclamationTriangleIcon,
     GearIcon,
+    HamburgerMenuIcon,
     InfoCircledIcon,
     MixIcon,
     MobileIcon,
@@ -104,12 +105,12 @@ function Container({
                         >
                             <DropdownMenu.Root>
                                 <DropdownMenu.Trigger>
-                                    <IconButton style={{ margin: "6px 0 0 6px" }} size="1" color="gray" variant="soft">
-                                        <PlusIcon />
+                                    <IconButton style={{ margin: "6px 0 0 6px" }} size="1" color="cyan" variant="soft">
+                                        <HamburgerMenuIcon />
                                     </IconButton>
                                 </DropdownMenu.Trigger>
                                 <DropdownMenu.Content size="1" variant="soft">
-                                    <DropdownMenu.Item shortcut="Ctrl+Alt+N" onClick={handleAddDevice}>
+                                    <DropdownMenu.Item onClick={handleAddDevice}>
                                         <PlusIcon />
                                         {t("add_device")}
                                     </DropdownMenu.Item>

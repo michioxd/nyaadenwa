@@ -4,7 +4,6 @@
  * Repository: https://github.com/michioxd/nyaadenwa
  */
 
-import Locales from "@/locales/list";
 import { ExternalLinkIcon, GitHubLogoIcon } from "@radix-ui/react-icons";
 import { Flex, Link, Text } from "@radix-ui/themes";
 import { useTranslation } from "react-i18next";
@@ -28,24 +27,6 @@ export default function About() {
                     {t("all_contributors")} <ExternalLinkIcon />
                 </Link>
             </Text>
-
-            <Text size="4" mt="2" weight="medium">
-                {t("translation_authors")}:
-            </Text>
-
-            {Locales.map((lc) => (
-                <Text key={lc.code}>
-                    {lc.flag} {lc.name}:{" "}
-                    {lc.author.map((a, index) => (
-                        <span key={index + a.github}>
-                            <Link href={a.github} target="_blank">
-                                {a.name}
-                            </Link>
-                            {index < lc.author.length - 1 && ", "}
-                        </span>
-                    ))}
-                </Text>
-            ))}
         </Flex>
     );
 }
