@@ -109,15 +109,13 @@ function ScrcpyPlayer({ dev }: { dev: Adb }) {
         [dev, t],
     );
     const handleInjectSystemKey = useCallback(
-        async (keyCode: AndroidKeyCode) => {
-            for (let i = 0; i <= 1; i++) {
-                client.current?.controller?.injectKeyCode({
-                    action: i === 0 ? 0 : 1,
-                    keyCode,
-                    repeat: 0,
-                    metaState: 0,
-                });
-            }
+        (keyCode: AndroidKeyCode, up: boolean) => {
+            client.current?.controller?.injectKeyCode({
+                action: up ? 1 : 0,
+                keyCode,
+                repeat: 0,
+                metaState: 0,
+            });
         },
         [client],
     );
@@ -444,7 +442,8 @@ function ScrcpyPlayer({ dev }: { dev: Adb }) {
                             <IconButton
                                 variant="soft"
                                 color="gray"
-                                onClick={() => handleInjectSystemKey(AndroidKeyCode.AndroidBack)}
+                                onMouseDown={() => handleInjectSystemKey(AndroidKeyCode.AndroidBack, false)}
+                                onMouseUp={() => handleInjectSystemKey(AndroidKeyCode.AndroidBack, true)}
                             >
                                 <PiTriangleDuotone
                                     size={18}
@@ -456,7 +455,8 @@ function ScrcpyPlayer({ dev }: { dev: Adb }) {
                             <IconButton
                                 variant="soft"
                                 color="gray"
-                                onClick={() => handleInjectSystemKey(AndroidKeyCode.AndroidHome)}
+                                onMouseDown={() => handleInjectSystemKey(AndroidKeyCode.AndroidHome, false)}
+                                onMouseUp={() => handleInjectSystemKey(AndroidKeyCode.AndroidHome, true)}
                             >
                                 <PiCircleDuotone size={18} />
                             </IconButton>
@@ -465,7 +465,8 @@ function ScrcpyPlayer({ dev }: { dev: Adb }) {
                             <IconButton
                                 variant="soft"
                                 color="gray"
-                                onClick={() => handleInjectSystemKey(AndroidKeyCode.AndroidAppSwitch)}
+                                onMouseDown={() => handleInjectSystemKey(AndroidKeyCode.AndroidAppSwitch, false)}
+                                onMouseUp={() => handleInjectSystemKey(AndroidKeyCode.AndroidAppSwitch, true)}
                             >
                                 <PiSquareDuotone size={18} />
                             </IconButton>
