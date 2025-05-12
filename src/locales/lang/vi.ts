@@ -72,6 +72,7 @@ const Locale: LocaleResourcesType = {
         copy_to_clipboard: "Sao chép vào clipboard",
         screenshot_copied_to_clipboard: "Chụp màn hình đã được sao chép vào clipboard",
         failed_to_take_screenshot: "Không thể chụp màn hình. Kiểm tra console để biết thêm thông tin chi tiết.",
+        open_in_window: "Mở trong cửa sổ con",
     },
 };
 

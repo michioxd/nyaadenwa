@@ -72,6 +72,7 @@ const Locale: LocaleResourcesType = {
         copy_to_clipboard: "Copy to clipboard",
         screenshot_copied_to_clipboard: "Screenshot copied to clipboard",
         failed_to_take_screenshot: "Failed to take screenshot. Check console for more details.",
+        open_in_window: "Open in child window",
     },
 };
 

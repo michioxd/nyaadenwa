@@ -12,6 +12,7 @@ import {
     InfoCircledIcon,
     MixIcon,
     MobileIcon,
+    OpenInNewWindowIcon,
     PlusIcon,
     ReloadIcon,
     TrashIcon,
@@ -106,6 +107,14 @@ const Container = observer(
                                         >
                                             <GearIcon />
                                             {t("settings")}
+                                        </DropdownMenu.Item>
+                                        <DropdownMenu.Item
+                                            onClick={() => {
+                                                window.open("/", "", "width=700,height=700")
+                                            }}
+                                        >
+                                            <OpenInNewWindowIcon />
+                                            {t("open_in_window")}
                                         </DropdownMenu.Item>
                                         <DropdownMenu.Sub>
                                             <DropdownMenu.SubTrigger>
@@ -206,8 +215,8 @@ const Container = observer(
                                                                         () => {
                                                                             deviceForgot.push(
                                                                                 device.raw.manufacturerName +
-                                                                                    device.name +
-                                                                                    device.serial,
+                                                                                device.name +
+                                                                                device.serial,
                                                                             );
                                                                             try {
                                                                                 device.raw.close();
