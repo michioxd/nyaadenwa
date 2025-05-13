@@ -68,7 +68,10 @@
         "terser": "^5.39.0",
         "typescript": "~5.8.3",
         "typescript-eslint": "^8.30.1",
-        "vite": "^6.3.5"
+        "vite": "^6.3.5",
+        "vite-plugin-compression": "^0.5.1",
+        "vite-plugin-minify": "^2.1.0",
+        "vite-plugin-pwa": "^1.0.0"
     },
     "patchedDependencies": {
         "@sinm/react-chrome-tabs@2.5.2": "patches/@sinm%2Freact-chrome-tabs@2.5.2.patch"
