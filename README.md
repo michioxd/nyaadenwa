@@ -13,10 +13,8 @@ A powerful web-based multiple phone management system that allows you to control
 
 ## Prerequisites
 
-- Node.js (Latest LTS version recommended)
-- Bun package manager
 - Android device(s) with USB debugging enabled
-- WebUSB-compatible browser (Chrome recommended)
+- WebUSB-compatible browser (Chromium-based browsers recommended)
 
 ## Development
 
