@@ -14,7 +14,7 @@ A powerful web-based multiple phone management system that allows you to control
 ## Prerequisites
 
 - Android device(s) with USB debugging enabled
-- WebUSB-compatible browser (Chromium-based browsers recommended)
+- WebUSB, WebCodecs, Opus supported browser (Chromium-based browsers recommended)
 
 ## Development
 
