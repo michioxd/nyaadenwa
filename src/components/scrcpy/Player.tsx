@@ -283,7 +283,8 @@ function ScrcpyPlayer({ dev }: { dev: Adb }) {
             device: dev,
             canvas: canvasRef.current,
             options: {
-                maxSize: 1080,
+                maxSize: 2400,
+                videoBitRate: 10_000_000,
                 maxFps: 60,
             },
             onResize: (w, h) => {

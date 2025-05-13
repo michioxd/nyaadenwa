@@ -16,6 +16,7 @@ import { getDeviceHashFromDev } from "./utils/str";
 import { observer } from "mobx-react";
 import tabsController from "./controller/tabs";
 import StackControls from "./components/Stack";
+import { ContentTypeProperties } from "./types/content";
 
 const App = observer(() => {
     const { t } = useTranslation();
@@ -48,6 +49,7 @@ const App = observer(() => {
         const deviceDisconnected: string[] = [];
 
         tabsController.contents.forEach((c) => {
+            if (c.type !== ContentTypeProperties.Device) return;
             const device = listDevices.find((d) => getDeviceHashFromDev(d) === c.id);
             if (!device) {
                 tabsController.closeTab(c.id);
