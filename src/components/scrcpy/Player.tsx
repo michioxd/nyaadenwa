@@ -110,6 +110,10 @@ function ScrcpyPlayer({ dev }: { dev: Adb }) {
     );
     const handleInjectSystemKey = useCallback(
         (keyCode: AndroidKeyCode, up: boolean) => {
+            if (keyCode === AndroidKeyCode.AndroidBack) {
+                client.current?.controller?.backOrScreenOn(up ? 1 : 0);
+                return;
+            }
             client.current?.controller?.injectKeyCode({
                 action: up ? 1 : 0,
                 keyCode,
