@@ -62,46 +62,50 @@ const Container = observer(
         const filteredTabs = computed(() => tabsController.tabs.filter((tab) => tab.stackNo === stackNo)).get();
 
         const handleAddWsDevice = useCallback(() => {
-            dialog.prompt(t("create_websocket_connection"), <>
-                <Trans i18nKey="create_websocket_connection_description">
-                    <Link href="https://github.com/novnc/noVNC/wiki/Using-noVNC-with-websockify" target="_blank" rel="noreferrer"></Link>
-                </Trans>
-            </>, [
-                {
-                    label: t("address"),
-                    placeholder: "ws://localhost:5555",
-                    defaultValue: localStorage.getItem("last_ws_address") ?? "",
-                },
-            ], (v, close) => {
-                if (!v) return;
-                const address = v[0];
-                if (!address) return;
-                try {
-                    new URL(address);
-                    localStorage.setItem("last_ws_address", address);
-                } catch {
-                    toast.error(t("invalid_websocket_address"));
-                    return;
-                }
-
-                tabsController.openTab(
+            dialog.prompt(
+                t("create_websocket_connection"),
+                <>
+                    <Trans i18nKey="create_websocket_connection_description">
+                        <Link
+                            href="https://github.com/novnc/noVNC/wiki/Using-noVNC-with-websockify"
+                            target="_blank"
+                            rel="noreferrer"
+                        ></Link>
+                    </Trans>
+                </>,
+                [
                     {
-                        id: getHashFromAddress(address),
-                        title: "WS: " + address,
-                        type: ContentTypeProperties.Device,
-                        content: ({ close }) => (
-                            <ScreenDevice
-                                webSocketURL={address}
-                                close={close}
-                            />
-                        ),
-                        stackNo: stackNo,
+                        label: t("address"),
+                        placeholder: "ws://localhost:5555",
+                        defaultValue: localStorage.getItem("last_ws_address") ?? "",
                     },
-                    stackNo,
-                );
+                ],
+                (v, close) => {
+                    if (!v) return;
+                    const address = v[0];
+                    if (!address) return;
+                    try {
+                        new URL(address);
+                        localStorage.setItem("last_ws_address", address);
+                    } catch {
+                        toast.error(t("invalid_websocket_address"));
+                        return;
+                    }
 
-                close();
-            });
+                    tabsController.openTab(
+                        {
+                            id: getHashFromAddress(address),
+                            title: "WS: " + address,
+                            type: ContentTypeProperties.Device,
+                            content: ({ close }) => <ScreenDevice webSocketURL={address} close={close} />,
+                            stackNo: stackNo,
+                        },
+                        stackNo,
+                    );
+
+                    close();
+                },
+            );
         }, [dialog, t, stackNo]);
 
         return (
@@ -170,7 +174,7 @@ const Container = observer(
                                         </DropdownMenu.Item>
                                         <DropdownMenu.Item
                                             onClick={() => {
-                                                window.open("/", "", "width=700,height=700")
+                                                window.open("/", "", "width=700,height=700");
                                             }}
                                         >
                                             <OpenInNewWindowIcon />
@@ -275,8 +279,8 @@ const Container = observer(
                                                                         () => {
                                                                             deviceForgot.push(
                                                                                 device.raw.manufacturerName +
-                                                                                device.name +
-                                                                                device.serial,
+                                                                                    device.name +
+                                                                                    device.serial,
                                                                             );
                                                                             try {
                                                                                 device.raw.close();

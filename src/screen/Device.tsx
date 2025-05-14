@@ -59,8 +59,19 @@ const DeviceInfo = memo(
         return (
             <Card className={cls.DeviceInfo}>
                 <Flex gap="2" align="center" style={{ width: "100%" }}>
-                    <IconButton variant="ghost" color={sidebarLevel === 2 ? "green" : sidebarLevel === 1 ? "cyan" : "gray"} size="1" onClick={() => setSidebarLevel(sidebarLevel === 2 ? 0 : sidebarLevel + 1)}>
-                        {sidebarLevel === 2 ? <RiSidebarFoldLine size={18} /> : sidebarLevel === 1 ? <RiSideBarFill size={18} /> : <RiSidebarUnfoldLine size={18} />}
+                    <IconButton
+                        variant="ghost"
+                        color={sidebarLevel === 2 ? "green" : sidebarLevel === 1 ? "cyan" : "gray"}
+                        size="1"
+                        onClick={() => setSidebarLevel(sidebarLevel === 2 ? 0 : sidebarLevel + 1)}
+                    >
+                        {sidebarLevel === 2 ? (
+                            <RiSidebarFoldLine size={18} />
+                        ) : sidebarLevel === 1 ? (
+                            <RiSideBarFill size={18} />
+                        ) : (
+                            <RiSidebarUnfoldLine size={18} />
+                        )}
                     </IconButton>
                     <Text size="2" style={{ width: "fit-content", flex: 1 }}>
                         {deviceName}
@@ -77,125 +88,133 @@ const DeviceInfo = memo(
 
 DeviceInfo.displayName = "DeviceInfo";
 
-const ScreenDevice = observer(({ usbDetails, webSocketURL, close }: { usbDetails?: DeviceDetails; webSocketURL?: string; close: () => void }) => {
-    const [state, setState] = useState<DeviceState>(DeviceState.Connecting);
-    const dialog = useDialog();
-    const [sidebarLevel, setSidebarLevel] = useState(0);
-    const { t } = useTranslation();
-    const [adb, setAdb] = useState<Adb | null>(null);
-    const dumpSys = useMemo(() => (adb ? new DumpSys(adb) : null), [adb]);
+const ScreenDevice = observer(
+    ({ usbDetails, webSocketURL, close }: { usbDetails?: DeviceDetails; webSocketURL?: string; close: () => void }) => {
+        const [state, setState] = useState<DeviceState>(DeviceState.Connecting);
+        const dialog = useDialog();
+        const [sidebarLevel, setSidebarLevel] = useState(0);
+        const { t } = useTranslation();
+        const [adb, setAdb] = useState<Adb | null>(null);
+        const dumpSys = useMemo(() => (adb ? new DumpSys(adb) : null), [adb]);
 
-    const deviceName = useMemo(() => usbDetails ? `${usbDetails?.name} (${usbDetails?.serial})` : webSocketURL ? `${webSocketURL} (WebSocket)` : "Unknown", [usbDetails, webSocketURL]);
+        const deviceName = useMemo(
+            () =>
+                usbDetails
+                    ? `${usbDetails?.name} (${usbDetails?.serial})`
+                    : webSocketURL
+                      ? `${webSocketURL} (WebSocket)`
+                      : "Unknown",
+            [usbDetails, webSocketURL],
+        );
 
-    const showErrorDialog = useCallback(
-        (titleKey: string, descriptionKey: string) => {
-            const deviceDescription = `${usbDetails?.manufacturerName} ${usbDetails?.name} (${usbDetails?.serial})`;
-            dialog.alert(t(titleKey), t(descriptionKey, { device: deviceDescription }), close);
-        },
-        [dialog, t, close, usbDetails],
-    );
+        const showErrorDialog = useCallback(
+            (titleKey: string, descriptionKey: string) => {
+                const deviceDescription = `${usbDetails?.manufacturerName} ${usbDetails?.name} (${usbDetails?.serial})`;
+                dialog.alert(t(titleKey), t(descriptionKey, { device: deviceDescription }), close);
+            },
+            [dialog, t, close, usbDetails],
+        );
 
-    const handleConnect = useCallback(async () => {
-        setAdb(null);
-        setState(DeviceState.Connecting);
+        const handleConnect = useCallback(async () => {
+            setAdb(null);
+            setState(DeviceState.Connecting);
 
-        if (webSocketURL) {
-            try {
-                const dev = await sessionDevices.addDeviceWebSocket(webSocketURL);
-                setAdb(dev.adb);
-                setState(DeviceState.Connected);
-            } catch (error) {
-                showErrorDialog("cannot_connect_websocket", "cannot_connect_websocket_description");
-                console.error(error);
-                setState(DeviceState.Disconnected);
-            }
-            return;
-        }
-
-        if (!usbDetails) {
-            return;
-        }
-        const devHash = getDeviceHash(usbDetails);
-
-        if (devHash) {
-            const dev = sessionDevices.getDevice(devHash);
-            if (dev && dev.adb) {
-                setAdb(dev.adb);
-                setState(DeviceState.Connected);
+            if (webSocketURL) {
+                try {
+                    const dev = await sessionDevices.addDeviceWebSocket(webSocketURL);
+                    setAdb(dev.adb);
+                    setState(DeviceState.Connected);
+                } catch (error) {
+                    showErrorDialog("cannot_connect_websocket", "cannot_connect_websocket_description");
+                    console.error(error);
+                    setState(DeviceState.Disconnected);
+                }
                 return;
             }
-        }
 
-        try {
-            const whichDev = await DeviceManager?.getDevices({
-                filters: [{ serialNumber: usbDetails.serial }],
-            });
+            if (!usbDetails) {
+                return;
+            }
+            const devHash = getDeviceHash(usbDetails);
 
-            if (!whichDev?.length) {
-                throw Error("Device not found");
+            if (devHash) {
+                const dev = sessionDevices.getDevice(devHash);
+                if (dev && dev.adb) {
+                    setAdb(dev.adb);
+                    setState(DeviceState.Connected);
+                    return;
+                }
             }
 
-            const device = whichDev.find(
-                (dev) =>
-                    dev.serial === usbDetails.serial &&
-                    dev.raw.manufacturerName === usbDetails.manufacturerName &&
-                    dev.name === usbDetails.name,
-            );
+            try {
+                const whichDev = await DeviceManager?.getDevices({
+                    filters: [{ serialNumber: usbDetails.serial }],
+                });
 
-            if (!device) {
-                throw Error("Device not found");
+                if (!whichDev?.length) {
+                    throw Error("Device not found");
+                }
+
+                const device = whichDev.find(
+                    (dev) =>
+                        dev.serial === usbDetails.serial &&
+                        dev.raw.manufacturerName === usbDetails.manufacturerName &&
+                        dev.name === usbDetails.name,
+                );
+
+                if (!device) {
+                    throw Error("Device not found");
+                }
+
+                const dvc = await sessionDevices.addDeviceUSB(device);
+                setAdb(dvc.adb);
+                setState(DeviceState.Connected);
+
+                return device;
+            } catch (error) {
+                if (String(error).includes("Access denied")) {
+                    showErrorDialog("device_access_denied", "device_access_denied_description");
+                } else if (error instanceof AdbDaemonWebUsbDevice.DeviceBusyError) {
+                    showErrorDialog("device_busy", "device_busy_description");
+                } else {
+                    showErrorDialog("cannot_connect_device", "cannot_connect_device_description");
+                }
+
+                console.error(error);
+                setState(DeviceState.Disconnected);
+                return null;
             }
+        }, [webSocketURL, usbDetails, showErrorDialog]);
 
-            const dvc = await sessionDevices.addDeviceUSB(device);
-            setAdb(dvc.adb);
-            setState(DeviceState.Connected);
+        useEffect(() => {
+            handleConnect();
+            // eslint-disable-next-line react-hooks/exhaustive-deps
+        }, []);
 
-            return device;
-        } catch (error) {
-            if (String(error).includes("Access denied")) {
-                showErrorDialog("device_access_denied", "device_access_denied_description");
-            } else if (error instanceof AdbDaemonWebUsbDevice.DeviceBusyError) {
-                showErrorDialog("device_busy", "device_busy_description");
-            } else {
-                showErrorDialog("cannot_connect_device", "cannot_connect_device_description");
-            }
-
-            console.error(error);
-            setState(DeviceState.Disconnected);
-            return null;
-        }
-    }, [webSocketURL, usbDetails, showErrorDialog]);
-
-    useEffect(() => {
-        handleConnect();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
-
-    return (
-        <div className={cls.Device}>
-            <DeviceInfo
-                deviceName={deviceName}
-                state={state}
-                t={t}
-                dumpSys={dumpSys}
-                close={close}
-                sidebarLevel={sidebarLevel}
-                setSidebarLevel={setSidebarLevel}
-            />
-            <div className={cls.DeviceInner}>
-                <DeviceSidebar
+        return (
+            <div className={cls.Device}>
+                <DeviceInfo
+                    deviceName={deviceName}
+                    state={state}
+                    t={t}
+                    dumpSys={dumpSys}
+                    close={close}
                     sidebarLevel={sidebarLevel}
+                    setSidebarLevel={setSidebarLevel}
                 />
-                {state === DeviceState.Connecting ? (
-                    <Card className={cls.Loading}>
-                        <Spinner size="3" /> <Text size="1">{t("waiting_for_device")}</Text>
-                    </Card>
-                ) : (
-                    <>{adb && <ScrcpyPlayer dev={adb} />}</>
-                )}
+                <div className={cls.DeviceInner}>
+                    <DeviceSidebar sidebarLevel={sidebarLevel} />
+                    {state === DeviceState.Connecting ? (
+                        <Card className={cls.Loading}>
+                            <Spinner size="3" /> <Text size="1">{t("waiting_for_device")}</Text>
+                        </Card>
+                    ) : (
+                        <>{adb && <ScrcpyPlayer dev={adb} />}</>
+                    )}
+                </div>
             </div>
-        </div>
-    );
-});
+        );
+    },
+);
 
 export default memo(ScreenDevice);

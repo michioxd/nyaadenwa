@@ -78,7 +78,8 @@ const Locale: LocaleResourcesType = {
         failed_to_take_screenshot: "Failed to take screenshot. Check console for more details.",
         open_in_window: "Open in child window",
         create_websocket_connection: "Create WebSocket connection",
-        create_websocket_connection_description: "Enter the address of the WebSockify server. You may have to follow <0>this guide</0> to install it on your local machine to proxy local ADB connection.",
+        create_websocket_connection_description:
+            "Enter the address of the WebSockify server. You may have to follow <0>this guide</0> to install it on your local machine to proxy local ADB connection.",
         invalid_websocket_address: "Invalid WebSocket address",
         error_while_starting_mirroring: "An error occurred while starting mirroring",
         address: "Address",

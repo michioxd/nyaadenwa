@@ -66,10 +66,10 @@ const App = observer(() => {
         const handleDeviceAdd = () => {
             toast.success(t("usb_device_connected"));
             handleGetDevice();
-        }
+        };
         const handleDeviceRemove = () => {
             handleGetDevice();
-        }
+        };
 
         window.navigator.usb.addEventListener("connect", handleDeviceAdd);
         window.navigator.usb.addEventListener("disconnect", handleDeviceRemove);

@@ -4,23 +4,10 @@
  * Repository: https://github.com/michioxd/nyaadenwa
  */
 
-import type {
-    AdbDaemonDevice,
-    AdbPacketData,
-    AdbPacketInit,
-} from "@yume-chan/adb";
-import {
-    AdbPacket,
-    AdbPacketSerializeStream,
-    unreachable,
-} from "@yume-chan/adb";
+import type { AdbDaemonDevice, AdbPacketData, AdbPacketInit } from "@yume-chan/adb";
+import { AdbPacket, AdbPacketSerializeStream, unreachable } from "@yume-chan/adb";
 import { Consumable, type WrapReadableStream, type ReadableWritablePair } from "@yume-chan/stream-extra";
-import {
-    DuplexStreamFactory,
-    ReadableStream,
-    StructDeserializeStream,
-    pipeFrom,
-} from "@yume-chan/stream-extra";
+import { DuplexStreamFactory, ReadableStream, StructDeserializeStream, pipeFrom } from "@yume-chan/stream-extra";
 
 export default class AdbDaemonWebSocketDevice implements AdbDaemonDevice {
     readonly serial: string;
@@ -36,9 +23,7 @@ export default class AdbDaemonWebSocketDevice implements AdbDaemonDevice {
         this.name = name;
     }
 
-    async connect(): Promise<
-        ReadableWritablePair<AdbPacketData, Consumable<AdbPacketInit>>
-    > {
+    async connect(): Promise<ReadableWritablePair<AdbPacketData, Consumable<AdbPacketInit>>> {
         this.socket = new WebSocket(this.serial);
         this.socket.binaryType = "arraybuffer";
 
@@ -55,10 +40,7 @@ export default class AdbDaemonWebSocketDevice implements AdbDaemonDevice {
             };
         });
 
-        const duplex = new DuplexStreamFactory<
-            Uint8Array,
-            Consumable<Uint8Array>
-        >({
+        const duplex = new DuplexStreamFactory<Uint8Array, Consumable<Uint8Array>>({
             close: () => {
                 socket.close();
             },
@@ -72,11 +54,7 @@ export default class AdbDaemonWebSocketDevice implements AdbDaemonDevice {
             new ReadableStream(
                 {
                     start: (controller) => {
-                        socket.onmessage = ({
-                            data,
-                        }: {
-                            data: ArrayBuffer;
-                        }) => {
+                        socket.onmessage = ({ data }: { data: ArrayBuffer }) => {
                             controller.enqueue(new Uint8Array(data));
                         };
                     },
@@ -99,9 +77,7 @@ export default class AdbDaemonWebSocketDevice implements AdbDaemonDevice {
         );
 
         return {
-            readable: this.readable!.pipeThrough(
-                new StructDeserializeStream(AdbPacket),
-            ),
+            readable: this.readable!.pipeThrough(new StructDeserializeStream(AdbPacket)),
             //@ts-expect-error bruh
             writable: pipeFrom(this.writable!, new AdbPacketSerializeStream()),
         };

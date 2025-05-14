@@ -78,7 +78,8 @@ const Locale: LocaleResourcesType = {
         failed_to_take_screenshot: "Không thể chụp màn hình. Kiểm tra console để biết thêm thông tin chi tiết.",
         open_in_window: "Mở trong cửa sổ con",
         create_websocket_connection: "Tạo kết nối WebSocket",
-        create_websocket_connection_description: "Nhập địa chỉ của máy chủ WebSockify. Bạn có thể cần theo <0>hướng dẫn này</0> để cài đặt nó trên máy của bạn để proxy kết nối tới ADB.",
+        create_websocket_connection_description:
+            "Nhập địa chỉ của máy chủ WebSockify. Bạn có thể cần theo <0>hướng dẫn này</0> để cài đặt nó trên máy của bạn để proxy kết nối tới ADB.",
         invalid_websocket_address: "Địa chỉ WebSocket không hợp lệ",
         address: "Địa chỉ",
         usb: "USB",

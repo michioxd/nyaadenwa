@@ -54,29 +54,29 @@ type DialogCustomButtons = ((onConfirm?: () => void, onCancel?: () => void) => R
 
 type DialogData =
     | {
-        type: DialogType.Alert;
-        title: React.ReactNode;
-        content?: React.ReactNode;
-        buttons?: DialogCustomButtons;
-        onConfirm?: () => void;
-    }
+          type: DialogType.Alert;
+          title: React.ReactNode;
+          content?: React.ReactNode;
+          buttons?: DialogCustomButtons;
+          onConfirm?: () => void;
+      }
     | {
-        type: DialogType.Confirm;
-        title: React.ReactNode;
-        content?: React.ReactNode;
-        buttons?: DialogCustomButtons;
-        onConfirm?: () => void;
-        onCancel?: () => void;
-    }
+          type: DialogType.Confirm;
+          title: React.ReactNode;
+          content?: React.ReactNode;
+          buttons?: DialogCustomButtons;
+          onConfirm?: () => void;
+          onCancel?: () => void;
+      }
     | {
-        type: DialogType.Prompt;
-        title: React.ReactNode;
-        content?: React.ReactNode;
-        inputs: DialogField[];
-        buttons?: DialogCustomButtons;
-        onConfirm?: (value: string[], close: () => void) => void;
-        onCancel?: () => void;
-    };
+          type: DialogType.Prompt;
+          title: React.ReactNode;
+          content?: React.ReactNode;
+          inputs: DialogField[];
+          buttons?: DialogCustomButtons;
+          onConfirm?: (value: string[], close: () => void) => void;
+          onCancel?: () => void;
+      };
 
 export default function DialogProvider({ children }: { children: React.ReactNode }) {
     const { t } = useTranslation();
@@ -85,7 +85,7 @@ export default function DialogProvider({ children }: { children: React.ReactNode
         type: DialogType.Alert,
         title: "",
         content: "",
-        onConfirm: () => { },
+        onConfirm: () => {},
     });
     const [fieldData, setFieldData] = useState<string[]>([]);
 
@@ -139,7 +139,7 @@ export default function DialogProvider({ children }: { children: React.ReactNode
                 onCancel,
                 buttons,
             });
-            setFieldData(inputs.map(input => input.defaultValue || ''));
+            setFieldData(inputs.map((input) => input.defaultValue || ""));
             setOpen(true);
         },
         show: (data: DialogData) => {
@@ -155,7 +155,7 @@ export default function DialogProvider({ children }: { children: React.ReactNode
         <>
             <DialogContext.Provider
                 value={{
-                    dialog
+                    dialog,
                 }}
             >
                 <Dialog.Root open={open}>
@@ -199,10 +199,10 @@ export default function DialogProvider({ children }: { children: React.ReactNode
                                     {data.buttons(
                                         typeof data.onConfirm === "function"
                                             ? () => data.onConfirm?.(fieldData, () => setOpen(false))
-                                            : () => { },
+                                            : () => {},
                                         "onCancel" in data && typeof data.onCancel === "function"
                                             ? data.onCancel
-                                            : () => { },
+                                            : () => {},
                                     )}
                                 </Flex>
                             ) : (

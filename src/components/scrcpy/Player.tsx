@@ -185,11 +185,11 @@ function ScrcpyPlayer({ dev }: { dev: Adb }) {
             event.preventDefault();
             event.stopPropagation();
 
-            if (event.pointerType === 'mouse' && event.button === 2) {
+            if (event.pointerType === "mouse" && event.button === 2) {
                 return;
             }
 
-            if (event.pointerType === 'touch') {
+            if (event.pointerType === "touch") {
                 canvas.setPointerCapture(event.pointerId);
             }
 
@@ -199,7 +199,7 @@ function ScrcpyPlayer({ dev }: { dev: Adb }) {
             switch (type) {
                 case "pointerdown":
                     action = AndroidMotionEventAction.Down;
-                    if (event.pointerType === 'touch') {
+                    if (event.pointerType === "touch") {
                         touchPoints.set(pointerId, { x: clientX, y: clientY });
                     }
                     break;
@@ -209,13 +209,13 @@ function ScrcpyPlayer({ dev }: { dev: Adb }) {
                     } else {
                         action = AndroidMotionEventAction.Move;
                     }
-                    if (event.pointerType === 'touch' && touchPoints.has(pointerId)) {
+                    if (event.pointerType === "touch" && touchPoints.has(pointerId)) {
                         touchPoints.set(pointerId, { x: clientX, y: clientY });
                     }
                     break;
                 case "pointerup":
                     action = AndroidMotionEventAction.Up;
-                    if (event.pointerType === 'touch') {
+                    if (event.pointerType === "touch") {
                         touchPoints.delete(pointerId);
                     }
                     break;
@@ -230,7 +230,7 @@ function ScrcpyPlayer({ dev }: { dev: Adb }) {
             currentPointerX = percentageX * width;
             currentPointerY = percentageY * height;
 
-            const touchPressure = event.pointerType === 'touch' ? pressure : (buttons === 0 ? 0 : 1);
+            const touchPressure = event.pointerType === "touch" ? pressure : buttons === 0 ? 0 : 1;
 
             client.current?.controller?.injectTouch({
                 action,

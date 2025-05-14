@@ -5,9 +5,5 @@
  */
 
 export default function Settings() {
-    return (
-        <>
-
-        </>
-    )
+    return <></>;
 }

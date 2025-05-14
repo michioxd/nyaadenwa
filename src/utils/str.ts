@@ -27,8 +27,5 @@ export const getDeviceHash = (device: { manufacturerName: string; name: string; 
 };
 
 export const getHashFromAddress = (address: string) => {
-    return objectHash(
-        { address },
-        { algorithm: "sha1" },
-    );
+    return objectHash({ address }, { algorithm: "sha1" });
 };

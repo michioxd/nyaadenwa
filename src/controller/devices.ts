@@ -16,15 +16,17 @@ enum DeviceType {
     WEBSOCKET = "websocket",
 }
 
-export type TConnectedDevice = {
-    type: DeviceType.USB;
-    dev: AdbDaemonWebUsbDevice;
-    adb: Adb;
-} | {
-    type: DeviceType.WEBSOCKET;
-    daemon: AdbDaemonWebSocketDevice;
-    adb: Adb;
-}
+export type TConnectedDevice =
+    | {
+          type: DeviceType.USB;
+          dev: AdbDaemonWebUsbDevice;
+          adb: Adb;
+      }
+    | {
+          type: DeviceType.WEBSOCKET;
+          daemon: AdbDaemonWebSocketDevice;
+          adb: Adb;
+      };
 
 class SessionDevices {
     private readonly credentialStore = new AdbWebCredentialStore("nyaadenwa");
@@ -52,8 +54,9 @@ class SessionDevices {
         );
 
         this.connectedDevices.set(deviceHash, {
-            dev: device, adb,
-            type: DeviceType.USB
+            dev: device,
+            adb,
+            type: DeviceType.USB,
         });
 
         return { dev: device, adb, type: DeviceType.USB };
@@ -81,7 +84,9 @@ class SessionDevices {
         );
 
         this.connectedDevices.set(deviceHash, {
-            daemon: wsDaemon, adb, type: DeviceType.WEBSOCKET
+            daemon: wsDaemon,
+            adb,
+            type: DeviceType.WEBSOCKET,
         });
 
         clearTimeout(timeout);
@@ -104,10 +109,7 @@ class SessionDevices {
             }
         }
         this.connectedDevices.delete(deviceHash);
-        console.log(
-            "Device removed",
-            deviceHash,
-        );
+        console.log("Device removed", deviceHash);
     }
 }
 
