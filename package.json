@@ -74,6 +74,7 @@
         "vite-plugin-pwa": "^1.0.0"
     },
     "patchedDependencies": {
-        "@sinm/react-chrome-tabs@2.5.2": "patches/@sinm%2Freact-chrome-tabs@2.5.2.patch"
+        "@sinm/react-chrome-tabs@2.5.2": "patches/@sinm%2Freact-chrome-tabs@2.5.2.patch",
+        "@yume-chan/adb-credential-web@2.0.1": "patches/@yume-chan%2Fadb-credential-web@2.0.1.patch"
     }
 }

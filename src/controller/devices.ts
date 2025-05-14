@@ -4,19 +4,30 @@
  * Repository: https://github.com/michioxd/nyaadenwa
  */
 
-import { getDeviceHashFromDev } from "@/utils/str";
+import { getDeviceHashFromDev, getHashFromAddress } from "@/utils/str";
 import { Adb, AdbDaemonTransport } from "@yume-chan/adb";
 import AdbWebCredentialStore from "@yume-chan/adb-credential-web";
 import type { AdbDaemonWebUsbDevice } from "@yume-chan/adb-daemon-webusb";
 import { makeAutoObservable, observable } from "mobx";
+import AdbDaemonWebSocketDevice from "./websocket";
 
-interface TConnectedDevice {
+enum DeviceType {
+    USB = "usb",
+    WEBSOCKET = "websocket",
+}
+
+export type TConnectedDevice = {
+    type: DeviceType.USB;
     dev: AdbDaemonWebUsbDevice;
+    adb: Adb;
+} | {
+    type: DeviceType.WEBSOCKET;
+    daemon: AdbDaemonWebSocketDevice;
     adb: Adb;
 }
 
 class SessionDevices {
-    private readonly credentialStore = new AdbWebCredentialStore();
+    private readonly credentialStore = new AdbWebCredentialStore("nyaadenwa");
     private readonly connectedDevices = observable.map<string, TConnectedDevice>();
 
     constructor() {
@@ -27,7 +38,7 @@ class SessionDevices {
         return this.connectedDevices.get(deviceHash);
     }
 
-    public async addDevice(device: AdbDaemonWebUsbDevice): Promise<TConnectedDevice> {
+    public async addDeviceUSB(device: AdbDaemonWebUsbDevice): Promise<TConnectedDevice> {
         const deviceHash = getDeviceHashFromDev(device);
 
         const dvc = await device.connect();
@@ -40,26 +51,59 @@ class SessionDevices {
             }),
         );
 
-        this.connectedDevices.set(deviceHash, { dev: device, adb });
+        this.connectedDevices.set(deviceHash, {
+            dev: device, adb,
+            type: DeviceType.USB
+        });
 
-        return { dev: device, adb };
+        return { dev: device, adb, type: DeviceType.USB };
+    }
+
+    public async addDeviceWebSocket(address: string): Promise<TConnectedDevice> {
+        new URL(address); // throw error if invalid
+        const deviceHash = getHashFromAddress(address);
+
+        const wsDaemon = new AdbDaemonWebSocketDevice(address, deviceHash);
+
+        const dvc = await wsDaemon.connect();
+
+        console.log("dvc", dvc);
+
+        const adb = new Adb(
+            await AdbDaemonTransport.authenticate({
+                serial: "",
+                connection: dvc,
+                credentialStore: this.credentialStore,
+            }),
+        );
+
+        console.log("adb", adb);
+
+        this.connectedDevices.set(deviceHash, {
+            daemon: wsDaemon, adb, type: DeviceType.WEBSOCKET
+        });
+
+        return { daemon: wsDaemon, adb, type: DeviceType.WEBSOCKET };
     }
 
     public removeDevice(deviceHash: string) {
         const device = this.connectedDevices.get(deviceHash);
         if (device) {
             try {
-                device.dev.raw.close();
                 device.adb.close();
+                if (device.type === DeviceType.USB) {
+                    device.dev.raw.close();
+                } else {
+                    device.daemon.close();
+                }
             } catch (error) {
                 console.error(error);
             }
         }
         this.connectedDevices.delete(deviceHash);
         console.log(
-            deviceHash,
             "Device removed",
-            this.connectedDevices.forEach((d) => d.dev.serial),
+            deviceHash,
         );
     }
 }

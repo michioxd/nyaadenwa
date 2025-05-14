@@ -27,7 +27,7 @@ if (!isWebUSBSupported) {
     }
 } else
     createRoot(document.getElementById("root")!).render(
-        <Theme appearance="dark" accentColor="cyan">
+        <>
             <Toaster
                 position="bottom-right"
                 richColors
@@ -48,8 +48,10 @@ if (!isWebUSBSupported) {
                     } as React.CSSProperties
                 }
             />
-            <DialogProvider>
-                <App />
-            </DialogProvider>
-        </Theme>,
+            <Theme appearance="dark" accentColor="cyan">
+                <DialogProvider>
+                    <App />
+                </DialogProvider>
+            </Theme>
+        </>
     );

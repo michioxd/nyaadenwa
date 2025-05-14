@@ -69,10 +69,14 @@ html {
     font-size: 18px;
 }
 
-.toast * {
-    user-select: none;
-    -webkit-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    font-family: var(--default-font-family);
+.toast {
+    z-index: 99999999999;
+
+    * {
+        user-select: none;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        font-family: var(--default-font-family);
+    }
 }

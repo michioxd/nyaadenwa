@@ -63,16 +63,22 @@ const App = observer(() => {
     }, [listDevices, tabsController.contents]);
 
     useEffect(() => {
-        DeviceManagerTrackDevices.onDeviceAdd(() => {
-            toast.success(t("device_attached"));
+        const handleDeviceAdd = () => {
+            toast.success(t("usb_device_connected"));
             handleGetDevice();
-        });
-        DeviceManagerTrackDevices.onDeviceRemove(handleGetDevice);
+        }
+        const handleDeviceRemove = () => {
+            handleGetDevice();
+        }
+
+        window.navigator.usb.addEventListener("connect", handleDeviceAdd);
+        window.navigator.usb.addEventListener("disconnect", handleDeviceRemove);
 
         handleGetDevice();
 
         return () => {
-            DeviceManagerTrackDevices.stop();
+            window.navigator.usb.removeEventListener("connect", handleDeviceAdd);
+            window.navigator.usb.removeEventListener("disconnect", handleDeviceRemove);
         };
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);

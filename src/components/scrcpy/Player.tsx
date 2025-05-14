@@ -340,6 +340,7 @@ function ScrcpyPlayer({ dev }: { dev: Adb }) {
         return () => {
             stream.stop();
             client.current = null;
+            keyboard.current = null;
         };
     }, [dev]);
     return (
