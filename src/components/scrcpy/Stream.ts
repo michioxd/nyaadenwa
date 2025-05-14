@@ -55,7 +55,7 @@ export default class ScrcpyStream {
 
     public async start() {
         if (!(await PushServer(this.device))) {
-            throw new Error("Failed to push server");
+            throw new Error("Failed to push server, please check console for more details");
         }
         this.client = await AdbScrcpyClient.start(
             this.device,

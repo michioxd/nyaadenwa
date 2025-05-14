@@ -65,9 +65,12 @@ class SessionDevices {
 
         const wsDaemon = new AdbDaemonWebSocketDevice(address, deviceHash);
 
-        const dvc = await wsDaemon.connect();
+        const timeout = setTimeout(() => {
+            wsDaemon.close();
+            throw new Error("Timeout waiting for device to connect");
+        }, 30000);
 
-        console.log("dvc", dvc);
+        const dvc = await wsDaemon.connect();
 
         const adb = new Adb(
             await AdbDaemonTransport.authenticate({
@@ -77,11 +80,11 @@ class SessionDevices {
             }),
         );
 
-        console.log("adb", adb);
-
         this.connectedDevices.set(deviceHash, {
             daemon: wsDaemon, adb, type: DeviceType.WEBSOCKET
         });
+
+        clearTimeout(timeout);
 
         return { daemon: wsDaemon, adb, type: DeviceType.WEBSOCKET };
     }

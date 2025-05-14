@@ -139,6 +139,7 @@ export default function DialogProvider({ children }: { children: React.ReactNode
                 onCancel,
                 buttons,
             });
+            setFieldData(inputs.map(input => input.defaultValue || ''));
             setOpen(true);
         },
         show: (data: DialogData) => {
@@ -176,8 +177,8 @@ export default function DialogProvider({ children }: { children: React.ReactNode
                                             </Text>
                                         )}
                                         <TextField.Root
-                                            defaultValue={input.defaultValue}
                                             placeholder={input.placeholder}
+                                            value={fieldData[index]}
                                             onChange={(e) => {
                                                 setFieldData((prev) => {
                                                     const newData = [...prev];

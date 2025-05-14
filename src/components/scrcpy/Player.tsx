@@ -31,6 +31,7 @@ import { MdOutlineScreenshot } from "react-icons/md";
 import { ClipboardCopyIcon, FileIcon, SpeakerLoudIcon, SpeakerOffIcon, SpeakerQuietIcon } from "@radix-ui/react-icons";
 import { LuMonitorOff, LuMonitorUp } from "react-icons/lu";
 import { TbKeyboard, TbKeyboardOff } from "react-icons/tb";
+import { RxExclamationTriangle } from "react-icons/rx";
 import clsx from "clsx";
 import { toast } from "sonner";
 
@@ -47,6 +48,7 @@ function ScrcpyPlayer({ dev }: { dev: Adb }) {
     const playerRef = useRef<HTMLDivElement>(null);
     const [width, setWidth] = useState(0);
     const [height, setHeight] = useState(0);
+    const [error, setError] = useState<string | null>(null);
     const [menuPosition, setMenuPosition] = useState<{
         pos: number;
         overflow: boolean;
@@ -333,7 +335,10 @@ function ScrcpyPlayer({ dev }: { dev: Adb }) {
                 client.current = await stream.start();
                 keyboard.current = stream.keyboard ?? null;
             } catch (e) {
+                setError(e instanceof Error ? e.message : "Unknown error");
                 console.error(e);
+            } finally {
+                setLoading(false);
             }
         })();
 
@@ -348,6 +353,19 @@ function ScrcpyPlayer({ dev }: { dev: Adb }) {
             {loading && (
                 <Card className={cls.Loading}>
                     <Spinner size="3" /> <Text size="1">{t("connecting_to_device")}</Text>
+                </Card>
+            )}
+            {error && (
+                <Card className={cls.Error} size="2">
+                    <Flex direction="column" gap="2">
+                        <Text size="2" style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                            <RxExclamationTriangle size={18} />
+                            {t("error_while_starting_mirroring")}
+                        </Text>
+                        <Text asChild size="1">
+                            <code>{error}</code>
+                        </Text>
+                    </Flex>
                 </Card>
             )}
             {width > 1 && client.current && (

@@ -5,7 +5,7 @@
  */
 
 import { useCallback, useEffect, useState } from "react";
-import DeviceManager, { DeviceManagerTrackDevices } from "./controller/manager";
+import DeviceManager from "./controller/manager";
 import type { AdbDaemonWebUsbDevice } from "@yume-chan/adb-daemon-webusb";
 import Container from "./components/Container";
 import cls from "./scss/Main.module.scss";

@@ -19,39 +19,32 @@ import "@fontsource/inter/700.css";
 import "@/scss/tabs.scss";
 import "@/main.scss";
 
-const isWebUSBSupported = "usb" in navigator;
-if (!isWebUSBSupported) {
-    const notSupportedElement = document.getElementById("notSupported");
-    if (notSupportedElement) {
-        notSupportedElement.style.display = "flex";
-    }
-} else
-    createRoot(document.getElementById("root")!).render(
-        <>
-            <Toaster
-                position="bottom-right"
-                richColors
-                duration={5000}
-                theme="dark"
-                className="toast"
-                style={
-                    {
-                        "--toast-bg": "var(--color-panel-solid)",
-                        "--toast-border": "var(--gray-a5)",
-                        "--toast-text": "var(--gray-12)",
-                        "--toast-success-bg": "var(--green-3)",
-                        "--toast-success-border": "var(--green-5)",
-                        "--toast-success-text": "var(--green-11)",
-                        "--toast-error-bg": "var(--red-3)",
-                        "--toast-error-border": "var(--red-5)",
-                        "--toast-error-text": "var(--red-11)",
-                    } as React.CSSProperties
-                }
-            />
-            <Theme appearance="dark" accentColor="cyan">
-                <DialogProvider>
-                    <App />
-                </DialogProvider>
-            </Theme>
-        </>
-    );
+createRoot(document.getElementById("root")!).render(
+    <>
+        <Toaster
+            position="bottom-right"
+            richColors
+            duration={5000}
+            theme="dark"
+            className="toast"
+            style={
+                {
+                    "--toast-bg": "var(--color-panel-solid)",
+                    "--toast-border": "var(--gray-a5)",
+                    "--toast-text": "var(--gray-12)",
+                    "--toast-success-bg": "var(--green-3)",
+                    "--toast-success-border": "var(--green-5)",
+                    "--toast-success-text": "var(--green-11)",
+                    "--toast-error-bg": "var(--red-3)",
+                    "--toast-error-border": "var(--red-5)",
+                    "--toast-error-text": "var(--red-11)",
+                } as React.CSSProperties
+            }
+        />
+        <Theme appearance="dark" accentColor="cyan">
+            <DialogProvider>
+                <App />
+            </DialogProvider>
+        </Theme>
+    </>
+);

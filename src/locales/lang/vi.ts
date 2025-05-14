@@ -52,6 +52,7 @@ const Locale: LocaleResourcesType = {
         cannot_connect_websocket: "Không thể kết nối đến WebSocket",
         cannot_connect_websocket_description:
             "Đã xảy ra lỗi khi kết nối đến WebSocket. Vui lòng thử lại. Kiểm tra console để biết thêm thông tin chi tiết.",
+        webusb_not_supported: "WebUSB không được hỗ trợ trong trình duyệt này",
         CONNECTING: "Đang kết nối",
         DISCONNECTED: "Đã ngắt kết nối",
         CONNECTED: "Đã kết nối",
@@ -81,7 +82,7 @@ const Locale: LocaleResourcesType = {
         invalid_websocket_address: "Địa chỉ WebSocket không hợp lệ",
         address: "Địa chỉ",
         usb: "USB",
-        websocket: "WebSocket",
+        websocket_adb: "WebSocket (ADB)",
         file_manager: "Quản lý tệp",
         terminal: "Terminal",
     },

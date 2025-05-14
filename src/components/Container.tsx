@@ -36,6 +36,7 @@ import { computed } from "mobx";
 import { MdAdb, MdUsb } from "react-icons/md";
 import { toast } from "sonner";
 import { useCallback } from "react";
+import DeviceManager from "@/controller/manager";
 
 const deviceForgot: string[] = [];
 
@@ -69,6 +70,7 @@ const Container = observer(
                 {
                     label: t("address"),
                     placeholder: "ws://localhost:5555",
+                    defaultValue: localStorage.getItem("last_ws_address") ?? "",
                 },
             ], (v, close) => {
                 if (!v) return;
@@ -76,6 +78,7 @@ const Container = observer(
                 if (!address) return;
                 try {
                     new URL(address);
+                    localStorage.setItem("last_ws_address", address);
                 } catch {
                     toast.error(t("invalid_websocket_address"));
                     return;
@@ -84,7 +87,7 @@ const Container = observer(
                 tabsController.openTab(
                     {
                         id: getHashFromAddress(address),
-                        title: t("websocket") + " " + address,
+                        title: "WS: " + address,
                         type: ContentTypeProperties.Device,
                         content: ({ close }) => (
                             <ScreenDevice
@@ -137,13 +140,13 @@ const Container = observer(
                                                 {t("add_device")}
                                             </DropdownMenu.SubTrigger>
                                             <DropdownMenu.SubContent>
-                                                <DropdownMenu.Item onClick={handleAddDevice}>
+                                                <DropdownMenu.Item onClick={handleAddDevice} disabled={!DeviceManager}>
                                                     <MdUsb size={18} />
-                                                    {t("usb")}
+                                                    {DeviceManager ? t("usb") : t("webusb_not_supported")}
                                                 </DropdownMenu.Item>
                                                 <DropdownMenu.Item onClick={handleAddWsDevice}>
                                                     <MdAdb size={18} />
-                                                    {t("websocket")}
+                                                    {t("websocket_adb")}
                                                 </DropdownMenu.Item>
                                             </DropdownMenu.SubContent>
                                         </DropdownMenu.Sub>
