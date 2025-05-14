@@ -7,7 +7,7 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
-import { ViteMinifyPlugin } from 'vite-plugin-minify';
+import { ViteMinifyPlugin } from "vite-plugin-minify";
 import viteCompression from "vite-plugin-compression";
 // import { VitePWA } from 'vite-plugin-pwa' implement later
 
@@ -19,7 +19,7 @@ export default defineConfig({
     plugins: [
         react(),
         ViteMinifyPlugin({
-            ignoreCustomComments: []
+            ignoreCustomComments: [],
         }),
         viteCompression(),
     ],
@@ -35,29 +35,29 @@ export default defineConfig({
     css:
         process.env.NODE_ENV === "production"
             ? {
-                modules: {
-                    generateScopedName: (localName: string, filename: string): string => {
-                        const key = `${filename}|${localName}`;
-                        return (
-                            nameMap.get(key) ??
-                            nameMap
-                                .set(
-                                    key,
-                                    (() => {
-                                        let name = "",
-                                            n = counter++;
-                                        do {
-                                            name = [..."abcdefghijklmnopqrstuvwxyz"][n % 26] + name;
-                                            n = Math.floor(n / 26) - 1;
-                                        } while (n >= 0);
-                                        return name;
-                                    })(),
-                                )
-                                .get(key)!
-                        );
-                    },
-                },
-            }
+                  modules: {
+                      generateScopedName: (localName: string, filename: string): string => {
+                          const key = `${filename}|${localName}`;
+                          return (
+                              nameMap.get(key) ??
+                              nameMap
+                                  .set(
+                                      key,
+                                      (() => {
+                                          let name = "",
+                                              n = counter++;
+                                          do {
+                                              name = [..."abcdefghijklmnopqrstuvwxyz"][n % 26] + name;
+                                              n = Math.floor(n / 26) - 1;
+                                          } while (n >= 0);
+                                          return name;
+                                      })(),
+                                  )
+                                  .get(key)!
+                          );
+                      },
+                  },
+              }
             : {},
     build: {
         target: ["es2022"],

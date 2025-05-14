@@ -49,10 +49,14 @@ const Locale: LocaleResourcesType = {
         cannot_connect_device: "Không thể kết nối thiết bị",
         cannot_connect_device_description:
             "Đã xảy ra lỗi khi kết nối đến thiết bị. Vui lòng thử lại. Kiểm tra console để biết thêm thông tin chi tiết.",
+        cannot_connect_websocket: "Không thể kết nối đến WebSocket",
+        cannot_connect_websocket_description:
+            "Đã xảy ra lỗi khi kết nối đến WebSocket. Vui lòng thử lại. Kiểm tra console để biết thêm thông tin chi tiết.",
+        webusb_not_supported: "WebUSB không được hỗ trợ trong trình duyệt này",
         CONNECTING: "Đang kết nối",
         DISCONNECTED: "Đã ngắt kết nối",
         CONNECTED: "Đã kết nối",
-        device_attached: "Thiết bị đã được kết nối",
+        usb_device_connected: "Một thiết bị USB đã được kết nối",
         connecting_to_device: "Đang kết nối đến thiết bị...",
         waiting_for_device: "Đang chờ thiết bị...",
         working_in_progress: "Đang phát triển",
@@ -73,6 +77,15 @@ const Locale: LocaleResourcesType = {
         screenshot_copied_to_clipboard: "Chụp màn hình đã được sao chép vào clipboard",
         failed_to_take_screenshot: "Không thể chụp màn hình. Kiểm tra console để biết thêm thông tin chi tiết.",
         open_in_window: "Mở trong cửa sổ con",
+        create_websocket_connection: "Tạo kết nối WebSocket",
+        create_websocket_connection_description:
+            "Nhập địa chỉ của máy chủ WebSockify. Bạn có thể cần theo <0>hướng dẫn này</0> để cài đặt nó trên máy của bạn để proxy kết nối tới ADB.",
+        invalid_websocket_address: "Địa chỉ WebSocket không hợp lệ",
+        address: "Địa chỉ",
+        usb: "USB",
+        websocket_adb: "WebSocket (ADB)",
+        file_manager: "Quản lý tệp",
+        terminal: "Terminal",
     },
 };
 

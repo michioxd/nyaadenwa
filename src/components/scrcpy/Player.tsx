@@ -31,6 +31,7 @@ import { MdOutlineScreenshot } from "react-icons/md";
 import { ClipboardCopyIcon, FileIcon, SpeakerLoudIcon, SpeakerOffIcon, SpeakerQuietIcon } from "@radix-ui/react-icons";
 import { LuMonitorOff, LuMonitorUp } from "react-icons/lu";
 import { TbKeyboard, TbKeyboardOff } from "react-icons/tb";
+import { RxExclamationTriangle } from "react-icons/rx";
 import clsx from "clsx";
 import { toast } from "sonner";
 
@@ -47,6 +48,7 @@ function ScrcpyPlayer({ dev }: { dev: Adb }) {
     const playerRef = useRef<HTMLDivElement>(null);
     const [width, setWidth] = useState(0);
     const [height, setHeight] = useState(0);
+    const [error, setError] = useState<string | null>(null);
     const [menuPosition, setMenuPosition] = useState<{
         pos: number;
         overflow: boolean;
@@ -110,6 +112,10 @@ function ScrcpyPlayer({ dev }: { dev: Adb }) {
     );
     const handleInjectSystemKey = useCallback(
         (keyCode: AndroidKeyCode, up: boolean) => {
+            if (keyCode === AndroidKeyCode.AndroidBack) {
+                client.current?.controller?.backOrScreenOn(up ? 1 : 0);
+                return;
+            }
             client.current?.controller?.injectKeyCode({
                 action: up ? 1 : 0,
                 keyCode,
@@ -127,6 +133,7 @@ function ScrcpyPlayer({ dev }: { dev: Adb }) {
         const player = playerRef.current;
         let currentPointerX = 0,
             currentPointerY = 0;
+        const touchPoints = new Map<number, { x: number; y: number }>();
 
         const resizeCanvas = () => {
             if (!playerRef.current) return;
@@ -178,14 +185,23 @@ function ScrcpyPlayer({ dev }: { dev: Adb }) {
             event.preventDefault();
             event.stopPropagation();
 
-            canvas.setPointerCapture(event.pointerId);
+            if (event.pointerType === "mouse" && event.button === 2) {
+                return;
+            }
 
-            const { type, clientX, clientY, button, buttons } = event;
+            if (event.pointerType === "touch") {
+                canvas.setPointerCapture(event.pointerId);
+            }
+
+            const { type, clientX, clientY, button, buttons, pointerId, pressure } = event;
 
             let action: AndroidMotionEventAction;
             switch (type) {
                 case "pointerdown":
                     action = AndroidMotionEventAction.Down;
+                    if (event.pointerType === "touch") {
+                        touchPoints.set(pointerId, { x: clientX, y: clientY });
+                    }
                     break;
                 case "pointermove":
                     if (buttons === 0) {
@@ -193,9 +209,15 @@ function ScrcpyPlayer({ dev }: { dev: Adb }) {
                     } else {
                         action = AndroidMotionEventAction.Move;
                     }
+                    if (event.pointerType === "touch" && touchPoints.has(pointerId)) {
+                        touchPoints.set(pointerId, { x: clientX, y: clientY });
+                    }
                     break;
                 case "pointerup":
                     action = AndroidMotionEventAction.Up;
+                    if (event.pointerType === "touch") {
+                        touchPoints.delete(pointerId);
+                    }
                     break;
                 default:
                     throw new Error(`Unsupported event type: ${type}`);
@@ -208,6 +230,8 @@ function ScrcpyPlayer({ dev }: { dev: Adb }) {
             currentPointerX = percentageX * width;
             currentPointerY = percentageY * height;
 
+            const touchPressure = event.pointerType === "touch" ? pressure : buttons === 0 ? 0 : 1;
+
             client.current?.controller?.injectTouch({
                 action,
                 pointerId: BigInt(event.pointerId),
@@ -215,7 +239,7 @@ function ScrcpyPlayer({ dev }: { dev: Adb }) {
                 pointerY: currentPointerY,
                 videoWidth: width,
                 videoHeight: height,
-                pressure: buttons === 0 ? 0 : 1,
+                pressure: touchPressure,
                 actionButton: PointerEventButtonToAndroidButton[button],
                 buttons,
             });
@@ -257,6 +281,10 @@ function ScrcpyPlayer({ dev }: { dev: Adb }) {
         canvas.addEventListener("contextmenu", (e) => e.preventDefault());
         canvas.addEventListener("wheel", handleMouseScroll);
         canvas.addEventListener("contextmenu", handleRightClick);
+        canvas.addEventListener("touchstart", (e) => e.preventDefault(), { passive: false });
+        canvas.addEventListener("touchmove", (e) => e.preventDefault(), { passive: false });
+        canvas.addEventListener("touchend", (e) => e.preventDefault(), { passive: false });
+        canvas.addEventListener("touchcancel", (e) => e.preventDefault(), { passive: false });
         player?.addEventListener("keydown", handleKeyEvent);
         player?.addEventListener("keyup", handleKeyEvent);
         player?.addEventListener("focus", handleFocus);
@@ -269,6 +297,10 @@ function ScrcpyPlayer({ dev }: { dev: Adb }) {
             canvas.removeEventListener("pointerup", handlePointerEvent);
             canvas.removeEventListener("wheel", handleMouseScroll);
             canvas.removeEventListener("contextmenu", handleRightClick);
+            canvas.removeEventListener("touchstart", (e) => e.preventDefault());
+            canvas.removeEventListener("touchmove", (e) => e.preventDefault());
+            canvas.removeEventListener("touchend", (e) => e.preventDefault());
+            canvas.removeEventListener("touchcancel", (e) => e.preventDefault());
             player?.removeEventListener("keydown", handleKeyEvent);
             player?.removeEventListener("keyup", handleKeyEvent);
             player?.removeEventListener("focus", handleFocus);
@@ -303,13 +335,17 @@ function ScrcpyPlayer({ dev }: { dev: Adb }) {
                 client.current = await stream.start();
                 keyboard.current = stream.keyboard ?? null;
             } catch (e) {
+                setError(e instanceof Error ? e.message : "Unknown error");
                 console.error(e);
+            } finally {
+                setLoading(false);
             }
         })();
 
         return () => {
             stream.stop();
             client.current = null;
+            keyboard.current = null;
         };
     }, [dev]);
     return (
@@ -317,6 +353,19 @@ function ScrcpyPlayer({ dev }: { dev: Adb }) {
             {loading && (
                 <Card className={cls.Loading}>
                     <Spinner size="3" /> <Text size="1">{t("connecting_to_device")}</Text>
+                </Card>
+            )}
+            {error && (
+                <Card className={cls.Error} size="2">
+                    <Flex direction="column" gap="2">
+                        <Text size="2" style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                            <RxExclamationTriangle size={18} />
+                            {t("error_while_starting_mirroring")}
+                        </Text>
+                        <Text asChild size="1">
+                            <code>{error}</code>
+                        </Text>
+                    </Flex>
                 </Card>
             )}
             {width > 1 && client.current && (

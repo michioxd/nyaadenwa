@@ -49,10 +49,14 @@ const Locale: LocaleResourcesType = {
         cannot_connect_device: "Cannot connect device",
         cannot_connect_device_description:
             "An error occurred while connecting to the device. Please try again. Check console for more details.",
+        cannot_connect_websocket: "Cannot connect to WebSocket",
+        cannot_connect_websocket_description:
+            "An error occurred while connecting to the WebSocket. Please try again. Check console for more details.",
+        webusb_not_supported: "WebUSB is not supported in this browser",
         CONNECTING: "Connecting",
         DISCONNECTED: "Disconnected",
         CONNECTED: "Connected",
-        device_attached: "Device attached",
+        usb_device_connected: "An USB device connected",
         connecting_to_device: "Connecting to device...",
         waiting_for_device: "Waiting for device...",
         working_in_progress: "Working in progress",
@@ -73,6 +77,17 @@ const Locale: LocaleResourcesType = {
         screenshot_copied_to_clipboard: "Screenshot copied to clipboard",
         failed_to_take_screenshot: "Failed to take screenshot. Check console for more details.",
         open_in_window: "Open in child window",
+        create_websocket_connection: "Create WebSocket connection",
+        create_websocket_connection_description:
+            "Enter the address of the WebSockify server. You may have to follow <0>this guide</0> to install it on your local machine to proxy local ADB connection.",
+        invalid_websocket_address: "Invalid WebSocket address",
+        error_while_starting_mirroring: "An error occurred while starting mirroring",
+        address: "Address",
+        usb: "USB",
+        websocket_adb: "WebSocket (ADB)",
+        file_manager: "File manager",
+        terminal: "Terminal",
+        device_info: "Device info",
     },
 };
 

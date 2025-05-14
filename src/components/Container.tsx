@@ -17,9 +17,9 @@ import {
     ReloadIcon,
     TrashIcon,
 } from "@radix-ui/react-icons";
-import { Box, DropdownMenu, IconButton, Text } from "@radix-ui/themes";
+import { Box, DropdownMenu, IconButton, Link, Text } from "@radix-ui/themes";
 import { Tabs } from "@sinm/react-chrome-tabs";
-import { useTranslation } from "react-i18next";
+import { Trans, useTranslation } from "react-i18next";
 import clsx from "clsx";
 import type { AdbDaemonWebUsbDevice } from "@yume-chan/adb-daemon-webusb";
 import ScreenWelcome from "@/screen/Welcome";
@@ -29,10 +29,14 @@ import About from "./About";
 import LangSelector from "./LangSelector";
 import ScreenDevice from "@/screen/Device";
 import useDialog from "./dialog/Dialog";
-import { getDeviceHashFromDev } from "@/utils/str";
+import { getDeviceHashFromDev, getHashFromAddress } from "@/utils/str";
 import tabsController from "@/controller/tabs";
 import { observer } from "mobx-react";
 import { computed } from "mobx";
+import { MdAdb, MdUsb } from "react-icons/md";
+import { toast } from "sonner";
+import { useCallback } from "react";
+import DeviceManager from "@/controller/manager";
 
 const deviceForgot: string[] = [];
 
@@ -56,6 +60,53 @@ const Container = observer(
         const dialog = useDialog();
 
         const filteredTabs = computed(() => tabsController.tabs.filter((tab) => tab.stackNo === stackNo)).get();
+
+        const handleAddWsDevice = useCallback(() => {
+            dialog.prompt(
+                t("create_websocket_connection"),
+                <>
+                    <Trans i18nKey="create_websocket_connection_description">
+                        <Link
+                            href="https://github.com/novnc/noVNC/wiki/Using-noVNC-with-websockify"
+                            target="_blank"
+                            rel="noreferrer"
+                        ></Link>
+                    </Trans>
+                </>,
+                [
+                    {
+                        label: t("address"),
+                        placeholder: "ws://localhost:5555",
+                        defaultValue: localStorage.getItem("last_ws_address") ?? "",
+                    },
+                ],
+                (v, close) => {
+                    if (!v) return;
+                    const address = v[0];
+                    if (!address) return;
+                    try {
+                        new URL(address);
+                        localStorage.setItem("last_ws_address", address);
+                    } catch {
+                        toast.error(t("invalid_websocket_address"));
+                        return;
+                    }
+
+                    tabsController.openTab(
+                        {
+                            id: getHashFromAddress(address),
+                            title: "WS: " + address,
+                            type: ContentTypeProperties.Device,
+                            content: ({ close }) => <ScreenDevice webSocketURL={address} close={close} />,
+                            stackNo: stackNo,
+                        },
+                        stackNo,
+                    );
+
+                    close();
+                },
+            );
+        }, [dialog, t, stackNo]);
 
         return (
             <>
@@ -87,10 +138,23 @@ const Container = observer(
                                         </IconButton>
                                     </DropdownMenu.Trigger>
                                     <DropdownMenu.Content size="1" variant="soft">
-                                        <DropdownMenu.Item onClick={handleAddDevice}>
-                                            <PlusIcon />
-                                            {t("add_device")}
-                                        </DropdownMenu.Item>
+                                        <DropdownMenu.Sub>
+                                            <DropdownMenu.SubTrigger>
+                                                <PlusIcon />
+                                                {t("add_device")}
+                                            </DropdownMenu.SubTrigger>
+                                            <DropdownMenu.SubContent>
+                                                <DropdownMenu.Item onClick={handleAddDevice} disabled={!DeviceManager}>
+                                                    <MdUsb size={18} />
+                                                    {DeviceManager ? t("usb") : t("webusb_not_supported")}
+                                                </DropdownMenu.Item>
+                                                <DropdownMenu.Item onClick={handleAddWsDevice}>
+                                                    <MdAdb size={18} />
+                                                    {t("websocket_adb")}
+                                                </DropdownMenu.Item>
+                                            </DropdownMenu.SubContent>
+                                        </DropdownMenu.Sub>
+
                                         <DropdownMenu.Item
                                             onClick={() =>
                                                 tabsController.openTab(
@@ -110,7 +174,7 @@ const Container = observer(
                                         </DropdownMenu.Item>
                                         <DropdownMenu.Item
                                             onClick={() => {
-                                                window.open("/", "", "width=700,height=700")
+                                                window.open("/", "", "width=700,height=700");
                                             }}
                                         >
                                             <OpenInNewWindowIcon />
@@ -178,7 +242,7 @@ const Container = observer(
                                                                             type: ContentTypeProperties.Device,
                                                                             content: ({ close }) => (
                                                                                 <ScreenDevice
-                                                                                    devDetails={{
+                                                                                    usbDetails={{
                                                                                         manufacturerName:
                                                                                             device.raw
                                                                                                 .manufacturerName ?? "",
@@ -215,8 +279,8 @@ const Container = observer(
                                                                         () => {
                                                                             deviceForgot.push(
                                                                                 device.raw.manufacturerName +
-                                                                                device.name +
-                                                                                device.serial,
+                                                                                    device.name +
+                                                                                    device.serial,
                                                                             );
                                                                             try {
                                                                                 device.raw.close();

@@ -19,7 +19,7 @@ export default class ScrcpyStream {
     private device: Adb;
     private canvas: HTMLCanvasElement;
     private options: AdbScrcpyOptionsLatest.Init<boolean>;
-    private client!: AdbScrcpyClient<AdbScrcpyOptionsLatest<boolean>>;
+    private client?: AdbScrcpyClient<AdbScrcpyOptionsLatest<boolean>>;
     private codec: ScrcpyVideoCodecId = ScrcpyVideoCodecId.H264;
     private audioPlayer?: Float32PcmPlayer;
     private onResize?: (width: number, height: number) => void;
@@ -55,7 +55,7 @@ export default class ScrcpyStream {
 
     public async start() {
         if (!(await PushServer(this.device))) {
-            throw new Error("Failed to push server");
+            throw new Error("Failed to push server, please check console for more details");
         }
         this.client = await AdbScrcpyClient.start(
             this.device,
@@ -95,19 +95,20 @@ export default class ScrcpyStream {
     }
 
     public async stop() {
-        this.client.close();
+        await this.client?.close();
         this.audioPlayer?.stop();
         this.audioPlayer = undefined;
         this.streamWorker?.terminate();
         this.streamWorker = undefined;
         this.keyboard?.dispose();
         this.keyboard = undefined;
+        this.client = undefined;
     }
 
     private async initVideo() {
         this.streamWorker = new StreamWorker();
         const offscreenCanvas = this.canvas.transferControlToOffscreen();
-        const stream = await this.client.videoStream;
+        const stream = await this.client?.videoStream;
         if (!stream) {
             return;
         }
@@ -131,7 +132,7 @@ export default class ScrcpyStream {
     }
 
     private async initAudio() {
-        this.client.audioStream?.then(async (stream) => {
+        this.client?.audioStream?.then(async (stream) => {
             if (!stream) {
                 console.warn("No audio stream, returned: ", stream);
                 return;
