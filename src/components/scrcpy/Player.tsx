@@ -183,6 +183,10 @@ function ScrcpyPlayer({ dev }: { dev: Adb }) {
             event.preventDefault();
             event.stopPropagation();
 
+            if (event.pointerType === 'mouse' && event.button === 2) {
+                return;
+            }
+
             if (event.pointerType === 'touch') {
                 canvas.setPointerCapture(event.pointerId);
             }
