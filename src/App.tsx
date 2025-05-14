@@ -49,7 +49,7 @@ const App = observer(() => {
         const deviceDisconnected: string[] = [];
 
         tabsController.contents.forEach((c) => {
-            if (c.type !== ContentTypeProperties.Device) return;
+            if (c.type !== ContentTypeProperties.Device || c.title.includes("WS: ")) return;
             const device = listDevices.find((d) => getDeviceHashFromDev(d) === c.id);
             if (!device) {
                 tabsController.closeTab(c.id);
