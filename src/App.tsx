@@ -59,7 +59,7 @@ const App = observer(() => {
 
         if (deviceDisconnected.length > 0)
             toast.error(t("device_disconnected_description") + " " + deviceDisconnected.join(", "));
-        // eslint-disable-next-line react-hooks/exhaustive-deps
+         
     }, [listDevices, tabsController.contents]);
 
     useEffect(() => {
@@ -80,8 +80,16 @@ const App = observer(() => {
             window.navigator.usb.removeEventListener("connect", handleDeviceAdd);
             window.navigator.usb.removeEventListener("disconnect", handleDeviceRemove);
         };
-        // eslint-disable-next-line react-hooks/exhaustive-deps
+         
     }, []);
+
+    useEffect(() => {
+        tabsController.contents.forEach((c) => {
+            if (c.stackNo > stackNum - 1) {
+                tabsController.closeTab(c.id);
+            }
+        });
+    }, [stackNum, tabsController.contents]);
 
     return (
         <div className={clsx(cls.Stack, stackNum > 0 && cls.enabledStack)}>

@@ -46,7 +46,7 @@ export default function DeviceHeader({ dumpSys, close }: { dumpSys: DumpSys; clo
                 clearInterval(interval.current);
             }
         };
-        // eslint-disable-next-line react-hooks/exhaustive-deps
+         
     }, [dumpSys]);
     return (
         <>

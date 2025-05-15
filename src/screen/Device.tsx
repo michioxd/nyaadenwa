@@ -188,7 +188,7 @@ const ScreenDevice = observer(
 
         useEffect(() => {
             handleConnect();
-            // eslint-disable-next-line react-hooks/exhaustive-deps
+             
         }, []);
 
         return (
