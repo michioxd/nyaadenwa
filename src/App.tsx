@@ -59,7 +59,6 @@ const App = observer(() => {
 
         if (deviceDisconnected.length > 0)
             toast.error(t("device_disconnected_description") + " " + deviceDisconnected.join(", "));
-         
     }, [listDevices, tabsController.contents]);
 
     useEffect(() => {
@@ -80,12 +79,11 @@ const App = observer(() => {
             window.navigator.usb.removeEventListener("connect", handleDeviceAdd);
             window.navigator.usb.removeEventListener("disconnect", handleDeviceRemove);
         };
-         
     }, []);
 
     useEffect(() => {
         tabsController.contents.forEach((c) => {
-            if (c.stackNo > stackNum - 1) {
+            if (c.stackNo > stackNum - 1 && c.stackNo !== 0) {
                 tabsController.closeTab(c.id);
             }
         });

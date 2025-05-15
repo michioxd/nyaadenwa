@@ -46,7 +46,6 @@ export default function DeviceHeader({ dumpSys, close }: { dumpSys: DumpSys; clo
                 clearInterval(interval.current);
             }
         };
-         
     }, [dumpSys]);
     return (
         <>

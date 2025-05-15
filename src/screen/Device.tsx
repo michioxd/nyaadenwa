@@ -188,7 +188,6 @@ const ScreenDevice = observer(
 
         useEffect(() => {
             handleConnect();
-             
         }, []);
 
         return (
