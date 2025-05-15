@@ -27,7 +27,14 @@ import {
     PiSquareDuotone,
     PiTriangleDuotone,
 } from "react-icons/pi";
-import { MdOutlineScreenshot, MdRotateLeft } from "react-icons/md";
+import {
+    MdArrowBackIosNew,
+    MdArrowForwardIos,
+    MdFullscreen,
+    MdFullscreenExit,
+    MdOutlineScreenshot,
+    MdRotateLeft,
+} from "react-icons/md";
 import { ClipboardCopyIcon, FileIcon, SpeakerLoudIcon, SpeakerOffIcon, SpeakerQuietIcon } from "@radix-ui/react-icons";
 import { LuMonitorOff, LuMonitorUp } from "react-icons/lu";
 import { TbKeyboard, TbKeyboardOff } from "react-icons/tb";
@@ -63,6 +70,35 @@ function ScrcpyPlayer({ dev }: { dev: Adb }) {
     const [screenshoting, setScreenshoting] = useState(false);
     const keyboard = useRef<ScrcpyKeyboardInjector | null>(null);
     const client = useRef<AdbScrcpyClient<AdbScrcpyOptionsLatest<boolean>> | null>(null);
+    const [showControls, setShowControls] = useState(false);
+    const [fullScreen, setFullScreen] = useState(false);
+
+    const handleFullScreen = useCallback(
+        (enter: boolean) => {
+            if (!playerRef.current) return;
+
+            const player = playerRef.current;
+
+            if (enter) {
+                if (player.requestFullscreen) {
+                    player.requestFullscreen();
+                    // @ts-expect-error we know
+                } else if (player.webkitRequestFullscreen) {
+                    // @ts-expect-error we know
+                    player.webkitRequestFullscreen();
+                    // @ts-expect-error we know
+                } else if (player.msRequestFullscreen) {
+                    // @ts-expect-error we know
+                    player.msRequestFullscreen();
+                } else {
+                    toast.error(t("failed_to_enter_full_screen"));
+                }
+            } else {
+                document.exitFullscreen();
+            }
+        },
+        [t],
+    );
 
     const handleTakeScreenshot = useCallback(
         async (clipboard?: boolean) => {
@@ -172,6 +208,8 @@ function ScrcpyPlayer({ dev }: { dev: Adb }) {
             setFocused(false);
         }
 
+        let lastHandleFullScreen = 0;
+
         function handleKeyEvent(e: KeyboardEvent) {
             if (!client.current || !keyboard.current || !focused) {
                 return;
@@ -181,6 +219,19 @@ function ScrcpyPlayer({ dev }: { dev: Adb }) {
             e.stopPropagation();
 
             const { type, code } = e;
+
+            if (e.ctrlKey && e.shiftKey && e.code === "F11") {
+                if (Date.now() - lastHandleFullScreen < 1000) {
+                    return;
+                }
+                if (document.fullscreenElement) {
+                    handleFullScreen(false);
+                } else {
+                    handleFullScreen(true);
+                }
+                lastHandleFullScreen = Date.now();
+                return;
+            }
 
             keyboard.current![type === "keydown" ? "down" : "up"](code);
         }
@@ -283,6 +334,10 @@ function ScrcpyPlayer({ dev }: { dev: Adb }) {
             client.current?.controller?.backOrScreenOn(1);
         }
 
+        function handleFullScreenChange() {
+            setFullScreen(!!document.fullscreenElement);
+        }
+
         const resizeObserver = new ResizeObserver(() => {
             resizeCanvas();
         });
@@ -303,6 +358,7 @@ function ScrcpyPlayer({ dev }: { dev: Adb }) {
         player?.addEventListener("keyup", handleKeyEvent);
         player?.addEventListener("focus", handleFocus);
         player?.addEventListener("blur", handleBlur);
+        player?.addEventListener("fullscreenchange", handleFullScreenChange);
 
         return () => {
             resizeObserver.disconnect();
@@ -319,8 +375,9 @@ function ScrcpyPlayer({ dev }: { dev: Adb }) {
             player?.removeEventListener("keyup", handleKeyEvent);
             player?.removeEventListener("focus", handleFocus);
             player?.removeEventListener("blur", handleBlur);
+            player?.removeEventListener("fullscreenchange", handleFullScreenChange);
         };
-    }, [width, height, client, focused, keyboard]);
+    }, [width, height, client, focused, keyboard, handleFullScreen]);
 
     useEffect(() => {
         if (!canvasRef.current) return;
@@ -383,173 +440,205 @@ function ScrcpyPlayer({ dev }: { dev: Adb }) {
                 </Card>
             )}
             {width > 1 && client.current && (
-                <Card
-                    className={clsx(cls.Controls, menuPosition.overflow && cls.Overflow)}
-                    style={
-                        {
-                            "--position": `${menuPosition.pos}px`,
-                        } as React.CSSProperties
-                    }
-                >
-                    <Flex direction="column" gap="2">
-                        <Tooltip content={t(focused ? "keyboard_focused" : "keyboard_unfocused")}>
-                            <IconButton
-                                variant="soft"
-                                color={focused ? "green" : "red"}
-                                onClick={() => {
-                                    playerRef.current?.focus();
-                                }}
-                            >
-                                {focused ? <TbKeyboard size={18} /> : <TbKeyboardOff size={18} />}
-                            </IconButton>
+                <>
+                    {!showControls && menuPosition.overflow && (
+                        <Tooltip content={t("show_controls")}>
+                            <div className={cls.ShowControls} onClick={() => setShowControls(!showControls)}>
+                                <MdArrowBackIosNew size={18} />
+                            </div>
                         </Tooltip>
-
-                        <Tooltip content={t("reset_video")}>
-                            <IconButton
-                                variant="soft"
-                                color="gray"
-                                onClick={() => {
-                                    client.current?.controller?.resetVideo();
-                                }}
-                            >
-                                <MdRotateLeft size={18} />
-                            </IconButton>
-                        </Tooltip>
-                        <ContextMenu.Root>
-                            <ContextMenu.Trigger disabled={screenshoting}>
-                                <IconButton variant="soft" color="gray" onClick={() => handleTakeScreenshot(false)}>
-                                    <Tooltip content={t("screenshot")}>
-                                        {screenshoting ? <Spinner size="2" /> : <MdOutlineScreenshot size={18} />}
-                                    </Tooltip>
+                    )}
+                    <Card
+                        className={clsx(cls.Controls, menuPosition.overflow && cls.Overflow, showControls && cls.Show)}
+                        style={
+                            {
+                                "--position": `${menuPosition.pos}px`,
+                            } as React.CSSProperties
+                        }
+                    >
+                        <Flex direction="column" gap="2">
+                            <Tooltip content={t(focused ? "keyboard_focused" : "keyboard_unfocused")}>
+                                <IconButton
+                                    variant="soft"
+                                    color={focused ? "green" : "red"}
+                                    onClick={() => {
+                                        playerRef.current?.focus();
+                                    }}
+                                >
+                                    {focused ? <TbKeyboard size={18} /> : <TbKeyboardOff size={18} />}
                                 </IconButton>
-                            </ContextMenu.Trigger>
-                            <ContextMenu.Content size="1" variant="soft">
-                                <ContextMenu.Item onClick={() => handleTakeScreenshot(false)}>
-                                    <FileIcon />
-                                    {t("save_to_file")}
-                                </ContextMenu.Item>
-                                <ContextMenu.Item onClick={() => handleTakeScreenshot(true)}>
-                                    <ClipboardCopyIcon />
-                                    {t("copy_to_clipboard")}
-                                </ContextMenu.Item>
-                            </ContextMenu.Content>
-                        </ContextMenu.Root>
-                        <Tooltip content={t("volume_up")}>
-                            <IconButton
-                                variant="soft"
-                                color="gray"
-                                onClick={() => {
-                                    client.current?.controller?.injectKeyCode({
-                                        action: AndroidKeyEventAction.Down,
-                                        keyCode: AndroidKeyCode.VolumeUp,
-                                        repeat: 0,
-                                        metaState: 0,
-                                    });
-                                }}
-                            >
-                                <SpeakerLoudIcon />
-                            </IconButton>
-                        </Tooltip>
-                        <Tooltip content={t("volume_down")}>
-                            <IconButton
-                                variant="soft"
-                                color="gray"
-                                onClick={() => {
-                                    client.current?.controller?.injectKeyCode({
-                                        action: AndroidKeyEventAction.Down,
-                                        keyCode: AndroidKeyCode.VolumeDown,
-                                        repeat: 0,
-                                        metaState: 0,
-                                    });
-                                }}
-                            >
-                                <SpeakerQuietIcon />
-                            </IconButton>
-                        </Tooltip>
-                        <Tooltip content={t("mute")}>
-                            <IconButton
-                                variant="soft"
-                                color="gray"
-                                onClick={() => {
-                                    client.current?.controller?.injectKeyCode({
-                                        action: AndroidKeyEventAction.Down,
-                                        keyCode: AndroidKeyCode.VolumeMute,
-                                        repeat: 0,
-                                        metaState: 0,
-                                    });
-                                }}
-                            >
-                                <SpeakerOffIcon />
-                            </IconButton>
-                        </Tooltip>
-                        <Tooltip content={t("rotate_device")}>
-                            <IconButton
-                                variant="soft"
-                                color="gray"
-                                onClick={() => {
-                                    client.current?.controller?.rotateDevice();
-                                }}
-                            >
-                                <PiDeviceRotateDuotone size={18} />
-                            </IconButton>
-                        </Tooltip>
-                        <Tooltip content={t("turn_on_screen")}>
-                            <IconButton
-                                variant="soft"
-                                color="gray"
-                                onClick={() => {
-                                    client.current?.controller?.setScreenPowerMode(AndroidScreenPowerMode.Normal);
-                                }}
-                            >
-                                <LuMonitorUp size={18} />
-                            </IconButton>
-                        </Tooltip>
-                        <Tooltip content={t("turn_off_screen")}>
-                            <IconButton
-                                variant="soft"
-                                color="gray"
-                                onClick={() => {
-                                    client.current?.controller?.setScreenPowerMode(AndroidScreenPowerMode.Off);
-                                }}
-                            >
-                                <LuMonitorOff size={18} />
-                            </IconButton>
-                        </Tooltip>
-                        <Tooltip content={t("back")}>
-                            <IconButton
-                                variant="soft"
-                                color="gray"
-                                onMouseDown={() => handleInjectSystemKey(AndroidKeyCode.AndroidBack, false)}
-                                onMouseUp={() => handleInjectSystemKey(AndroidKeyCode.AndroidBack, true)}
-                            >
-                                <PiTriangleDuotone
-                                    size={18}
-                                    style={{ transform: "rotate(-90deg)", transformOrigin: "center" }}
-                                />
-                            </IconButton>
-                        </Tooltip>
-                        <Tooltip content={t("home")}>
-                            <IconButton
-                                variant="soft"
-                                color="gray"
-                                onMouseDown={() => handleInjectSystemKey(AndroidKeyCode.AndroidHome, false)}
-                                onMouseUp={() => handleInjectSystemKey(AndroidKeyCode.AndroidHome, true)}
-                            >
-                                <PiCircleDuotone size={18} />
-                            </IconButton>
-                        </Tooltip>
-                        <Tooltip content={t("recent_apps")}>
-                            <IconButton
-                                variant="soft"
-                                color="gray"
-                                onMouseDown={() => handleInjectSystemKey(AndroidKeyCode.AndroidAppSwitch, false)}
-                                onMouseUp={() => handleInjectSystemKey(AndroidKeyCode.AndroidAppSwitch, true)}
-                            >
-                                <PiSquareDuotone size={18} />
-                            </IconButton>
-                        </Tooltip>
-                    </Flex>
-                </Card>
+                            </Tooltip>
+                            {menuPosition.overflow && (
+                                <Tooltip content={t("hide_controls")}>
+                                    <IconButton
+                                        variant="soft"
+                                        color="gray"
+                                        onClick={() => {
+                                            setShowControls(!showControls);
+                                        }}
+                                    >
+                                        <MdArrowForwardIos size={18} />
+                                    </IconButton>
+                                </Tooltip>
+                            )}
+                            <Tooltip content={t(fullScreen ? "exit_full_screen" : "enter_full_screen")}>
+                                <IconButton
+                                    variant="soft"
+                                    color="gray"
+                                    onClick={() => {
+                                        handleFullScreen(!fullScreen);
+                                    }}
+                                >
+                                    {fullScreen ? <MdFullscreenExit size={18} /> : <MdFullscreen size={18} />}
+                                </IconButton>
+                            </Tooltip>
+                            <Tooltip content={t("reset_video")}>
+                                <IconButton
+                                    variant="soft"
+                                    color="gray"
+                                    onClick={() => {
+                                        client.current?.controller?.resetVideo();
+                                    }}
+                                >
+                                    <MdRotateLeft size={18} />
+                                </IconButton>
+                            </Tooltip>
+                            <ContextMenu.Root>
+                                <ContextMenu.Trigger disabled={screenshoting}>
+                                    <IconButton variant="soft" color="gray" onClick={() => handleTakeScreenshot(false)}>
+                                        <Tooltip content={t("screenshot")}>
+                                            {screenshoting ? <Spinner size="2" /> : <MdOutlineScreenshot size={18} />}
+                                        </Tooltip>
+                                    </IconButton>
+                                </ContextMenu.Trigger>
+                                <ContextMenu.Content size="1" variant="soft">
+                                    <ContextMenu.Item onClick={() => handleTakeScreenshot(false)}>
+                                        <FileIcon />
+                                        {t("save_to_file")}
+                                    </ContextMenu.Item>
+                                    <ContextMenu.Item onClick={() => handleTakeScreenshot(true)}>
+                                        <ClipboardCopyIcon />
+                                        {t("copy_to_clipboard")}
+                                    </ContextMenu.Item>
+                                </ContextMenu.Content>
+                            </ContextMenu.Root>
+                            <Tooltip content={t("volume_up")}>
+                                <IconButton
+                                    variant="soft"
+                                    color="gray"
+                                    onClick={() => {
+                                        client.current?.controller?.injectKeyCode({
+                                            action: AndroidKeyEventAction.Down,
+                                            keyCode: AndroidKeyCode.VolumeUp,
+                                            repeat: 0,
+                                            metaState: 0,
+                                        });
+                                    }}
+                                >
+                                    <SpeakerLoudIcon />
+                                </IconButton>
+                            </Tooltip>
+                            <Tooltip content={t("volume_down")}>
+                                <IconButton
+                                    variant="soft"
+                                    color="gray"
+                                    onClick={() => {
+                                        client.current?.controller?.injectKeyCode({
+                                            action: AndroidKeyEventAction.Down,
+                                            keyCode: AndroidKeyCode.VolumeDown,
+                                            repeat: 0,
+                                            metaState: 0,
+                                        });
+                                    }}
+                                >
+                                    <SpeakerQuietIcon />
+                                </IconButton>
+                            </Tooltip>
+                            <Tooltip content={t("mute")}>
+                                <IconButton
+                                    variant="soft"
+                                    color="gray"
+                                    onClick={() => {
+                                        client.current?.controller?.injectKeyCode({
+                                            action: AndroidKeyEventAction.Down,
+                                            keyCode: AndroidKeyCode.VolumeMute,
+                                            repeat: 0,
+                                            metaState: 0,
+                                        });
+                                    }}
+                                >
+                                    <SpeakerOffIcon />
+                                </IconButton>
+                            </Tooltip>
+                            <Tooltip content={t("rotate_device")}>
+                                <IconButton
+                                    variant="soft"
+                                    color="gray"
+                                    onClick={() => {
+                                        client.current?.controller?.rotateDevice();
+                                    }}
+                                >
+                                    <PiDeviceRotateDuotone size={18} />
+                                </IconButton>
+                            </Tooltip>
+                            <Tooltip content={t("turn_on_screen")}>
+                                <IconButton
+                                    variant="soft"
+                                    color="gray"
+                                    onClick={() => {
+                                        client.current?.controller?.setScreenPowerMode(AndroidScreenPowerMode.Normal);
+                                    }}
+                                >
+                                    <LuMonitorUp size={18} />
+                                </IconButton>
+                            </Tooltip>
+                            <Tooltip content={t("turn_off_screen")}>
+                                <IconButton
+                                    variant="soft"
+                                    color="gray"
+                                    onClick={() => {
+                                        client.current?.controller?.setScreenPowerMode(AndroidScreenPowerMode.Off);
+                                    }}
+                                >
+                                    <LuMonitorOff size={18} />
+                                </IconButton>
+                            </Tooltip>
+                            <Tooltip content={t("back")}>
+                                <IconButton
+                                    variant="soft"
+                                    color="gray"
+                                    onMouseDown={() => handleInjectSystemKey(AndroidKeyCode.AndroidBack, false)}
+                                    onMouseUp={() => handleInjectSystemKey(AndroidKeyCode.AndroidBack, true)}
+                                >
+                                    <PiTriangleDuotone
+                                        size={18}
+                                        style={{ transform: "rotate(-90deg)", transformOrigin: "center" }}
+                                    />
+                                </IconButton>
+                            </Tooltip>
+                            <Tooltip content={t("home")}>
+                                <IconButton
+                                    variant="soft"
+                                    color="gray"
+                                    onMouseDown={() => handleInjectSystemKey(AndroidKeyCode.AndroidHome, false)}
+                                    onMouseUp={() => handleInjectSystemKey(AndroidKeyCode.AndroidHome, true)}
+                                >
+                                    <PiCircleDuotone size={18} />
+                                </IconButton>
+                            </Tooltip>
+                            <Tooltip content={t("recent_apps")}>
+                                <IconButton
+                                    variant="soft"
+                                    color="gray"
+                                    onMouseDown={() => handleInjectSystemKey(AndroidKeyCode.AndroidAppSwitch, false)}
+                                    onMouseUp={() => handleInjectSystemKey(AndroidKeyCode.AndroidAppSwitch, true)}
+                                >
+                                    <PiSquareDuotone size={18} />
+                                </IconButton>
+                            </Tooltip>
+                        </Flex>
+                    </Card>
+                </>
             )}
             <div
                 className={cls.TouchArea}

@@ -70,6 +70,31 @@
         overflow: hidden;
         outline: none;
 
+        .ShowControls {
+            position: absolute;
+            right: 0;
+            top: 0;
+            z-index: 9;
+            background-color: rgba(21, 22, 22, 0.8901960784);
+            padding: 0.7rem 0.2rem;
+            border-radius: 6px 0 0 6px;
+            display: flex;
+            border-bottom: 1px solid var(--gray-5);
+            border-left: 1px solid var(--gray-5);
+            border-top: 1px solid var(--gray-5);
+            opacity: 0.5;
+            backdrop-filter: blur(30px);
+            cursor: pointer;
+            color: #fff;
+            transition: opacity 0.15s ease-in-out;
+            align-items: center;
+            justify-content: center;
+
+            &:hover {
+                opacity: 1;
+            }
+        }
+
         .Canvas {
             height: 100%;
             width: 100%;
@@ -90,18 +115,26 @@
             top: 0;
             left: var(--position);
             z-index: 9;
-            transition: opacity 0.2s ease-in-out;
+
+
+            &.Overflow {
+                opacity: 0;
+                visibility: hidden;
+                pointer-events: none;
+                left: unset;
+                right: 0;
+                transition: 0.2s;
+
+                &.Show {
+                    opacity: 1;
+                    visibility: visible;
+                    pointer-events: auto;
+                    right: 8px;
+                }
+            }
 
             &::before {
                 background-color: #151616e3;
-            }
-
-            &.Overflow {
-                opacity: 0.5;
-
-                &:hover {
-                    opacity: 1;
-                }
             }
         }
 
