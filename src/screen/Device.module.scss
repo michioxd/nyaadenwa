@@ -76,12 +76,25 @@
             object-fit: contain;
         }
 
+        .TouchArea {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 3;
+        }
+
         .Controls {
             position: absolute;
             top: 0;
             left: var(--position);
             z-index: 9;
             transition: opacity 0.2s ease-in-out;
+
+            &::before {
+                background-color: #151616e3;
+            }
 
             &.Overflow {
                 opacity: 0.5;

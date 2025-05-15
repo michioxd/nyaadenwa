@@ -44,6 +44,7 @@ html {
     position: fixed;
     top: 50%;
     left: 50%;
+    margin: 1rem;
     transform: translate(-50%, -50%);
     text-align: center;
     width: 100%;
@@ -59,14 +60,14 @@ html {
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
     z-index: 99;
     gap: 0.5rem;
-}
 
-#notSupported p {
-    font-size: 12px;
-}
+    p {
+        font-size: 12px;
+    }
 
-#notSupported h3 {
-    font-size: 18px;
+    h3 {
+        font-size: 18px;
+    }
 }
 
 .toast {

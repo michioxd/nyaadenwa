@@ -8,15 +8,14 @@
     </head>
 
     <body>
-        <div id="notSupported" style="display: none">
-            <h3>WebUSB is not supported in this browser</h3>
-            <p>
-                Your browser does not support WebUSB. Make sure you are using the latest version of Chrome or another
-                browser that supports WebUSB. It is recommended to use browser based on Chromium like Brave, Edge, or
-                Opera.
-            </p>
+        <div id="root">
+            <noscript>
+                <div id="notSupported">
+                    <h3>JavaScript is disabled</h3>
+                    <p>JavaScript is required to run this application. Please enable JavaScript in your browser.</p>
+                </div>
+            </noscript>
         </div>
-        <div id="root"></div>
         <script type="module" src="/src/main.tsx"></script>
     </body>
 </html>

@@ -70,6 +70,7 @@ const Locale: LocaleResourcesType = {
         recent_apps: "Recent apps",
         home: "Home",
         back: "Back",
+        reset_video: "Reset video",
         keyboard_focused: "Keyboard focused",
         keyboard_unfocused: "Keyboard will not work when unfocused",
         save_to_file: "Save to file",

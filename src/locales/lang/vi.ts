@@ -70,6 +70,7 @@ const Locale: LocaleResourcesType = {
         recent_apps: "Ứng dụng gần đây",
         home: "Trang chủ",
         back: "Trở lại",
+        reset_video: "Khởi động lại video",
         keyboard_focused: "Bàn phím đã focus",
         keyboard_unfocused: "Bàn phím sẽ không hoạt động khi chưa focus",
         save_to_file: "Lưu vào file",

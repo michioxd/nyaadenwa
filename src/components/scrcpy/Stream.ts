@@ -95,7 +95,7 @@ export default class ScrcpyStream {
     }
 
     public async stop() {
-        await this.client?.close();
+        this.client?.close();
         this.audioPlayer?.stop();
         this.audioPlayer = undefined;
         this.streamWorker?.terminate();

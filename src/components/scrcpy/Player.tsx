@@ -27,7 +27,7 @@ import {
     PiSquareDuotone,
     PiTriangleDuotone,
 } from "react-icons/pi";
-import { MdOutlineScreenshot } from "react-icons/md";
+import { MdOutlineScreenshot, MdRotateLeft } from "react-icons/md";
 import { ClipboardCopyIcon, FileIcon, SpeakerLoudIcon, SpeakerOffIcon, SpeakerQuietIcon } from "@radix-ui/react-icons";
 import { LuMonitorOff, LuMonitorUp } from "react-icons/lu";
 import { TbKeyboard, TbKeyboardOff } from "react-icons/tb";
@@ -46,6 +46,7 @@ const PointerEventButtonToAndroidButton = [
 function ScrcpyPlayer({ dev }: { dev: Adb }) {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const playerRef = useRef<HTMLDivElement>(null);
+    const touchAreaRef = useRef<HTMLDivElement>(null);
     const [width, setWidth] = useState(0);
     const [height, setHeight] = useState(0);
     const [error, setError] = useState<string | null>(null);
@@ -127,20 +128,23 @@ function ScrcpyPlayer({ dev }: { dev: Adb }) {
     );
 
     useEffect(() => {
-        if (!canvasRef.current || !playerRef.current) return;
+        if (!canvasRef.current || !playerRef.current || !touchAreaRef.current) return;
 
         const canvas = canvasRef.current;
         const player = playerRef.current;
+        const touchArea = touchAreaRef.current;
+
         let currentPointerX = 0,
-            currentPointerY = 0;
+            currentPointerY = 0,
+            scaled = 1;
         const touchPoints = new Map<number, { x: number; y: number }>();
 
         const resizeCanvas = () => {
             if (!playerRef.current) return;
             const { clientWidth: windowWidth, clientHeight: windowHeight } = playerRef.current;
-            const scale = Math.min(windowWidth / width, windowHeight / height);
+            scaled = Math.min(windowWidth / width, windowHeight / height);
 
-            const menuPos = (width * scale) / 2;
+            const menuPos = (width * scaled) / 2;
             const finalMenuPos = windowWidth / 2 + menuPos + 8;
             if (finalMenuPos + 56 + 8 > windowWidth) {
                 setMenuPosition({
@@ -156,7 +160,7 @@ function ScrcpyPlayer({ dev }: { dev: Adb }) {
 
             canvas!.style.width = `${width}px`;
             canvas!.style.height = `${height}px`;
-            canvas!.style.transform = `scale(${scale})`;
+            canvas!.style.transform = `scale(${scaled})`;
             canvas!.style.transformOrigin = "center";
         };
 
@@ -224,8 +228,18 @@ function ScrcpyPlayer({ dev }: { dev: Adb }) {
             }
 
             const rect = canvas.getBoundingClientRect();
-            const percentageX = clamp((clientX - rect.x) / rect.width, 0, 1);
-            const percentageY = clamp((clientY - rect.y) / rect.height, 0, 1);
+            const canvasStyle = window.getComputedStyle(canvas);
+            const canvasWidth = parseFloat(canvasStyle.width) * scaled;
+            const canvasHeight = parseFloat(canvasStyle.height) * scaled;
+
+            const canvasCenterX = rect.left + rect.width / 2;
+            const canvasCenterY = rect.top + rect.height / 2;
+
+            const relativeX = clientX - canvasCenterX;
+            const relativeY = clientY - canvasCenterY;
+
+            const percentageX = clamp(0.5 + relativeX / canvasWidth, 0, 1);
+            const percentageY = clamp(0.5 + relativeY / canvasHeight, 0, 1);
 
             currentPointerX = percentageX * width;
             currentPointerY = percentageY * height;
@@ -275,16 +289,16 @@ function ScrcpyPlayer({ dev }: { dev: Adb }) {
         resizeObserver.observe(playerRef.current!);
         resizeCanvas();
 
-        canvas.addEventListener("pointerdown", handlePointerEvent);
-        canvas.addEventListener("pointermove", handlePointerEvent);
-        canvas.addEventListener("pointerup", handlePointerEvent);
-        canvas.addEventListener("contextmenu", (e) => e.preventDefault());
-        canvas.addEventListener("wheel", handleMouseScroll);
-        canvas.addEventListener("contextmenu", handleRightClick);
-        canvas.addEventListener("touchstart", (e) => e.preventDefault(), { passive: false });
-        canvas.addEventListener("touchmove", (e) => e.preventDefault(), { passive: false });
-        canvas.addEventListener("touchend", (e) => e.preventDefault(), { passive: false });
-        canvas.addEventListener("touchcancel", (e) => e.preventDefault(), { passive: false });
+        touchArea.addEventListener("pointerdown", handlePointerEvent);
+        touchArea.addEventListener("pointermove", handlePointerEvent);
+        touchArea.addEventListener("pointerup", handlePointerEvent);
+        touchArea.addEventListener("contextmenu", (e) => e.preventDefault());
+        touchArea.addEventListener("wheel", handleMouseScroll);
+        touchArea.addEventListener("contextmenu", handleRightClick);
+        touchArea.addEventListener("touchstart", (e) => e.preventDefault(), { passive: false });
+        touchArea.addEventListener("touchmove", (e) => e.preventDefault(), { passive: false });
+        touchArea.addEventListener("touchend", (e) => e.preventDefault(), { passive: false });
+        touchArea.addEventListener("touchcancel", (e) => e.preventDefault(), { passive: false });
         player?.addEventListener("keydown", handleKeyEvent);
         player?.addEventListener("keyup", handleKeyEvent);
         player?.addEventListener("focus", handleFocus);
@@ -292,15 +306,15 @@ function ScrcpyPlayer({ dev }: { dev: Adb }) {
 
         return () => {
             resizeObserver.disconnect();
-            canvas.removeEventListener("pointerdown", handlePointerEvent);
-            canvas.removeEventListener("pointermove", handlePointerEvent);
-            canvas.removeEventListener("pointerup", handlePointerEvent);
-            canvas.removeEventListener("wheel", handleMouseScroll);
-            canvas.removeEventListener("contextmenu", handleRightClick);
-            canvas.removeEventListener("touchstart", (e) => e.preventDefault());
-            canvas.removeEventListener("touchmove", (e) => e.preventDefault());
-            canvas.removeEventListener("touchend", (e) => e.preventDefault());
-            canvas.removeEventListener("touchcancel", (e) => e.preventDefault());
+            touchArea.removeEventListener("pointerdown", handlePointerEvent);
+            touchArea.removeEventListener("pointermove", handlePointerEvent);
+            touchArea.removeEventListener("pointerup", handlePointerEvent);
+            touchArea.removeEventListener("wheel", handleMouseScroll);
+            touchArea.removeEventListener("contextmenu", handleRightClick);
+            touchArea.removeEventListener("touchstart", (e) => e.preventDefault());
+            touchArea.removeEventListener("touchmove", (e) => e.preventDefault());
+            touchArea.removeEventListener("touchend", (e) => e.preventDefault());
+            touchArea.removeEventListener("touchcancel", (e) => e.preventDefault());
             player?.removeEventListener("keydown", handleKeyEvent);
             player?.removeEventListener("keyup", handleKeyEvent);
             player?.removeEventListener("focus", handleFocus);
@@ -390,6 +404,17 @@ function ScrcpyPlayer({ dev }: { dev: Adb }) {
                             </IconButton>
                         </Tooltip>
 
+                        <Tooltip content={t("reset_video")}>
+                            <IconButton
+                                variant="soft"
+                                color="gray"
+                                onClick={() => {
+                                    client.current?.controller?.resetVideo();
+                                }}
+                            >
+                                <MdRotateLeft size={18} />
+                            </IconButton>
+                        </Tooltip>
                         <ContextMenu.Root>
                             <ContextMenu.Trigger disabled={screenshoting}>
                                 <IconButton variant="soft" color="gray" onClick={() => handleTakeScreenshot(false)}>
@@ -526,6 +551,15 @@ function ScrcpyPlayer({ dev }: { dev: Adb }) {
                     </Flex>
                 </Card>
             )}
+            <div
+                className={cls.TouchArea}
+                onClick={() => {
+                    playerRef.current?.focus();
+                    // eslint-disable-next-line @typescript-eslint/no-unused-expressions
+                    !focused && setFocused(true);
+                }}
+                ref={touchAreaRef}
+            ></div>
             <canvas
                 className={cls.Canvas}
                 ref={canvasRef}
