@@ -23,6 +23,7 @@ import {
     PiCircleDuotone,
     PiDeviceRotateDuotone,
     PiKeyboardDuotone,
+    PiPowerDuotone,
     PiSquareDuotone,
     PiTriangleDuotone,
 } from "react-icons/pi";
@@ -56,6 +57,7 @@ function ScrcpyPlayer({ dev }: { dev: Adb }) {
     const [width, setWidth] = useState(0);
     const [height, setHeight] = useState(0);
     const [error, setError] = useState<string | null>(null);
+    const [ready, setReady] = useState(false);
     const [menuPosition, setMenuPosition] = useState<{
         pos: number;
         overflow: boolean;
@@ -163,7 +165,7 @@ function ScrcpyPlayer({ dev }: { dev: Adb }) {
     );
 
     useEffect(() => {
-        if (!canvasRef.current || !playerRef.current || !touchAreaRef.current) return;
+        if (!canvasRef.current || !playerRef.current || !touchAreaRef.current || !ready) return;
 
         const canvas = canvasRef.current;
         const player = playerRef.current;
@@ -218,7 +220,7 @@ function ScrcpyPlayer({ dev }: { dev: Adb }) {
 
             const { type, code } = e;
 
-            if (e.ctrlKey && e.shiftKey && e.code === "F11") {
+            if (e.ctrlKey && e.shiftKey && e.altKey && e.code === "F11") {
                 if (Date.now() - lastHandleFullScreen < 1000) {
                     return;
                 }
@@ -366,7 +368,7 @@ function ScrcpyPlayer({ dev }: { dev: Adb }) {
             player?.removeEventListener("blur", handleBlur);
             player?.removeEventListener("fullscreenchange", handleFullScreenChange);
         };
-    }, [width, height, client, focused, keyboard, handleFullScreen]);
+    }, [width, height, client, focused, keyboard, handleFullScreen, ready]);
 
     useEffect(() => {
         if (!canvasRef.current) return;
@@ -380,6 +382,7 @@ function ScrcpyPlayer({ dev }: { dev: Adb }) {
                 maxFps: 60,
             },
             onResize: (w, h) => {
+                setReady(true);
                 setWidth(w);
                 setHeight(h);
             },
@@ -416,7 +419,7 @@ function ScrcpyPlayer({ dev }: { dev: Adb }) {
                 </Card>
             )}
             {error && (
-                <Card className={cls.Error} size="2">
+                <Card className={clsx(cls.Error, cls.Loading)} size="2">
                     <Flex direction="column" gap="2">
                         <Text size="2" style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
                             <RxExclamationTriangle size={18} />
@@ -428,7 +431,7 @@ function ScrcpyPlayer({ dev }: { dev: Adb }) {
                     </Flex>
                 </Card>
             )}
-            {width > 1 && client.current && (
+            {width > 1 && client.current && ready && (
                 <>
                     {!showControls && menuPosition.overflow && (
                         <Tooltip content={t("show_controls")}>
@@ -490,6 +493,16 @@ function ScrcpyPlayer({ dev }: { dev: Adb }) {
                                     }}
                                 >
                                     <MdRotateLeft size={18} />
+                                </IconButton>
+                            </Tooltip>
+                            <Tooltip content={t("power")}>
+                                <IconButton
+                                    variant="soft"
+                                    color="gray"
+                                    onMouseDown={() => handleInjectSystemKey(AndroidKeyCode.Power, false)}
+                                    onMouseUp={() => handleInjectSystemKey(AndroidKeyCode.Power, true)}
+                                >
+                                    <PiPowerDuotone size={18} />
                                 </IconButton>
                             </Tooltip>
                             <ContextMenu.Root>
@@ -639,7 +652,7 @@ function ScrcpyPlayer({ dev }: { dev: Adb }) {
                 }}
             ></div>
             <canvas className={cls.Canvas} ref={canvasRef} />
-            {focused && (
+            {focused && ready && (
                 <div className={cls.KeyboardIndicator}>
                     <PiKeyboardDuotone size={60} />
                 </div>

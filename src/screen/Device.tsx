@@ -102,8 +102,8 @@ const ScreenDevice = observer(
                 usbDetails
                     ? `${usbDetails?.name} (${usbDetails?.serial})`
                     : webSocketURL
-                      ? `${webSocketURL} (WebSocket)`
-                      : "Unknown",
+                        ? `${webSocketURL} (WebSocket)`
+                        : "Unknown",
             [usbDetails, webSocketURL],
         );
 
@@ -202,7 +202,7 @@ const ScreenDevice = observer(
                     setSidebarLevel={setSidebarLevel}
                 />
                 <div className={cls.DeviceInner}>
-                    <DeviceSidebar sidebarLevel={sidebarLevel} />
+                    {state === DeviceState.Connected && adb && <DeviceSidebar sidebarLevel={sidebarLevel} adb={adb} close={close} />}
                     {state === DeviceState.Connecting ? (
                         <Card className={cls.Loading}>
                             <Spinner size="3" /> <Text size="1">{t("waiting_for_device")}</Text>
