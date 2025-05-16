@@ -10,6 +10,7 @@ import { PiFolderOpenDuotone, PiInfoDuotone, PiTerminalWindowDuotone } from "rea
 import { useTranslation } from "react-i18next";
 import { useMemo } from "react";
 import { accentColorPropDef } from "@radix-ui/themes/src/props/color.prop.ts";
+import clsx from "clsx";
 
 export default function DeviceSidebar({ sidebarLevel }: { sidebarLevel: number }) {
     const { t } = useTranslation();
@@ -46,7 +47,7 @@ export default function DeviceSidebar({ sidebarLevel }: { sidebarLevel: number }
 
     return (
         <div className={cls.DeviceSidebar}>
-            <Card className={cls.Sidebar}>
+            <Card className={clsx(cls.Sidebar, sidebarLevel === 2 && cls.Expand)}>
                 <Flex gap="2" className={cls.SidebarContent} direction="column">
                     {sbItem.map((item, index) =>
                         sidebarLevel === 2 ? (
@@ -60,7 +61,9 @@ export default function DeviceSidebar({ sidebarLevel }: { sidebarLevel: number }
                                 <IconButton asChild variant="soft" color={item.color}>
                                     <span>{item.icon}</span>
                                 </IconButton>
-                                <Text ml="1">{item.text}</Text>
+                                <Text ml="1" className={cls.SbText}>
+                                    {item.text}
+                                </Text>
                             </Button>
                         ) : (
                             <IconButton key={index} variant="soft" color={item.color} onClick={item.onClick}>

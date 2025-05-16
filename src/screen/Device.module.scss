@@ -43,19 +43,29 @@
             display: flex;
             position: relative;
 
-            .SidebarContent {
-                width: fit-content;
-                height: 100%;
-
-                .SidebarButton {
-                    width: 100%;
-                    justify-content: flex-start;
-                }
-            }
-
             .Sidebar {
-                width: fit-content;
+                width: 56px;
                 height: 100%;
+                transition: 0.2s;
+
+                .SidebarContent {
+                    width: 100%;
+                    height: 100%;
+
+                    .SidebarButton {
+                        width: 100%;
+                        justify-content: flex-start;
+
+                        .SbText {
+                            width: fit-content;
+                            text-wrap: nowrap;
+                        }
+                    }
+                }
+
+                &.Expand {
+                    width: 230px;
+                }
             }
         }
     }
