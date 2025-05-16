@@ -9,6 +9,8 @@
         "@radix-ui/themes": "^3.2.1",
         "@sinm/react-chrome-tabs": "^2.5.2",
         "@types/object-hash": "^3.0.6",
+        "@xterm/addon-fit": "^0.10.0",
+        "@xterm/xterm": "^5.5.0",
         "@yume-chan/adb": "^2.0.1",
         "@yume-chan/adb-credential-web": "^2.0.1",
         "@yume-chan/adb-daemon-webusb": "^2.0.1",
@@ -696,6 +698,10 @@
     "@xhmikosr/decompress-unzip": ["@xhmikosr/decompress-unzip@6.0.0", "", { "dependencies": { "file-type": "^18.5.0", "get-stream": "^6.0.1", "yauzl": "^2.10.0" } }, "sha512-R1HAkjXLS7RAL74YFLxYY9zYflCcYGssld9KKFDu87PnJ4h4btdhzXfSC8J5i5A2njH3oYIoCzx03RIGTH07Sg=="],
 
     "@xhmikosr/downloader": ["@xhmikosr/downloader@13.0.1", "", { "dependencies": { "@xhmikosr/archive-type": "^6.0.1", "@xhmikosr/decompress": "^9.0.1", "content-disposition": "^0.5.4", "ext-name": "^5.0.0", "file-type": "^18.5.0", "filenamify": "^5.1.1", "get-stream": "^6.0.1", "got": "^12.6.1", "merge-options": "^3.0.4", "p-event": "^5.0.1" } }, "sha512-mBvWew1kZJHfNQVVfVllMjUDwCGN9apPa0t4/z1zaUJ9MzpXjRL3w8fsfJKB8gHN/h4rik9HneKfDbh2fErN+w=="],
+
+    "@xterm/addon-fit": ["@xterm/addon-fit@0.10.0", "", { "peerDependencies": { "@xterm/xterm": "^5.0.0" } }, "sha512-UFYkDm4HUahf2lnEyHvio51TNGiLK66mqP2JoATy7hRZeXaGMRDr00JiSF7m63vR5WKATF605yEggJKsw0JpMQ=="],
+
+    "@xterm/xterm": ["@xterm/xterm@5.5.0", "", {}, "sha512-hqJHYaQb5OptNunnyAnkHyM8aCjZ1MEIDTQu1iIbbTD/xops91NB5yq1ZK/dC2JDbVWtF23zUtl9JE2NqwT87A=="],
 
     "@xtuc/ieee754": ["@xtuc/ieee754@1.2.0", "", {}, "sha512-DX8nKgqcGwsc0eJSqYt5lwP4DH5FlHnmuWWBRy7X0NcaGR0ZtuyeESgMwTYVEtxmsNGY+qit4QYT/MIYTOTPeA=="],
 

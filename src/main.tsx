@@ -17,6 +17,7 @@ import "@fontsource/inter/400.css";
 import "@fontsource/inter/500.css";
 import "@fontsource/inter/700.css";
 import "@/scss/tabs.scss";
+import "@xterm/xterm/css/xterm.css";
 import "@/main.scss";
 
 createRoot(document.getElementById("root")!).render(

@@ -90,6 +90,30 @@ class Tabs {
         newTabs.splice(toIndex, 0, beforeTab);
         this.tabs = newTabs;
     }
+
+    public moveTabAndContent(id: string, toIndex: number, stackNo: number) {
+        const activeTab = this.tabs.find((tab) => tab.active && tab.stackNo === toIndex);
+        this.tabs = this.tabs.map((tab) =>
+            tab.stackNo === stackNo ? { ...tab, stackNo: toIndex, active: !activeTab } : tab,
+        );
+
+        const newContents = this.contents.get(id);
+        if (!newContents) {
+            return;
+        }
+        if (id.length === 40) {
+            connectedDevices.removeDevice(id);
+        }
+        setTimeout(
+            () => {
+                this.contents.set(id, {
+                    ...newContents,
+                    stackNo: toIndex,
+                });
+            },
+            id.length === 40 ? 100 : 0,
+        );
+    }
 }
 
 const tabsController = new Tabs();

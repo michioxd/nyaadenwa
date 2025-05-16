@@ -34,6 +34,8 @@ const Locale: LocaleResourcesType = {
         cancel: "Cancel",
         confirm: "Confirm",
         close: "Close",
+        enable_floating: "Enable floating",
+        exit_floating: "Exit floating",
         commit: "Commit",
         commit_date: "Commit date",
         translation_authors: "Translation authors",
@@ -61,6 +63,7 @@ const Locale: LocaleResourcesType = {
         waiting_for_device: "Waiting for device...",
         working_in_progress: "Working in progress",
         screenshot: "Screenshot",
+        screenshot_right_click_description: "Screenshot (Right click to see more options)",
         volume_up: "Volume up",
         volume_down: "Volume down",
         mute: "Mute",
@@ -103,6 +106,7 @@ const Locale: LocaleResourcesType = {
         command: "Command",
         apps_manager: "Apps manager",
         power_action_success: "Power action successful",
+        power_action_error: "Power action failed",
         samsung_download_mode: "Samsung Download Mode (Odin)",
         qualcomm_edl_mode: "Qualcomm EDL mode",
         custom_command: "Custom command",
@@ -121,7 +125,7 @@ const Locale: LocaleResourcesType = {
         confirm_power_action_description_edl:
             "This feature is only available for devices using Qualcomm SoC. Are you sure you want to reboot the device into Qualcomm EDL mode?",
         confirm_power_action_description_custom:
-            'Please enter the custom command to reboot the device, you may only need to enter the command next to the reboot command, for example "reboot recovery" then only enter "recovery"',
+            'Enter your custom command to reboot the device, you may only need to enter the command next to the reboot command, for example "reboot recovery" then only enter "recovery"',
     },
 };
 

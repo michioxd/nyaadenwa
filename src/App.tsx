@@ -84,7 +84,7 @@ const App = observer(() => {
     useEffect(() => {
         tabsController.contents.forEach((c) => {
             if (c.stackNo > stackNum - 1 && c.stackNo !== 0) {
-                tabsController.closeTab(c.id);
+                tabsController.moveTabAndContent(c.id, Math.max(0, stackNum - 1), c.stackNo);
             }
         });
     }, [stackNum, tabsController.contents]);

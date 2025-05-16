@@ -34,6 +34,8 @@ const Locale: LocaleResourcesType = {
         cancel: "Hủy",
         confirm: "Xác nhận",
         close: "Đóng",
+        enable_floating: "Bật chế độ nổi",
+        exit_floating: "Tắt chế độ nổi",
         commit: "Commit",
         commit_date: "Ngày commit",
         translation_authors: "Tác giả bản dịch",
@@ -61,6 +63,7 @@ const Locale: LocaleResourcesType = {
         waiting_for_device: "Đang chờ thiết bị...",
         working_in_progress: "Đang phát triển",
         screenshot: "Chụp màn hình",
+        screenshot_right_click_description: "Chụp màn hình (Chuột phải để xem thêm lựa chọn)",
         volume_up: "Tăng âm lượng",
         volume_down: "Giảm âm lượng",
         mute: "Tắt âm thanh",
@@ -103,6 +106,7 @@ const Locale: LocaleResourcesType = {
         command: "Lệnh",
         apps_manager: "Quản lý ứng dụng",
         power_action_success: "Thao tác nguồn thành công",
+        power_action_error: "Thao tác nguồn thất bại",
         samsung_download_mode: "Samsung Download Mode (Odin)",
         qualcomm_edl_mode: "Chế độ EDL Qualcomm",
         custom_command: "Lệnh tùy chỉnh",
@@ -121,7 +125,7 @@ const Locale: LocaleResourcesType = {
         confirm_power_action_description_edl:
             "Chức năng này chỉ dành cho các thiết bị sử dụng SoC của Qualcomm. Bạn có chắc chắn muốn khởi động lại vào chế độ EDL Qualcomm không?",
         confirm_power_action_description_custom:
-            'Vui lòng nhập lệnh tùy chỉnh để khởi động lại thiết bị, bạn chỉ cần nhập lệnh bên cạnh lệnh reboot, ví dụ như "reboot recovery" thì chỉ cần nhập "recovery"',
+            'Nhập lệnh tùy chỉnh để khởi động lại thiết bị, bạn chỉ cần nhập lệnh bên cạnh lệnh reboot, ví dụ như "reboot recovery" thì chỉ cần nhập "recovery"',
     },
 };
 

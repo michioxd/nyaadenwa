@@ -92,12 +92,14 @@ const Container = observer(
                         return;
                     }
 
+                    const deviceHash = getHashFromAddress(address);
+
                     tabsController.openTab(
                         {
-                            id: getHashFromAddress(address),
+                            id: deviceHash,
                             title: "WS: " + address,
                             type: ContentTypeProperties.Device,
-                            content: ({ close }) => <ScreenDevice webSocketURL={address} close={close} />,
+                            content: ({ close }) => <ScreenDevice webSocketURL={address} deviceHash={deviceHash} close={close} />,
                             stackNo: stackNo,
                         },
                         stackNo,
@@ -249,6 +251,7 @@ const Container = observer(
                                                                                         name: device.name,
                                                                                         serial: device.serial,
                                                                                     }}
+                                                                                    deviceHash={getDeviceHashFromDev(device)}
                                                                                     close={close}
                                                                                 />
                                                                             ),
@@ -279,8 +282,8 @@ const Container = observer(
                                                                         () => {
                                                                             deviceForgot.push(
                                                                                 device.raw.manufacturerName +
-                                                                                    device.name +
-                                                                                    device.serial,
+                                                                                device.name +
+                                                                                device.serial,
                                                                             );
                                                                             try {
                                                                                 device.raw.close();

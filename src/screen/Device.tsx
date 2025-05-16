@@ -5,7 +5,7 @@
  */
 
 import { AdbDaemonWebUsbDevice } from "@yume-chan/adb-daemon-webusb";
-import { memo, useCallback, useEffect, useMemo, useState } from "react";
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import cls from "./Device.module.scss";
 import { Badge, Card, Flex, IconButton, Spinner, Text } from "@radix-ui/themes";
 import useDialog from "@/components/dialog/Dialog";
@@ -19,7 +19,7 @@ import ScrcpyPlayer from "@/components/scrcpy/Player";
 import sessionDevices from "@/controller/devices";
 import { observer } from "mobx-react";
 import { RiSideBarFill, RiSidebarFoldLine, RiSidebarUnfoldLine } from "react-icons/ri";
-import DeviceSidebar from "@/components/device/Sidebar";
+import DeviceTools from "@/components/device/Tools";
 
 enum DeviceState {
     Connecting = "CONNECTING",
@@ -89,13 +89,25 @@ const DeviceInfo = memo(
 DeviceInfo.displayName = "DeviceInfo";
 
 const ScreenDevice = observer(
-    ({ usbDetails, webSocketURL, close }: { usbDetails?: DeviceDetails; webSocketURL?: string; close: () => void }) => {
+    ({ usbDetails, webSocketURL, deviceHash, close }:
+        {
+            usbDetails?: DeviceDetails;
+            webSocketURL?: string;
+            deviceHash: string;
+            close: () => void
+        }
+    ) => {
         const [state, setState] = useState<DeviceState>(DeviceState.Connecting);
         const dialog = useDialog();
-        const [sidebarLevel, setSidebarLevel] = useState(0);
+        const [sidebarLevel, setSidebarLevel] = useState(parseInt(localStorage.getItem("sbl_" + deviceHash) ?? "0"));
         const { t } = useTranslation();
         const [adb, setAdb] = useState<Adb | null>(null);
         const dumpSys = useMemo(() => (adb ? new DumpSys(adb) : null), [adb]);
+        const mainDeviceRef = useRef<HTMLDivElement>(null);
+        const [mainDeviceSize, setMainDeviceSize] = useState({
+            w: 0,
+            h: 0,
+        });
 
         const deviceName = useMemo(
             () =>
@@ -190,8 +202,31 @@ const ScreenDevice = observer(
             handleConnect();
         }, []);
 
+        useEffect(() => {
+            if (!mainDeviceRef.current) return;
+
+            setMainDeviceSize({ w: mainDeviceRef.current.clientWidth, h: mainDeviceRef.current.clientHeight });
+
+            const handleResize = () => {
+                if (mainDeviceRef.current) {
+                    setMainDeviceSize({ w: mainDeviceRef.current.clientWidth, h: mainDeviceRef.current.clientHeight });
+                }
+            };
+
+            const resizeObserver = new ResizeObserver(handleResize);
+            resizeObserver.observe(mainDeviceRef.current);
+
+            return () => {
+                resizeObserver.disconnect();
+            };
+        }, [mainDeviceRef]);
+
+        useEffect(() => {
+            localStorage.setItem("sbl_" + deviceHash, sidebarLevel.toString());
+        }, [sidebarLevel, deviceHash]);
+
         return (
-            <div className={cls.Device}>
+            <div className={cls.Device} ref={mainDeviceRef}>
                 <DeviceInfo
                     deviceName={deviceName}
                     state={state}
@@ -202,7 +237,13 @@ const ScreenDevice = observer(
                     setSidebarLevel={setSidebarLevel}
                 />
                 <div className={cls.DeviceInner}>
-                    {state === DeviceState.Connected && adb && <DeviceSidebar sidebarLevel={sidebarLevel} adb={adb} close={close} />}
+                    {state === DeviceState.Connected && adb && <DeviceTools
+                        deviceHash={deviceHash}
+                        sidebarLevel={sidebarLevel}
+                        adb={adb}
+                        close={close}
+                        mainDeviceSize={mainDeviceSize}
+                    />}
                     {state === DeviceState.Connecting ? (
                         <Card className={cls.Loading}>
                             <Spinner size="3" /> <Text size="1">{t("waiting_for_device")}</Text>

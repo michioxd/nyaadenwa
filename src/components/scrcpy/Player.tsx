@@ -150,10 +150,6 @@ function ScrcpyPlayer({ dev }: { dev: Adb }) {
     );
     const handleInjectSystemKey = useCallback(
         (keyCode: AndroidKeyCode, up: boolean) => {
-            if (keyCode === AndroidKeyCode.AndroidBack) {
-                client.current?.controller?.backOrScreenOn(up ? 1 : 0);
-                return;
-            }
             client.current?.controller?.injectKeyCode({
                 action: up ? 1 : 0,
                 keyCode,
@@ -508,7 +504,7 @@ function ScrcpyPlayer({ dev }: { dev: Adb }) {
                             <ContextMenu.Root>
                                 <ContextMenu.Trigger disabled={screenshoting}>
                                     <IconButton variant="soft" color="gray" onClick={() => handleTakeScreenshot(false)}>
-                                        <Tooltip content={t("screenshot")}>
+                                        <Tooltip content={t("screenshot_right_click_description")}>
                                             {screenshoting ? <Spinner size="2" /> : <MdOutlineScreenshot size={18} />}
                                         </Tooltip>
                                     </IconButton>
