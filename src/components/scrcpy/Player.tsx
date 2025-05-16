@@ -15,8 +15,7 @@ import {
     AndroidKeyEventAction,
     AndroidMotionEventAction,
     AndroidMotionEventButton,
-    AndroidScreenPowerMode,
-    clamp,
+    AndroidScreenPowerMode
 } from "@yume-chan/scrcpy";
 import type { AdbScrcpyClient, AdbScrcpyOptionsLatest } from "@yume-chan/adb-scrcpy";
 import type { ScrcpyKeyboardInjector } from "./keyboard";
@@ -173,7 +172,6 @@ function ScrcpyPlayer({ dev }: { dev: Adb }) {
         let currentPointerX = 0,
             currentPointerY = 0,
             scaled = 1;
-        const touchPoints = new Map<number, { x: number; y: number }>();
 
         const resizeCanvas = () => {
             if (!playerRef.current) return;
@@ -245,7 +243,7 @@ function ScrcpyPlayer({ dev }: { dev: Adb }) {
             }
 
             if (event.pointerType === "touch") {
-                canvas.setPointerCapture(event.pointerId);
+                touchArea.setPointerCapture(event.pointerId);
             }
 
             const { type, clientX, clientY, button, buttons, pointerId, pressure } = event;
@@ -254,9 +252,6 @@ function ScrcpyPlayer({ dev }: { dev: Adb }) {
             switch (type) {
                 case "pointerdown":
                     action = AndroidMotionEventAction.Down;
-                    if (event.pointerType === "touch") {
-                        touchPoints.set(pointerId, { x: clientX, y: clientY });
-                    }
                     break;
                 case "pointermove":
                     if (buttons === 0) {
@@ -264,15 +259,9 @@ function ScrcpyPlayer({ dev }: { dev: Adb }) {
                     } else {
                         action = AndroidMotionEventAction.Move;
                     }
-                    if (event.pointerType === "touch" && touchPoints.has(pointerId)) {
-                        touchPoints.set(pointerId, { x: clientX, y: clientY });
-                    }
                     break;
                 case "pointerup":
                     action = AndroidMotionEventAction.Up;
-                    if (event.pointerType === "touch") {
-                        touchPoints.delete(pointerId);
-                    }
                     break;
                 default:
                     throw new Error(`Unsupported event type: ${type}`);
@@ -289,8 +278,8 @@ function ScrcpyPlayer({ dev }: { dev: Adb }) {
             const relativeX = clientX - canvasCenterX;
             const relativeY = clientY - canvasCenterY;
 
-            const percentageX = clamp(0.5 + relativeX / canvasWidth, 0, 1);
-            const percentageY = clamp(0.5 + relativeY / canvasHeight, 0, 1);
+            const percentageX = 0.5 + relativeX / canvasWidth;
+            const percentageY = 0.5 + relativeY / canvasHeight;
 
             currentPointerX = percentageX * width;
             currentPointerY = percentageY * height;
@@ -299,7 +288,7 @@ function ScrcpyPlayer({ dev }: { dev: Adb }) {
 
             client.current?.controller?.injectTouch({
                 action,
-                pointerId: BigInt(event.pointerId),
+                pointerId: BigInt(pointerId),
                 pointerX: currentPointerX,
                 pointerY: currentPointerY,
                 videoWidth: width,
@@ -642,22 +631,14 @@ function ScrcpyPlayer({ dev }: { dev: Adb }) {
             )}
             <div
                 className={cls.TouchArea}
-                onClick={() => {
-                    playerRef.current?.focus();
-                    // eslint-disable-next-line @typescript-eslint/no-unused-expressions
-                    !focused && setFocused(true);
-                }}
                 ref={touchAreaRef}
-            ></div>
-            <canvas
-                className={cls.Canvas}
-                ref={canvasRef}
                 onClick={() => {
                     playerRef.current?.focus();
                     // eslint-disable-next-line @typescript-eslint/no-unused-expressions
                     !focused && setFocused(true);
                 }}
-            />
+            ></div>
+            <canvas className={cls.Canvas} ref={canvasRef} />
             {focused && (
                 <div className={cls.KeyboardIndicator}>
                     <PiKeyboardDuotone size={60} />
