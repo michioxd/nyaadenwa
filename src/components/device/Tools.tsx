@@ -220,7 +220,7 @@ export default function DeviceTools({ sidebarLevel, adb, close, mainDeviceSize, 
                             </Tooltip>
                         </Flex>
                         <div className={cls.DeviceToolsContent}>
-                            {section === 2 && <Terminal adb={adb} />}
+                            {section === 2 && <Terminal adb={adb} onTerminalClose={() => setSection(0)} />}
                         </div>
                     </Card>
                     {!toolFullScreen &&

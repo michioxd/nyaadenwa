@@ -126,6 +126,7 @@ const Locale: LocaleResourcesType = {
             "This feature is only available for devices using Qualcomm SoC. Are you sure you want to reboot the device into Qualcomm EDL mode?",
         confirm_power_action_description_custom:
             'Enter your custom command to reboot the device, you may only need to enter the command next to the reboot command, for example "reboot recovery" then only enter "recovery"',
+        terminal_process_exited: "Process exited. Press Enter to close terminal",
     },
 };
 

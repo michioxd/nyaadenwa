@@ -126,6 +126,7 @@ const Locale: LocaleResourcesType = {
             "Chức năng này chỉ dành cho các thiết bị sử dụng SoC của Qualcomm. Bạn có chắc chắn muốn khởi động lại vào chế độ EDL Qualcomm không?",
         confirm_power_action_description_custom:
             'Nhập lệnh tùy chỉnh để khởi động lại thiết bị, bạn chỉ cần nhập lệnh bên cạnh lệnh reboot, ví dụ như "reboot recovery" thì chỉ cần nhập "recovery"',
+        terminal_process_exited: "Tiến trình đã kết thúc. Nhấn Enter để đóng terminal",
     },
 };
 

@@ -12,10 +12,12 @@ import cls from "./terminal.module.scss";
 import { MaybeConsumable, ReadableStreamDefaultReader, WritableStreamDefaultWriter } from "@yume-chan/stream-extra";
 import { Box, Text } from "@radix-ui/themes";
 import clsx from "clsx";
+import { useTranslation } from "react-i18next";
 
-export default function Terminal({ adb }: { adb: Adb }) {
+export default function Terminal({ adb, onTerminalClose }: { adb: Adb, onTerminalClose: () => void }) {
     const terminalRef = useRef<HTMLDivElement>(null);
     const fitAddon = useRef<FitAddon>(new FitAddon());
+    const { t } = useTranslation();
     const xtermRef = useRef<XTerm>(new XTerm({
         fontSize: 12,
         cursorBlink: true,
@@ -57,7 +59,16 @@ export default function Terminal({ adb }: { adb: Adb }) {
                 if (!reader) return;
                 while (outputActive) {
                     const { value, done } = await reader.read();
-                    if (done) break;
+                    if (done) {
+                        terminal.writeln(`\r\n[${t("terminal_process_exited")}]`);
+                        const disposable = terminal.onKey(({ key }) => {
+                            if (key === 'Enter' || key === '\r') {
+                                disposable.dispose();
+                                onTerminalClose();
+                            }
+                        });
+                        break;
+                    }
                     if (value) {
                         terminal.write(new Uint8Array(value));
                     }
