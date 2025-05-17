@@ -51,10 +51,21 @@ const DeviceInfo = memo(
         sidebarLevel: number;
         setSidebarLevel: (sidebarLevel: number) => void;
     }) => {
+        const [dvName, setDvName] = useState(deviceName);
         const badgeColor = useMemo(
             () => (state === DeviceState.Connected ? "green" : state === DeviceState.Disconnected ? "red" : "gray"),
             [state],
         );
+
+        useEffect(() => {
+            (async () => {
+                const devName = await dumpSys?.adb?.getProp("ro.product.model");
+                const devManufacturer = await dumpSys?.adb?.getProp("ro.product.manufacturer");
+                if (devName && devManufacturer) {
+                    setDvName(`${devManufacturer} ${devName}`);
+                }
+            })();
+        }, [deviceName, dumpSys]);
 
         return (
             <Card className={cls.DeviceInfo}>
@@ -73,8 +84,8 @@ const DeviceInfo = memo(
                             <RiSidebarUnfoldLine size={18} />
                         )}
                     </IconButton>
-                    <Text size="2" style={{ width: "fit-content", flex: 1 }}>
-                        {deviceName}
+                    <Text size="1" style={{ width: "fit-content", flex: 1, textWrap: "nowrap", overflow: 'auto' }}>
+                        {dvName}
                     </Text>
                     <Badge size="1" color={badgeColor}>
                         {t(state)}
@@ -117,8 +128,8 @@ const ScreenDevice = observer(
                 usbDetails
                     ? `${usbDetails?.name} (${usbDetails?.serial})`
                     : webSocketURL
-                      ? `${webSocketURL} (WebSocket)`
-                      : "Unknown",
+                        ? `${webSocketURL} (WebSocket)`
+                        : "Unknown",
             [usbDetails, webSocketURL],
         );
 

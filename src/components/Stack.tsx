@@ -33,7 +33,7 @@ export default function StackControls({
 
     return (
         <>
-            {currentWindowWidth > 700 && (
+            {currentWindowWidth > 600 && (
                 <div className={cls.StackController}>
                     <IconButton
                         variant="soft"
