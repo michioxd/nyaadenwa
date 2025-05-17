@@ -61,3 +61,7 @@ export function formatPermissions(permission: number | string): string {
 
     return `${owner}${group}${others}`;
 }
+
+export function isValidPath(path: string): boolean {
+    return /^(\/[a-zA-Z0-9._\- ]+)*\/?$/.test(path) && path.length > 0;
+}

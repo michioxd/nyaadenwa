@@ -4,14 +4,14 @@
  * Repository: https://github.com/michioxd/nyaadenwa
  */
 
-import { Box, Button, Card, Checkbox, ContextMenu, IconButton, Spinner, Table, Text, Tooltip } from "@radix-ui/themes";
+import { Box, Button, Card, Checkbox, ContextMenu, Flex, IconButton, Popover, Spinner, Table, Text, TextField, Tooltip } from "@radix-ui/themes";
 import { Adb, AdbSyncEntry, LinuxFileType } from "@yume-chan/adb";
 import cls from "./fm.module.scss";
-import { PiArrowDown, PiArrowUp, PiFileDuotone, PiFolderDuotone, PiFoldersDuotone, PiHouseDuotone } from "react-icons/pi";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { PiArrowDown, PiArrowUp, PiDotsThreeBold, PiFileDuotone, PiFolderDuotone, PiFoldersDuotone, PiHouseDuotone } from "react-icons/pi";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
-import { formatPermissions, formatSize } from "@/utils/str";
+import { formatPermissions, formatSize, isValidPath } from "@/utils/str";
 
 const SortFunc = (a: AdbSyncEntry, b: AdbSyncEntry, sortMode: { by: "name" | "size" | "modified", order: "asc" | "desc" }) => {
     if (sortMode.by === "name") {
@@ -34,7 +34,7 @@ const FileManagerItem = ({ file, cd }: { file: AdbSyncEntry, cd?: () => void }) 
             <ContextMenu.Trigger>
                 <Table.Row onClick={file.type === LinuxFileType.Directory || file.type === LinuxFileType.Link ? () => cd?.() : undefined}>
                     <Table.RowHeaderCell>
-                        <IconButton variant="soft" color="gray" size="1">
+                        <IconButton variant="soft" color={file.type === LinuxFileType.Directory ? "yellow" : file.type === LinuxFileType.Link ? "orange" : "gray"} size="1">
                             {file.type === LinuxFileType.Directory
                                 ? <PiFolderDuotone size={18} />
                                 : file.type === LinuxFileType.Link
@@ -78,10 +78,13 @@ const FileManagerItem = ({ file, cd }: { file: AdbSyncEntry, cd?: () => void }) 
 }
 
 export default function FileManager({ adb }: { adb: Adb }) {
+    const fmRef = useRef<HTMLDivElement>(null);
     const [currentPath, setCurrentPath] = useState("/");
+    const [goToPath, setGoToPath] = useState("");
     const [listFiles, setListFiles] = useState<AdbSyncEntry[]>([]);
     const [listFolders, setListFolders] = useState<AdbSyncEntry[]>([]);
     const [isLoading, setIsLoading] = useState(false);
+    const [elemSize, setElemSize] = useState<{ w: number, h: number }>({ w: 0, h: 0 });
     const { t } = useTranslation();
     const [sortMode, setSortMode] = useState<{
         by: "name" | "size" | "modified",
@@ -103,7 +106,7 @@ export default function FileManager({ adb }: { adb: Adb }) {
                 label: item,
                 path,
             }
-        });
+        }).filter((item) => item !== null);
     }, [currentPath]);
 
     const handleListFiles = useCallback(async () => {
@@ -128,8 +131,32 @@ export default function FileManager({ adb }: { adb: Adb }) {
         handleListFiles();
     }, [handleListFiles]);
 
+    useEffect(() => {
+        setGoToPath(currentPath);
+    }, [currentPath]);
+
+    useEffect(() => {
+        if (!fmRef.current) return;
+        const handleResize = () => {
+            if (!fmRef.current) return;
+            setElemSize({ w: fmRef.current.clientWidth, h: fmRef.current.clientHeight });
+        }
+        handleResize();
+        const observer = new ResizeObserver(handleResize);
+        observer.observe(fmRef.current);
+        return () => observer.disconnect();
+    }, []);
+
+    const breadcrumbDisplayItems = useMemo(() => {
+        return breadcrumbItems.slice(
+            Math.max(0, breadcrumbItems.length - Math.floor(elemSize.w / 150))
+        );
+    }, [breadcrumbItems, elemSize.w]);
+
+    console.log(breadcrumbDisplayItems.length, breadcrumbItems.length);
+
     return (
-        <div className={cls.FileManager}>
+        <div className={cls.FileManager} ref={fmRef}>
             <Card size="1" variant="surface" className={cls.FileManagerBreadcrumb}>
                 <IconButton variant="soft"
                     color="gray" size="1"
@@ -140,11 +167,33 @@ export default function FileManager({ adb }: { adb: Adb }) {
                 <IconButton variant="soft" color={currentPath === "/" ? "cyan" : "gray"} size="1" onClick={() => setCurrentPath("/")} disabled={isLoading}>
                     <PiHouseDuotone />
                 </IconButton>
-                {currentPath !== "/" && breadcrumbItems.map((item, index) => item && (
+                {(currentPath !== "/" && breadcrumbDisplayItems.length !== breadcrumbItems.length) &&
+                    <Popover.Root>
+                        <Popover.Trigger>
+                            <IconButton variant="soft" color="gray" size="1">
+                                <PiDotsThreeBold />
+                            </IconButton>
+                        </Popover.Trigger>
+                        <Popover.Content size="1">
+                            <Flex direction="column" gap="1">
+                                {breadcrumbItems.map((item) => (
+                                    <Button key={item.label}
+                                        variant="soft"
+                                        color={item.path === currentPath ? "cyan" : "gray"}
+                                        size="1"
+                                        onClick={() => setCurrentPath(item.path)}
+                                        disabled={isLoading}
+                                    >{item.label}</Button>
+                                ))}
+                            </Flex>
+                        </Popover.Content>
+                    </Popover.Root>
+                }
+                {currentPath !== "/" && breadcrumbDisplayItems.map((item, index) => item && (
                     <Tooltip content={item.label}>
                         <Button
                             variant="soft"
-                            color={index === breadcrumbItems.length - 1 ? "cyan" : "gray"}
+                            color={index === breadcrumbDisplayItems.length - 1 ? "cyan" : "gray"}
                             size="1"
                             className={cls.FileManagerBreadcrumbItem}
                             key={index}
@@ -157,7 +206,22 @@ export default function FileManager({ adb }: { adb: Adb }) {
                         </Button>
                     </Tooltip>
                 ))}
-                <Box style={{ flex: '1' }}></Box>
+                <Popover.Root>
+                    <Popover.Trigger>
+                        <Box style={{ flex: '1', height: '100%' }}></Box>
+                    </Popover.Trigger>
+                    <Popover.Content size="1">
+                        <Text size="1" mb="1" weight="bold">{t('enter_path_to_go')}</Text>
+                        <TextField.Root mb="2" size="1" placeholder={t('path_name')} value={goToPath} onChange={(e) => setGoToPath(e.target.value)} />
+                        <Popover.Close>
+                            <Button variant="soft"
+                                disabled={!isValidPath(goToPath) || isLoading || goToPath === currentPath}
+                                color="cyan" size="1"
+                                onClick={() => setCurrentPath(goToPath === "/" || goToPath === "" ? "/" : goToPath.replace(/\/$/, ''))}
+                            >{t('go')}</Button>
+                        </Popover.Close>
+                    </Popover.Content>
+                </Popover.Root>
                 {isLoading &&
                     <IconButton variant="soft" color="gray" size="1" disabled>
                         <Spinner size="1" />
@@ -171,6 +235,7 @@ export default function FileManager({ adb }: { adb: Adb }) {
                             <Checkbox />
                         </Table.ColumnHeaderCell>
                         <Table.ColumnHeaderCell
+                            style={{ minWidth: "120px" }}
                             onClick={() => setSortMode({ by: "name", order: sortMode.by === "name" ? sortMode.order === "asc" ? "desc" : "asc" : "asc" })}
                         >
                             {t("name")}
@@ -210,7 +275,7 @@ export default function FileManager({ adb }: { adb: Adb }) {
                     {listFolders.
                         sort((a, b) => SortFunc(a, b, sortMode)).
                         map((file) => (
-                            <FileManagerItem key={file.name} file={file} cd={() => setCurrentPath(currentPath + "/" + file.name)} />
+                            <FileManagerItem key={file.name} file={file} cd={() => setCurrentPath((currentPath === "/" ? "" : currentPath) + "/" + file.name)} />
                         ))}
                     {listFiles.
                         sort((a, b) => SortFunc(a, b, sortMode)).

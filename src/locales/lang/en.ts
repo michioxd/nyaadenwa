@@ -131,6 +131,9 @@ const Locale: LocaleResourcesType = {
         size: "Size",
         permission: "Permission",
         modified: "Modified",
+        enter_path_to_go: "Enter path to go",
+        path_name: "Path name",
+        go: "Go",
     },
 };
 

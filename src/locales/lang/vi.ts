@@ -131,6 +131,9 @@ const Locale: LocaleResourcesType = {
         size: "Kích thước",
         permission: "Quyền",
         modified: "Ngày sửa đổi",
+        enter_path_to_go: "Nhập đường dẫn để đi tới",
+        path_name: "Tên đường dẫn",
+        go: "Đi",
     },
 };
 
