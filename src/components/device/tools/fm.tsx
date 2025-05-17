@@ -132,7 +132,9 @@ const FileManagerItem = memo(
                         toast.success(t("install_apk_to_device_success"));
                     } catch (error) {
                         console.error(error);
-                        toast.error(t("failed_to_install_apk"));
+                        toast.error(t("failed_to_install_apk", {
+                            name: file.name,
+                        }));
                     } finally {
                         setIsInstalling(false);
                     }
@@ -323,7 +325,10 @@ function FileManager({ adb, deviceHash }: { adb: Adb; deviceHash: string }) {
         async (file: AdbSyncEntry) => {
             dialog.confirm(
                 t("delete_" + (file.type === LinuxFileType.Directory ? "folder" : "file")),
-                t("delete_" + (file.type === LinuxFileType.Directory ? "folder" : "file") + "_description"),
+                t("delete_" + (file.type === LinuxFileType.Directory ? "folder" : "file") + "_description", {
+                    name: file.name,
+                    size: formatSize(Number(file.size)),
+                }),
                 async () => {
                     try {
                         setIsLoading(true);
@@ -335,7 +340,9 @@ function FileManager({ adb, deviceHash }: { adb: Adb; deviceHash: string }) {
                     } catch (error) {
                         console.error(error);
                         toast.error(
-                            t("failed_to_delete_" + (file.type === LinuxFileType.Directory ? "folder" : "file")),
+                            t("failed_to_delete_" + (file.type === LinuxFileType.Directory ? "folder" : "file"), {
+                                name: file.name,
+                            }),
                         );
                     } finally {
                         setIsLoading(false);
@@ -510,10 +517,10 @@ function FileManager({ adb, deviceHash }: { adb: Adb; deviceHash: string }) {
                                     listFiles.length + listFolders.length <= 0
                                         ? false
                                         : selected.length === listFiles.length + listFolders.length
-                                          ? true
-                                          : selected.length > 0
-                                            ? "indeterminate"
-                                            : false
+                                            ? true
+                                            : selected.length > 0
+                                                ? "indeterminate"
+                                                : false
                                 }
                             />
                         </Table.ColumnHeaderCell>
