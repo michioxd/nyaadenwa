@@ -7,27 +7,29 @@
 import { Adb, AdbShellProtocolPtyProcess } from "@yume-chan/adb";
 import { useEffect, useRef, useState } from "react";
 import { Terminal as XTerm } from "@xterm/xterm";
-import { FitAddon } from '@xterm/addon-fit';
+import { FitAddon } from "@xterm/addon-fit";
 import cls from "./terminal.module.scss";
 import { MaybeConsumable, ReadableStreamDefaultReader, WritableStreamDefaultWriter } from "@yume-chan/stream-extra";
 import { Box, Text } from "@radix-ui/themes";
 import clsx from "clsx";
 import { useTranslation } from "react-i18next";
 
-export default function Terminal({ adb, onTerminalClose }: { adb: Adb, onTerminalClose: () => void }) {
+export default function Terminal({ adb, onTerminalClose }: { adb: Adb; onTerminalClose: () => void }) {
     const terminalRef = useRef<HTMLDivElement>(null);
     const fitAddon = useRef<FitAddon>(new FitAddon());
     const { t } = useTranslation();
-    const xtermRef = useRef<XTerm>(new XTerm({
-        fontSize: 12,
-        cursorBlink: true,
-        fontFamily: "monospace",
-        theme: {
-            background: "#00000000",
-            foreground: "#ffffff",
-        },
-        allowTransparency: true
-    }));
+    const xtermRef = useRef<XTerm>(
+        new XTerm({
+            fontSize: 12,
+            cursorBlink: true,
+            fontFamily: "monospace",
+            theme: {
+                background: "#00000000",
+                foreground: "#ffffff",
+            },
+            allowTransparency: true,
+        }),
+    );
     const timeoutRef = useRef<NodeJS.Timeout | null>(null);
     const [showIndicator, setShowIndicator] = useState(false);
     const [currentSize, setCurrentSize] = useState({ rows: 0, cols: 0 });
@@ -46,8 +48,8 @@ export default function Terminal({ adb, onTerminalClose }: { adb: Adb, onTermina
 
         (async () => {
             pty = await adb.subprocess.shellProtocol?.pty({
-                terminalType: 'xterm-256color',
-                command: ['/system/bin/sh']
+                terminalType: "xterm-256color",
+                command: ["/system/bin/sh"],
             });
 
             setCurrentSize({ rows: terminal.rows, cols: terminal.cols });
@@ -62,7 +64,7 @@ export default function Terminal({ adb, onTerminalClose }: { adb: Adb, onTermina
                     if (done) {
                         terminal.writeln(`\r\n[${t("terminal_process_exited")}]`);
                         const disposable = terminal.onKey(({ key }) => {
-                            if (key === 'Enter' || key === '\r') {
+                            if (key === "Enter" || key === "\r") {
                                 disposable.dispose();
                                 onTerminalClose();
                             }
@@ -109,7 +111,7 @@ export default function Terminal({ adb, onTerminalClose }: { adb: Adb, onTermina
         if (!terminalRef.current) return;
         const handleResize = () => {
             fitAddon.current.fit();
-        }
+        };
         const observer = new ResizeObserver(handleResize);
         observer.observe(terminalRef.current);
         return () => observer.disconnect();
@@ -124,5 +126,5 @@ export default function Terminal({ adb, onTerminalClose }: { adb: Adb, onTermina
             </Box>
             <div ref={terminalRef} className={cls.Terminal}></div>
         </>
-    )
+    );
 }

@@ -15,7 +15,7 @@ import {
     AndroidKeyEventAction,
     AndroidMotionEventAction,
     AndroidMotionEventButton,
-    AndroidScreenPowerMode
+    AndroidScreenPowerMode,
 } from "@yume-chan/scrcpy";
 import type { AdbScrcpyClient, AdbScrcpyOptionsLatest } from "@yume-chan/adb-scrcpy";
 import type { ScrcpyKeyboardInjector } from "./keyboard";

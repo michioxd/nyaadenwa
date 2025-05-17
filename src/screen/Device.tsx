@@ -89,14 +89,17 @@ const DeviceInfo = memo(
 DeviceInfo.displayName = "DeviceInfo";
 
 const ScreenDevice = observer(
-    ({ usbDetails, webSocketURL, deviceHash, close }:
-        {
-            usbDetails?: DeviceDetails;
-            webSocketURL?: string;
-            deviceHash: string;
-            close: () => void
-        }
-    ) => {
+    ({
+        usbDetails,
+        webSocketURL,
+        deviceHash,
+        close,
+    }: {
+        usbDetails?: DeviceDetails;
+        webSocketURL?: string;
+        deviceHash: string;
+        close: () => void;
+    }) => {
         const [state, setState] = useState<DeviceState>(DeviceState.Connecting);
         const dialog = useDialog();
         const [sidebarLevel, setSidebarLevel] = useState(parseInt(localStorage.getItem("sbl_" + deviceHash) ?? "0"));
@@ -114,8 +117,8 @@ const ScreenDevice = observer(
                 usbDetails
                     ? `${usbDetails?.name} (${usbDetails?.serial})`
                     : webSocketURL
-                        ? `${webSocketURL} (WebSocket)`
-                        : "Unknown",
+                      ? `${webSocketURL} (WebSocket)`
+                      : "Unknown",
             [usbDetails, webSocketURL],
         );
 
@@ -237,13 +240,15 @@ const ScreenDevice = observer(
                     setSidebarLevel={setSidebarLevel}
                 />
                 <div className={cls.DeviceInner}>
-                    {state === DeviceState.Connected && adb && <DeviceTools
-                        deviceHash={deviceHash}
-                        sidebarLevel={sidebarLevel}
-                        adb={adb}
-                        close={close}
-                        mainDeviceSize={mainDeviceSize}
-                    />}
+                    {state === DeviceState.Connected && adb && (
+                        <DeviceTools
+                            deviceHash={deviceHash}
+                            sidebarLevel={sidebarLevel}
+                            adb={adb}
+                            close={close}
+                            mainDeviceSize={mainDeviceSize}
+                        />
+                    )}
                     {state === DeviceState.Connecting ? (
                         <Card className={cls.Loading}>
                             <Spinner size="3" /> <Text size="1">{t("waiting_for_device")}</Text>

@@ -17,7 +17,19 @@ import { Adb } from "@yume-chan/adb";
 import Power from "./sidebar/Power";
 import Terminal from "./tools/terminal";
 
-export default function DeviceTools({ sidebarLevel, adb, close, mainDeviceSize, deviceHash }: { sidebarLevel: number, adb: Adb, close: () => void, mainDeviceSize: { w: number, h: number }, deviceHash: string }) {
+export default function DeviceTools({
+    sidebarLevel,
+    adb,
+    close,
+    mainDeviceSize,
+    deviceHash,
+}: {
+    sidebarLevel: number;
+    adb: Adb;
+    close: () => void;
+    mainDeviceSize: { w: number; h: number };
+    deviceHash: string;
+}) {
     const { t } = useTranslation();
     const [section, setSection] = useState(parseInt(localStorage.getItem("sbs_" + deviceHash) ?? "0"));
     const toolsRef = useRef<HTMLDivElement>(null);
@@ -83,7 +95,7 @@ export default function DeviceTools({ sidebarLevel, adb, close, mainDeviceSize, 
             const mouseEvent = e as unknown as MouseEvent;
             if (!toolsRef.current) return;
             const deltaX = mouseEvent.clientX - startXRef.current;
-            const newWidth = Math.max(380, startWidthRef.current + deltaX)
+            const newWidth = Math.max(380, startWidthRef.current + deltaX);
             setToolWidth(newWidth);
         };
 
@@ -94,12 +106,12 @@ export default function DeviceTools({ sidebarLevel, adb, close, mainDeviceSize, 
             }
         };
 
-        document.addEventListener('mousemove', handleMouseMove);
-        document.addEventListener('mouseup', handleMouseUp);
+        document.addEventListener("mousemove", handleMouseMove);
+        document.addEventListener("mouseup", handleMouseUp);
 
         return () => {
-            document.removeEventListener('mousemove', handleMouseMove);
-            document.removeEventListener('mouseup', handleMouseUp);
+            document.removeEventListener("mousemove", handleMouseMove);
+            document.removeEventListener("mouseup", handleMouseUp);
         };
     }, [resizing]);
 
@@ -134,7 +146,11 @@ export default function DeviceTools({ sidebarLevel, adb, close, mainDeviceSize, 
                                         }
                                     }}
                                 >
-                                    <IconButton asChild variant="soft" color={section !== index + 1 ? "gray" : item.color}>
+                                    <IconButton
+                                        asChild
+                                        variant="soft"
+                                        color={section !== index + 1 ? "gray" : item.color}
+                                    >
                                         <span>{item.icon}</span>
                                     </IconButton>
                                     <Text ml="1" className={cls.SbText}>
@@ -142,53 +158,52 @@ export default function DeviceTools({ sidebarLevel, adb, close, mainDeviceSize, 
                                     </Text>
                                 </Button>
                             ) : (
-                                <IconButton key={index} variant="soft" color={section !== index + 1 ? "gray" : item.color} onClick={() => {
-                                    setSection(index + 1);
-                                    if (item.onClick) {
-                                        item.onClick();
-                                    }
-                                }}>
+                                <IconButton
+                                    key={index}
+                                    variant="soft"
+                                    color={section !== index + 1 ? "gray" : item.color}
+                                    onClick={() => {
+                                        setSection(index + 1);
+                                        if (item.onClick) {
+                                            item.onClick();
+                                        }
+                                    }}
+                                >
                                     {item.icon}
                                 </IconButton>
                             ),
                         )}
                         <DropdownMenu.Root>
                             <DropdownMenu.Trigger>
-                                {
-                                    sidebarLevel === 2 ? (
-                                        <Button
-                                            className={cls.SidebarButton}
-                                            variant="ghost"
-                                            color="gray"
-                                        >
-                                            <IconButton asChild variant="soft" color="gray">
-                                                <span>
-                                                    <PiPowerDuotone size={20} />
-                                                </span>
-                                            </IconButton>
-                                            <Text ml="1" className={cls.SbText}>
-                                                {t("power")}
-                                            </Text>
-                                        </Button>
-                                    ) : (
-                                        <IconButton variant="soft" color="gray">
-                                            <PiPowerDuotone size={20} />
+                                {sidebarLevel === 2 ? (
+                                    <Button className={cls.SidebarButton} variant="ghost" color="gray">
+                                        <IconButton asChild variant="soft" color="gray">
+                                            <span>
+                                                <PiPowerDuotone size={20} />
+                                            </span>
                                         </IconButton>
-                                    )
-                                }
+                                        <Text ml="1" className={cls.SbText}>
+                                            {t("power")}
+                                        </Text>
+                                    </Button>
+                                ) : (
+                                    <IconButton variant="soft" color="gray">
+                                        <PiPowerDuotone size={20} />
+                                    </IconButton>
+                                )}
                             </DropdownMenu.Trigger>
                             <Power close={close} adb={adb} />
                         </DropdownMenu.Root>
                     </Flex>
                 </Card>
             </div>
-            {(section > 0 && selectedMenuItem) &&
+            {section > 0 && selectedMenuItem && (
                 <div
-                    className={clsx(cls.DeviceTools,
-                        toolFullScreen && clsx(
-                            cls.FullScreen, cls.Floating),
+                    className={clsx(
+                        cls.DeviceTools,
+                        toolFullScreen && clsx(cls.FullScreen, cls.Floating),
                         (toolFloating || mainDeviceSize.w < 600) && cls.Floating,
-                        resizing && cls.Resizing
+                        resizing && cls.Resizing,
                     )}
                     data-sb-lv={sidebarLevel}
                     ref={toolsRef}
@@ -197,24 +212,41 @@ export default function DeviceTools({ sidebarLevel, adb, close, mainDeviceSize, 
                     <Card className={cls.DeviceToolsSection}>
                         <Flex align="center" gap="1" className={cls.DeviceToolsHeader}>
                             {selectedMenuItem.icon}
-                            <Text size="3" weight="bold">{selectedMenuItem.text}</Text>
+                            <Text size="3" weight="bold">
+                                {selectedMenuItem.text}
+                            </Text>
                             <Box style={{ flex: 1 }} />
-                            {(mainDeviceSize.w > 600 && !toolFullScreen) && (
+                            {mainDeviceSize.w > 600 && !toolFullScreen && (
                                 <Tooltip content={t(toolFloating ? "exit_floating" : "enable_floating")}>
-                                    <IconButton variant="soft" color="gray" size="1" onClick={() => setToolFloating(!toolFloating)}>
+                                    <IconButton
+                                        variant="soft"
+                                        color="gray"
+                                        size="1"
+                                        onClick={() => setToolFloating(!toolFloating)}
+                                    >
                                         {toolFloating ? <BiWindow size={18} /> : <BiWindows size={18} />}
                                     </IconButton>
                                 </Tooltip>
                             )}
                             <Tooltip content={t(toolFullScreen ? "exit_full_screen" : "enter_full_screen")}>
-                                <IconButton variant="soft" color="gray" size="1" onClick={() => setToolFullScreen(!toolFullScreen)}>
+                                <IconButton
+                                    variant="soft"
+                                    color="gray"
+                                    size="1"
+                                    onClick={() => setToolFullScreen(!toolFullScreen)}
+                                >
                                     {toolFullScreen ? <MdFullscreenExit size={20} /> : <MdFullscreen size={20} />}
                                 </IconButton>
                             </Tooltip>
                             <Tooltip content={t("close")}>
-                                <IconButton variant="soft" color="gray" size="1" onClick={() => {
-                                    setSection(0);
-                                }}>
+                                <IconButton
+                                    variant="soft"
+                                    color="gray"
+                                    size="1"
+                                    onClick={() => {
+                                        setSection(0);
+                                    }}
+                                >
                                     <PiX size={20} />
                                 </IconButton>
                             </Tooltip>
@@ -223,13 +255,9 @@ export default function DeviceTools({ sidebarLevel, adb, close, mainDeviceSize, 
                             {section === 2 && <Terminal adb={adb} onTerminalClose={() => setSection(0)} />}
                         </div>
                     </Card>
-                    {!toolFullScreen &&
-                        <div className={cls.ResizeHandle}
-                            onMouseDown={handleMouseDown}
-                        />
-                    }
+                    {!toolFullScreen && <div className={cls.ResizeHandle} onMouseDown={handleMouseDown} />}
                 </div>
-            }
+            )}
         </>
     );
 }

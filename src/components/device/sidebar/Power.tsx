@@ -11,67 +11,98 @@ import { useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { PiPowerDuotone, PiWarningDuotone, PiCommandDuotone } from "react-icons/pi";
-import { MdEmergency, MdDownload, MdFlashOn, MdOutlineSystemSecurityUpdateWarning, MdRestartAlt, MdRotateLeft, MdSystemUpdate } from "react-icons/md";
+import {
+    MdEmergency,
+    MdDownload,
+    MdFlashOn,
+    MdOutlineSystemSecurityUpdateWarning,
+    MdRestartAlt,
+    MdRotateLeft,
+    MdSystemUpdate,
+} from "react-icons/md";
 
-export default function Power({ close, adb }: { close: () => void, adb: Adb }) {
+export default function Power({ close, adb }: { close: () => void; adb: Adb }) {
     const { t } = useTranslation();
     const dialog = useDialog();
 
-    const handlePower = useCallback((type: "shutdown" | "reboot" | "recovery" | "bootloader" | "fastboot" | "samsung_odin" | "sideload" | "edl" | "custom") => {
-        if (type === "custom") {
-            dialog.prompt(t("custom_reboot_command"), t("confirm_power_action_description_custom"), [{
-                label: t("command"),
-                placeholder: "recovery",
-            }],
-                (value, close) => {
-                    if (value[0]) {
-                        adb.power.reboot(value[0]);
+    const handlePower = useCallback(
+        (
+            type:
+                | "shutdown"
+                | "reboot"
+                | "recovery"
+                | "bootloader"
+                | "fastboot"
+                | "samsung_odin"
+                | "sideload"
+                | "edl"
+                | "custom",
+        ) => {
+            if (type === "custom") {
+                dialog.prompt(
+                    t("custom_reboot_command"),
+                    t("confirm_power_action_description_custom"),
+                    [
+                        {
+                            label: t("command"),
+                            placeholder: "recovery",
+                        },
+                    ],
+                    (value, close) => {
+                        if (value[0]) {
+                            adb.power.reboot(value[0]);
+                            close();
+                        } else {
+                            toast.error(t("please_enter_command"));
+                        }
+                    },
+                );
+                return;
+            }
+            dialog.confirm(
+                t("confirm_power_action"),
+                <>
+                    <Text>{t("confirm_power_action_description_" + type)}</Text>
+                </>,
+                async () => {
+                    try {
+                        switch (type) {
+                            case "shutdown":
+                                await adb.power.powerOff();
+                                break;
+                            case "reboot":
+                                await adb.power.reboot();
+                                break;
+                            case "recovery":
+                                await adb.power.recovery();
+                                break;
+                            case "sideload":
+                                await adb.power.sideload();
+                                break;
+                            case "bootloader":
+                                await adb.power.bootloader();
+                                break;
+                            case "fastboot":
+                                await adb.power.fastboot();
+                                break;
+                            case "samsung_odin":
+                                await adb.power.samsungOdin();
+                                break;
+                            case "edl":
+                                await adb.power.qualcommEdlMode();
+                                break;
+                        }
+                        toast.success(t("power_action_success"));
                         close();
-                    } else {
-                        toast.error(t("please_enter_command"));
+                    } catch (error) {
+                        toast.error(t("power_action_error"));
+                        console.error(error);
                     }
                 },
             );
-            return;
-        }
-        dialog.confirm(t("confirm_power_action"), <>
-            <Text>{t("confirm_power_action_description_" + type)}</Text>
-        </>, async () => {
-            try {
-                switch (type) {
-                    case "shutdown":
-                        await adb.power.powerOff();
-                        break;
-                    case "reboot":
-                        await adb.power.reboot();
-                        break;
-                    case "recovery":
-                        await adb.power.recovery();
-                        break;
-                    case "sideload":
-                        await adb.power.sideload();
-                        break;
-                    case "bootloader":
-                        await adb.power.bootloader();
-                        break;
-                    case "fastboot":
-                        await adb.power.fastboot();
-                        break;
-                    case "samsung_odin":
-                        await adb.power.samsungOdin();
-                        break;
-                    case "edl":
-                        await adb.power.qualcommEdlMode();
-                        break;
-                }
-                toast.success(t("power_action_success"));
-                close();
-            } catch (error) {
-                toast.error(t("power_action_error"));
-                console.error(error);
-            }
-        });
-    }, [t, adb, close, dialog]);
+        },
+        [t, adb, close, dialog],
+    );
 
     return (
         <DropdownMenu.Content variant="soft">
@@ -84,7 +115,7 @@ export default function Power({ close, adb }: { close: () => void, adb: Adb }) {
                 {t("reboot")}
             </DropdownMenu.Item>
             <DropdownMenu.Separator />
-            <DropdownMenu.Sub >
+            <DropdownMenu.Sub>
                 <DropdownMenu.SubTrigger>
                     <PiWarningDuotone size={20} />
                     {t("advanced_power_options")}
