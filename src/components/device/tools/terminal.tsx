@@ -10,7 +10,7 @@ import { Terminal as XTerm } from "@xterm/xterm";
 import { FitAddon } from '@xterm/addon-fit';
 import cls from "./terminal.module.scss";
 import { MaybeConsumable, ReadableStreamDefaultReader, WritableStreamDefaultWriter } from "@yume-chan/stream-extra";
-import { Box, Card, Text } from "@radix-ui/themes";
+import { Box, Text } from "@radix-ui/themes";
 import clsx from "clsx";
 
 export default function Terminal({ adb }: { adb: Adb }) {
