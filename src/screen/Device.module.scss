@@ -132,7 +132,7 @@
 
                 .DeviceToolsContent {
                     width: 100%;
-                    height: 100%;
+                    height: calc(100% - var(--card-padding) * 3);
                     display: flex;
                     flex-direction: column;
                 }
@@ -170,7 +170,7 @@
                 height: calc(100% - 0.5rem) !important;
                 max-width: 100% !important;
                 right: 0.5rem;
-                left: unset;
+                left: 0.5rem;
 
                 &[data-sb-lv="1"] {
                     width: calc(100% - 56px - 1.5rem) !important;

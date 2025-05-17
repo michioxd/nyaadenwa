@@ -31,3 +31,33 @@ export const getHashFromAddress = (address: string) => {
 
     return objectHash({ address: url.toString() }, { algorithm: "sha1" });
 };
+
+export function formatSize(bytes: number, decimals: number = 2): string {
+    if (bytes === 0) return "0 B";
+
+    const k = 1024;
+    const sizes = ["B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+
+    const formattedSize = (bytes / Math.pow(k, i)).toFixed(decimals);
+
+    return `${formattedSize} ${sizes[i]}`;
+}
+
+export function formatPermissions(permission: number | string): string {
+    if (typeof permission === "number") {
+        permission = permission.toString();
+    }
+
+    if (permission.length !== 3 || !/^[0-7]{3}$/.test(permission)) {
+        return "---";
+    }
+
+    const permissionMap = ["---", "--x", "-w-", "-wx", "r--", "r-x", "rw-", "rwx"];
+
+    const owner = permissionMap[parseInt(permission[0], 10)];
+    const group = permissionMap[parseInt(permission[1], 10)];
+    const others = permissionMap[parseInt(permission[2], 10)];
+
+    return `${owner}${group}${others}`;
+}

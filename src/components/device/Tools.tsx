@@ -16,6 +16,7 @@ import { MdApps, MdFullscreen, MdFullscreenExit } from "react-icons/md";
 import { Adb } from "@yume-chan/adb";
 import Power from "./sidebar/Power";
 import Terminal from "./tools/terminal";
+import FileManager from "./tools/fm";
 
 export default function DeviceTools({
     sidebarLevel,
@@ -253,6 +254,7 @@ export default function DeviceTools({
                         </Flex>
                         <div className={cls.DeviceToolsContent}>
                             {section === 2 && <Terminal adb={adb} onTerminalClose={() => setSection(0)} />}
+                            {section === 3 && <FileManager adb={adb} />}
                         </div>
                     </Card>
                     {!toolFullScreen && <div className={cls.ResizeHandle} onMouseDown={handleMouseDown} />}
