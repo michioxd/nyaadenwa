@@ -5,11 +5,13 @@
  */
 
 import { Adb, AdbShellProtocolPtyProcess } from "@yume-chan/adb";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Terminal as XTerm } from "@xterm/xterm";
 import { FitAddon } from '@xterm/addon-fit';
 import cls from "./terminal.module.scss";
 import { MaybeConsumable, ReadableStreamDefaultReader, WritableStreamDefaultWriter } from "@yume-chan/stream-extra";
+import { Box, Card, Text } from "@radix-ui/themes";
+import clsx from "clsx";
 
 export default function Terminal({ adb }: { adb: Adb }) {
     const terminalRef = useRef<HTMLDivElement>(null);
@@ -24,6 +26,9 @@ export default function Terminal({ adb }: { adb: Adb }) {
         },
         allowTransparency: true
     }));
+    const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+    const [showIndicator, setShowIndicator] = useState(false);
+    const [currentSize, setCurrentSize] = useState({ rows: 0, cols: 0 });
 
     useEffect(() => {
         if (!terminalRef.current) return;
@@ -43,6 +48,7 @@ export default function Terminal({ adb }: { adb: Adb }) {
                 command: ['/system/bin/sh']
             });
 
+            setCurrentSize({ rows: terminal.rows, cols: terminal.cols });
             await pty?.resize(terminal.rows, terminal.cols);
 
             reader = pty?.output.getReader();
@@ -69,6 +75,12 @@ export default function Terminal({ adb }: { adb: Adb }) {
             terminal.onData(onData);
 
             terminal.onResize((size) => {
+                setCurrentSize({ rows: size.rows, cols: size.cols });
+                setShowIndicator(true);
+                if (timeoutRef.current) clearTimeout(timeoutRef.current);
+                timeoutRef.current = setTimeout(() => {
+                    setShowIndicator(false);
+                }, 1000);
                 pty?.resize(size.rows, size.cols);
             });
         })();
@@ -94,6 +106,11 @@ export default function Terminal({ adb }: { adb: Adb }) {
 
     return (
         <>
+            <Box className={clsx(cls.Indicator, showIndicator && cls.Show)}>
+                <Text size="6" weight="medium">
+                    {currentSize.rows}x{currentSize.cols}
+                </Text>
+            </Box>
             <div ref={terminalRef} className={cls.Terminal}></div>
         </>
     )

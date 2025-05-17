@@ -6,3 +6,24 @@
         overflow: hidden !important;
     }
 }
+
+.Indicator {
+    position: absolute !important;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 100;
+    opacity: 0;
+    width: fit-content;
+    pointer-events: none;
+    transition: 0.2s;
+    background: rgba(22, 22, 22, 0.8);
+    border-radius: 4px;
+    padding: 6px 12px;
+    border: 1px solid var(--gray-6);
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+
+    &.Show {
+        opacity: 1;
+    }
+}
