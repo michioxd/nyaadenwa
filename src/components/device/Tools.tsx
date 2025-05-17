@@ -45,7 +45,7 @@ export default function DeviceTools({
     const sbItem = useMemo<
         {
             icon: React.ReactNode;
-            text: React.ReactNode;
+            text: string;
             color: (typeof accentColorPropDef)["color"]["values"][number];
             onClick?: () => void;
         }[]
@@ -53,26 +53,26 @@ export default function DeviceTools({
         () => [
             {
                 icon: <PiInfoDuotone size={20} />,
-                text: t("device_info"),
+                text: "device_info",
                 color: "cyan",
             },
             {
                 icon: <PiTerminalWindowDuotone size={20} />,
-                text: t("terminal"),
+                text: "terminal",
                 color: "cyan",
             },
             {
                 icon: <PiFolderOpenDuotone size={20} />,
-                text: t("file_manager"),
+                text: "file_manager",
                 color: "cyan",
             },
             {
                 icon: <MdApps size={20} />,
-                text: t("apps_manager"),
+                text: "apps_manager",
                 color: "cyan",
             },
         ],
-        [t],
+        [],
     );
 
     const selectedMenuItem = useMemo(() => {
@@ -155,7 +155,7 @@ export default function DeviceTools({
                                         <span>{item.icon}</span>
                                     </IconButton>
                                     <Text ml="1" className={cls.SbText}>
-                                        {item.text}
+                                        {t(item.text)}
                                     </Text>
                                 </Button>
                             ) : (
@@ -214,7 +214,7 @@ export default function DeviceTools({
                         <Flex align="center" gap="1" className={cls.DeviceToolsHeader}>
                             {selectedMenuItem.icon}
                             <Text size="3" weight="bold">
-                                {selectedMenuItem.text}
+                                {t(selectedMenuItem.text)}
                             </Text>
                             <Box style={{ flex: 1 }} />
                             {mainDeviceSize.w > 600 && !toolFullScreen && (
