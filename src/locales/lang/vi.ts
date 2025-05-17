@@ -127,6 +127,10 @@ const Locale: LocaleResourcesType = {
         confirm_power_action_description_custom:
             'Nhập lệnh tùy chỉnh để khởi động lại thiết bị, bạn chỉ cần nhập lệnh bên cạnh lệnh reboot, ví dụ như "reboot recovery" thì chỉ cần nhập "recovery"',
         terminal_process_exited: "Tiến trình đã kết thúc. Nhấn Enter để đóng terminal",
+        name: "Tên",
+        size: "Kích thước",
+        permission: "Quyền",
+        modified: "Ngày sửa đổi",
     },
 };
 

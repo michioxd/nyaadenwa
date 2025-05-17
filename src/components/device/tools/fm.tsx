@@ -27,7 +27,7 @@ const SortFunc = (a: AdbSyncEntry, b: AdbSyncEntry, sortMode: { by: "name" | "si
 }
 
 const FileManagerItem = ({ file, cd }: { file: AdbSyncEntry, cd?: () => void }) => {
-    const { i18n } = useTranslation();
+    const { t, i18n } = useTranslation();
     return (
 
         <ContextMenu.Root>
@@ -65,10 +65,12 @@ const FileManagerItem = ({ file, cd }: { file: AdbSyncEntry, cd?: () => void }) 
                 </Table.Row>
             </ContextMenu.Trigger>
             <ContextMenu.Content variant="soft" size="1">
-                <ContextMenu.Item>
-                    <PiFolderDuotone />
-                    Open
-                </ContextMenu.Item>
+                {(file.type === LinuxFileType.Directory || file.type === LinuxFileType.Link) &&
+                    <ContextMenu.Item onClick={() => cd?.()}>
+                        <PiFolderDuotone />
+                        {t("open")}
+                    </ContextMenu.Item>
+                }
             </ContextMenu.Content>
         </ContextMenu.Root>
 
@@ -80,6 +82,7 @@ export default function FileManager({ adb }: { adb: Adb }) {
     const [listFiles, setListFiles] = useState<AdbSyncEntry[]>([]);
     const [listFolders, setListFolders] = useState<AdbSyncEntry[]>([]);
     const [isLoading, setIsLoading] = useState(false);
+    const { t } = useTranslation();
     const [sortMode, setSortMode] = useState<{
         by: "name" | "size" | "modified",
         order: "asc" | "desc"
@@ -170,7 +173,7 @@ export default function FileManager({ adb }: { adb: Adb }) {
                         <Table.ColumnHeaderCell
                             onClick={() => setSortMode({ by: "name", order: sortMode.by === "name" ? sortMode.order === "asc" ? "desc" : "asc" : "asc" })}
                         >
-                            Name
+                            {t("name")}
                             {sortMode.by === 'name' &&
                                 <IconButton variant="soft" color="gray" size="1" className={cls.SortButton}>
                                     {sortMode.order === "asc" ? <PiArrowUp size={12} /> : <PiArrowDown size={12} />}
@@ -180,18 +183,20 @@ export default function FileManager({ adb }: { adb: Adb }) {
                         <Table.ColumnHeaderCell style={{ width: "80px" }}
                             onClick={() => setSortMode({ by: "size", order: sortMode.by === "size" ? sortMode.order === "asc" ? "desc" : "asc" : "asc" })}
                         >
-                            Size
+                            {t("size")}
                             {sortMode.by === 'size' &&
                                 <IconButton variant="soft" color="gray" size="1" className={cls.SortButton}>
                                     {sortMode.order === "asc" ? <PiArrowUp size={12} /> : <PiArrowDown size={12} />}
                                 </IconButton>
                             }
                         </Table.ColumnHeaderCell>
-                        <Table.ColumnHeaderCell style={{ width: "120px" }}>Permission</Table.ColumnHeaderCell>
+                        <Table.ColumnHeaderCell style={{ width: "120px" }}>
+                            {t("permission")}
+                        </Table.ColumnHeaderCell>
                         <Table.ColumnHeaderCell style={{ width: "200px" }}
                             onClick={() => setSortMode({ by: "modified", order: sortMode.by === "modified" ? sortMode.order === "asc" ? "desc" : "asc" : "asc" })}
                         >
-                            Modified
+                            {t("modified")}
                             {sortMode.by === 'modified' &&
                                 <IconButton variant="soft" color="gray" size="1" className={cls.SortButton}>
                                     {sortMode.order === "asc" ? <PiArrowUp size={12} /> : <PiArrowDown size={12} />}

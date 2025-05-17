@@ -127,6 +127,10 @@ const Locale: LocaleResourcesType = {
         confirm_power_action_description_custom:
             'Enter your custom command to reboot the device, you may only need to enter the command next to the reboot command, for example "reboot recovery" then only enter "recovery"',
         terminal_process_exited: "Process exited. Press Enter to close terminal",
+        name: "Name",
+        size: "Size",
+        permission: "Permission",
+        modified: "Modified",
     },
 };
 
