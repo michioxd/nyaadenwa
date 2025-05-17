@@ -48,17 +48,17 @@ const FileManagerItem = ({ file, cd }: { file: AdbSyncEntry, cd?: () => void }) 
                         </Text>
                     </Table.Cell>
                     <Table.Cell>
-                        <Text size="1" weight="medium" color="gray">
+                        <Text size="1" weight="medium" color="gray" align="center">
                             {formatSize(Number(file.size))}
                         </Text>
                     </Table.Cell>
                     <Table.Cell>
-                        <Text size="1" weight="medium" color="gray">
+                        <Text size="1" weight="medium" color="gray" align="center">
                             {formatPermissions(file.permission)}
                         </Text>
                     </Table.Cell>
                     <Table.Cell>
-                        <Text size="1" weight="medium" color="gray">
+                        <Text size="1" weight="medium" color="gray" align="center">
                             {new Date(Number(file.mtime) * 1000).toLocaleString(i18n.language)}
                         </Text>
                     </Table.Cell>
@@ -180,7 +180,7 @@ export default function FileManager({ adb }: { adb: Adb }) {
                                 </IconButton>
                             }
                         </Table.ColumnHeaderCell>
-                        <Table.ColumnHeaderCell style={{ width: "80px" }}
+                        <Table.ColumnHeaderCell style={{ width: "120px" }}
                             onClick={() => setSortMode({ by: "size", order: sortMode.by === "size" ? sortMode.order === "asc" ? "desc" : "asc" : "asc" })}
                         >
                             {t("size")}
