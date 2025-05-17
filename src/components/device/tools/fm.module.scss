@@ -36,4 +36,12 @@
             }
         }
     }
+
+    &.HidePermission {
+        .FileManagerTable {
+            [data-col-type="permission"] {
+                display: none;
+            }
+        }
+    }
 }

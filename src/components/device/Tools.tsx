@@ -254,7 +254,7 @@ export default function DeviceTools({
                         </Flex>
                         <div className={cls.DeviceToolsContent}>
                             {section === 2 && <Terminal adb={adb} onTerminalClose={() => setSection(0)} />}
-                            {section === 3 && <FileManager adb={adb} />}
+                            {section === 3 && <FileManager adb={adb} deviceHash={deviceHash} />}
                         </div>
                     </Card>
                     {!toolFullScreen && <div className={cls.ResizeHandle} onMouseDown={handleMouseDown} />}

@@ -84,7 +84,7 @@ const DeviceInfo = memo(
                             <RiSidebarUnfoldLine size={18} />
                         )}
                     </IconButton>
-                    <Text size="1" style={{ width: "fit-content", flex: 1, textWrap: "nowrap", overflow: 'auto' }}>
+                    <Text size="1" style={{ width: "fit-content", flex: 1, textWrap: "nowrap", overflow: "auto" }}>
                         {dvName}
                     </Text>
                     <Badge size="1" color={badgeColor}>
@@ -128,8 +128,8 @@ const ScreenDevice = observer(
                 usbDetails
                     ? `${usbDetails?.name} (${usbDetails?.serial})`
                     : webSocketURL
-                        ? `${webSocketURL} (WebSocket)`
-                        : "Unknown",
+                      ? `${webSocketURL} (WebSocket)`
+                      : "Unknown",
             [usbDetails, webSocketURL],
         );
 
