@@ -55,6 +55,8 @@ const Locale: LocaleResourcesType = {
         cannot_connect_websocket_description:
             "Đã xảy ra lỗi khi kết nối đến WebSocket. Vui lòng thử lại. Kiểm tra console để biết thêm thông tin chi tiết.",
         webusb_not_supported: "WebUSB không được hỗ trợ trong trình duyệt này",
+        webusb_not_supported_description:
+            "Vui lòng sử dụng trình duyệt khác (như Google Chrome, Microsoft Edge,... hoặc bất kỳ trình duyệt nào dựa trên Chromium) hoặc bạn có thể thử bật tính năng WebUSB trong cài đặt trình duyệt của bạn.",
         CONNECTING: "Đang kết nối",
         DISCONNECTED: "Đã ngắt kết nối",
         CONNECTED: "Đã kết nối",

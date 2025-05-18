@@ -55,6 +55,8 @@ const Locale: LocaleResourcesType = {
         cannot_connect_websocket_description:
             "An error occurred while connecting to the WebSocket. Please try again. Check console for more details.",
         webusb_not_supported: "WebUSB is not supported in this browser",
+        webusb_not_supported_description:
+            "Please use a different browser (like Google Chrome, Microsoft Edge,... or any browser based Chromium) or try to enable WebUSB feature in your browser setting. If you are using Firefox, idk :) use Chrome lol",
         CONNECTING: "Connecting",
         DISCONNECTED: "Disconnected",
         CONNECTED: "Connected",
