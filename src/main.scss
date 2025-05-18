@@ -74,7 +74,8 @@ html {
     z-index: 99999999999;
 
     *,
-    & {
+    &,
+    &* {
         user-select: none;
         -webkit-user-select: none;
         -moz-user-select: none;
