@@ -11,9 +11,9 @@ import unknownFlag from "@/assets/unknown_flag.svg";
 
 function getLangInfo(localeCode: string, currentLang: string) {
     const region = new Intl.Locale(localeCode).maximize().region;
-    const languageName = new Intl.DisplayNames([localeCode], { type: 'language' }).of(localeCode);
-    const emoji = region?.toUpperCase().replace(/./g, char => String.fromCodePoint(char.charCodeAt(0) + 0x1F1A5));
-    const english = new Intl.DisplayNames([currentLang], { type: 'language' }).of(localeCode);
+    const languageName = new Intl.DisplayNames([localeCode], { type: "language" }).of(localeCode);
+    const emoji = region?.toUpperCase().replace(/./g, (char) => String.fromCodePoint(char.charCodeAt(0) + 0x1f1a5));
+    const english = new Intl.DisplayNames([currentLang], { type: "language" }).of(localeCode);
     let flag = null;
 
     try {
@@ -34,14 +34,18 @@ const LangItem = ({ lang }: { lang: string }) => {
         <DropdownMenu.Item key={lang} onClick={() => i18n.changeLanguage(lang)}>
             <Text weight={i18n.language === lang ? "bold" : "regular"}>
                 <Flex gap="1" align="center">
-                    {langInfo.flag && <img
-                        style={{ width: 20, height: 13.33333333333333, objectFit: "cover" }}
-                        onError={(e) => {
-                            e.currentTarget.src = unknownFlag;
-                            e.currentTarget.onerror = null;
-                        }}
-                        src={langInfo.flag} alt={langInfo.name}
-                    />} {langInfo.name} {lang !== i18n.language && `(${langInfo.english})`}
+                    {langInfo.flag && (
+                        <img
+                            style={{ width: 20, height: 13.33333333333333, objectFit: "cover" }}
+                            onError={(e) => {
+                                e.currentTarget.src = unknownFlag;
+                                e.currentTarget.onerror = null;
+                            }}
+                            src={langInfo.flag}
+                            alt={langInfo.name}
+                        />
+                    )}{" "}
+                    {langInfo.name} {lang !== i18n.language && `(${langInfo.english})`}
                 </Flex>
             </Text>
         </DropdownMenu.Item>
@@ -53,7 +57,9 @@ export default function LangSelector() {
 
     return (
         <DropdownMenu.SubContent>
-            {Object.keys(i18n.services.resourceStore.data).map((lc) => <LangItem key={lc} lang={lc} />)}
+            {Object.keys(i18n.services.resourceStore.data).map((lc) => (
+                <LangItem key={lc} lang={lc} />
+            ))}
         </DropdownMenu.SubContent>
     );
 }

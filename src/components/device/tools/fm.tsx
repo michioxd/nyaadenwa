@@ -80,7 +80,7 @@ const FileManagerItem = memo(
         onDelete,
         adb,
         currentPath,
-        onOpenEditor
+        onOpenEditor,
     }: {
         file: AdbSyncEntry;
         cd?: () => void;
@@ -141,9 +141,11 @@ const FileManagerItem = memo(
                         toast.success(t("install_apk_to_device_success"));
                     } catch (error) {
                         console.error(error);
-                        toast.error(t("failed_to_install_apk", {
-                            name: file.name,
-                        }));
+                        toast.error(
+                            t("failed_to_install_apk", {
+                                name: file.name,
+                            }),
+                        );
                     } finally {
                         setIsInstalling(false);
                     }
@@ -159,7 +161,7 @@ const FileManagerItem = memo(
                             <IconButton
                                 onClick={() => onSelect?.()}
                                 variant={selected ? "solid" : "soft"}
-                                style={{ position: 'relative' }}
+                                style={{ position: "relative" }}
                                 color={
                                     file.type === LinuxFileType.Directory || file.type === LinuxFileType.Link
                                         ? "yellow"
@@ -172,7 +174,12 @@ const FileManagerItem = memo(
                                 ) : file.type === LinuxFileType.Directory || file.type === LinuxFileType.Link ? (
                                     <>
                                         <PiFolderDuotone size={18} />
-                                        {file.type === LinuxFileType.Link && <PiLinkBold style={{ position: 'absolute', bottom: '2px', right: '2px' }} size={11} />}
+                                        {file.type === LinuxFileType.Link && (
+                                            <PiLinkBold
+                                                style={{ position: "absolute", bottom: "2px", right: "2px" }}
+                                                size={11}
+                                            />
+                                        )}
                                     </>
                                 ) : (
                                     <FileIcon.icon size={18} />
@@ -239,12 +246,12 @@ const FileManagerItem = memo(
                             {t(isInstalling ? "installing" : "install_apk_to_device")}
                         </ContextMenu.Item>
                     )}
-                    {(fileType === "code" || fileType === "text") &&
+                    {(fileType === "code" || fileType === "text") && (
                         <ContextMenu.Item onClick={onOpenEditor}>
                             <PiPenDuotone size={18} />
                             {t("edit_this_file")}
                         </ContextMenu.Item>
-                    }
+                    )}
                     {(file.type === LinuxFileType.Directory || file.type === LinuxFileType.Link) && (
                         <ContextMenu.Item onClick={() => cd?.()}>
                             <PiFolderDuotone size={18} />
@@ -289,9 +296,9 @@ function FileManager({ adb, deviceHash }: { adb: Adb; deviceHash: string }) {
     const [elemSize, setElemSize] = useState<{ w: number; h: number }>({ w: 0, h: 0 });
     const [selected, setSelected] = useState<string[]>([]);
     const [showEditor, setShowEditor] = useState(false);
-    const [editorPath, setEditorPath] = useState<{ path: string | null, name: string }>({
+    const [editorPath, setEditorPath] = useState<{ path: string | null; name: string }>({
         path: null,
-        name: ""
+        name: "",
     });
     const { t } = useTranslation();
     const [sortMode, setSortMode] = useState<{
@@ -375,44 +382,58 @@ function FileManager({ adb, deviceHash }: { adb: Adb; deviceHash: string }) {
         [dialog, adb, currentPath, handleListFiles, t],
     );
 
-    const handleCreateFile = useCallback(async (type: "folder" | "file") => {
-        dialog.prompt(t("create_" + type), t("create_" + type + "_description", {
-            currentPath: currentPath === "/" ? "" : currentPath
-        }), [{
-            label: t(type + "_name"),
-        }], async (val, close) => {
-            const name = val[0].trim();
-            const path = currentPath === "/" ? "" : currentPath;
-            if (!validateLinuxFileName(name)) {
-                toast.error(t("invalid_" + type + "_name"));
-                return;
-            }
-            close();
-            try {
-                setIsLoading(true);
-                const res = await adb.subprocess.shellProtocol?.spawnWaitText(
-                    type === "folder" ?
-                        "mkdir -p \"" + path + "/" + name + "\"" :
-                        "touch \"" + path + "/" + name + "\""
-                );
-                if (res?.exitCode !== 0) {
-                    console.error(res?.stderr);
-                    toast.error(t("failed_to_create_" + type, {
-                        name,
-                    }));
-                    setIsLoading(false);
-                    return;
-                }
-                handleListFiles();
-            } catch (error) {
-                console.error(error);
-                toast.error(t("failed_to_create_" + type, {
-                    name,
-                }));
-                setIsLoading(false);
-            }
-        });
-    }, [adb, currentPath, handleListFiles, t]);
+    const handleCreateFile = useCallback(
+        async (type: "folder" | "file") => {
+            dialog.prompt(
+                t("create_" + type),
+                t("create_" + type + "_description", {
+                    currentPath: currentPath === "/" ? "" : currentPath,
+                }),
+                [
+                    {
+                        label: t(type + "_name"),
+                    },
+                ],
+                async (val, close) => {
+                    const name = val[0].trim();
+                    const path = currentPath === "/" ? "" : currentPath;
+                    if (!validateLinuxFileName(name)) {
+                        toast.error(t("invalid_" + type + "_name"));
+                        return;
+                    }
+                    close();
+                    try {
+                        setIsLoading(true);
+                        const res = await adb.subprocess.shellProtocol?.spawnWaitText(
+                            type === "folder"
+                                ? 'mkdir -p "' + path + "/" + name + '"'
+                                : 'touch "' + path + "/" + name + '"',
+                        );
+                        if (res?.exitCode !== 0) {
+                            console.error(res?.stderr);
+                            toast.error(
+                                t("failed_to_create_" + type, {
+                                    name,
+                                }),
+                            );
+                            setIsLoading(false);
+                            return;
+                        }
+                        handleListFiles();
+                    } catch (error) {
+                        console.error(error);
+                        toast.error(
+                            t("failed_to_create_" + type, {
+                                name,
+                            }),
+                        );
+                        setIsLoading(false);
+                    }
+                },
+            );
+        },
+        [adb, currentPath, handleListFiles, t],
+    );
 
     useEffect(() => {
         handleListFiles();
@@ -624,10 +645,10 @@ function FileManager({ adb, deviceHash }: { adb: Adb; deviceHash: string }) {
                                         listFiles.length + listFolders.length <= 0
                                             ? false
                                             : selected.length === listFiles.length + listFolders.length
-                                                ? true
-                                                : selected.length > 0
-                                                    ? "indeterminate"
-                                                    : false
+                                              ? true
+                                              : selected.length > 0
+                                                ? "indeterminate"
+                                                : false
                                     }
                                 />
                             </Table.ColumnHeaderCell>
@@ -636,7 +657,12 @@ function FileManager({ adb, deviceHash }: { adb: Adb; deviceHash: string }) {
                                 onClick={() =>
                                     setSortMode({
                                         by: "name",
-                                        order: sortMode.by === "name" ? (sortMode.order === "asc" ? "desc" : "asc") : "asc",
+                                        order:
+                                            sortMode.by === "name"
+                                                ? sortMode.order === "asc"
+                                                    ? "desc"
+                                                    : "asc"
+                                                : "asc",
                                     })
                                 }
                             >
@@ -653,7 +679,12 @@ function FileManager({ adb, deviceHash }: { adb: Adb; deviceHash: string }) {
                                 onClick={() =>
                                     setSortMode({
                                         by: "size",
-                                        order: sortMode.by === "size" ? (sortMode.order === "asc" ? "desc" : "asc") : "asc",
+                                        order:
+                                            sortMode.by === "size"
+                                                ? sortMode.order === "asc"
+                                                    ? "desc"
+                                                    : "asc"
+                                                : "asc",
                                     })
                                 }
                             >
@@ -701,7 +732,9 @@ function FileManager({ adb, deviceHash }: { adb: Adb; deviceHash: string }) {
                                     file={file}
                                     adb={adb}
                                     currentPath={currentPath === "/" ? "" : currentPath}
-                                    cd={() => setCurrentPath((currentPath === "/" ? "" : currentPath) + "/" + file.name)}
+                                    cd={() =>
+                                        setCurrentPath((currentPath === "/" ? "" : currentPath) + "/" + file.name)
+                                    }
                                     selected={selected.includes(file.name)}
                                     onDelete={() => handleDelete(file)}
                                     onSelect={() =>
@@ -723,7 +756,10 @@ function FileManager({ adb, deviceHash }: { adb: Adb; deviceHash: string }) {
                                     adb={adb}
                                     currentPath={currentPath === "/" ? "" : currentPath}
                                     onOpenEditor={() => {
-                                        setEditorPath({ path: (currentPath === "/" ? "" : currentPath) + "/" + file.name, name: file.name });
+                                        setEditorPath({
+                                            path: (currentPath === "/" ? "" : currentPath) + "/" + file.name,
+                                            name: file.name,
+                                        });
                                         setShowEditor(true);
                                     }}
                                     onDelete={() => handleDelete(file)}

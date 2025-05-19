@@ -67,11 +67,11 @@ const App = observer(() => {
         if (!window.navigator.usb) {
             if (!localStorage.getItem("confirmed_webusb_not_supported")) {
                 dialog.alert(t("webusb_not_supported"), t("webusb_not_supported_description"), () =>
-                    localStorage.setItem("confirmed_webusb_not_supported", "true")
+                    localStorage.setItem("confirmed_webusb_not_supported", "true"),
                 );
             }
             return;
-        };
+        }
         const handleDeviceAdd = () => {
             toast.success(t("usb_device_connected"));
             handleGetDevice();

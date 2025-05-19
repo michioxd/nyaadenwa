@@ -96,7 +96,7 @@ export const fileExtension = {
         "rmvb",
         "asf",
         "mpg",
-        "mpeg"
+        "mpeg",
     ],
     audio: ["mp3", "wav", "aac", "flac", "ogg", "wma", "m4a", "amr", "aiff", "alac", "opus", "mid", "midi", "ra", "au"],
     document: ["doc", "docx", "odt", "rtf", "tex"],
@@ -296,43 +296,43 @@ export const fileExtensionIcon: {
 };
 
 const fileLanguage = {
-    'javascript': ['js', 'jsx'],
-    'typescript': ['ts', 'tsx'],
-    'html': ['html', 'htm', 'razor', 'handlebars'],
-    'css': ['css', 'scss', 'less'],
-    'json': ['json'],
-    'yaml': ['yaml', 'yml'],
-    'ini': ['ini', 'cfg', 'conf'],
-    'sql': ['sql', 'sqlite', 'sqlite3', 'db', 'db3', 'mdb', 'accdb', 'frm', 'myd', 'myi', 'ndf', 'ldf', 'sdf'],
-    'python': ['py'],
-    'java': ['java'],
-    'c': ['c', 'h'],
-    'cpp': ['cpp', 'hpp'],
-    'ruby': ['rb'],
-    'php': ['php'],
-    'go': ['go'],
-    'rust': ['rs'],
-    'swift': ['swift'],
-    'kotlin': ['kt', 'kts'],
-    'scala': ['scala'],
-    'perl': ['pl'],
-    'bash': ['sh', 'bash'],
-    'powershell': ['ps1'],
-    'lua': ['lua'],
-    'r': ['r'],
-    'v': ['v'],
-    'sv': ['sv'],
-    'vhd': ['vhd'],
-    'vhdl': ['vhdl'],
-    'fs': ['fs'],
-    'fsx': ['fsx'],
-    'fsi': ['fsi'],
-    'fsscript': ['fsscript'],
-    'groovy': ['groovy'],
-    'clojure': ['clj', 'cljs', 'cljc'],
-    'edn': ['edn'],
-    'coffeescript': ['coffee']
-}
+    javascript: ["js", "jsx"],
+    typescript: ["ts", "tsx"],
+    html: ["html", "htm", "razor", "handlebars"],
+    css: ["css", "scss", "less"],
+    json: ["json"],
+    yaml: ["yaml", "yml"],
+    ini: ["ini", "cfg", "conf"],
+    sql: ["sql", "sqlite", "sqlite3", "db", "db3", "mdb", "accdb", "frm", "myd", "myi", "ndf", "ldf", "sdf"],
+    python: ["py"],
+    java: ["java"],
+    c: ["c", "h"],
+    cpp: ["cpp", "hpp"],
+    ruby: ["rb"],
+    php: ["php"],
+    go: ["go"],
+    rust: ["rs"],
+    swift: ["swift"],
+    kotlin: ["kt", "kts"],
+    scala: ["scala"],
+    perl: ["pl"],
+    bash: ["sh", "bash"],
+    powershell: ["ps1"],
+    lua: ["lua"],
+    r: ["r"],
+    v: ["v"],
+    sv: ["sv"],
+    vhd: ["vhd"],
+    vhdl: ["vhdl"],
+    fs: ["fs"],
+    fsx: ["fsx"],
+    fsi: ["fsi"],
+    fsscript: ["fsscript"],
+    groovy: ["groovy"],
+    clojure: ["clj", "cljs", "cljc"],
+    edn: ["edn"],
+    coffeescript: ["coffee"],
+};
 
 export const getFileType = (ext: string): keyof typeof fileExtension | "file" => {
     for (const [key, value] of Object.entries(fileExtension)) {
@@ -352,10 +352,10 @@ export const getFileIcon = (
 };
 
 export const getFileLanguage = (fileName: string): string => {
-    const ext = fileName.split('.').pop()?.toLowerCase();
+    const ext = fileName.split(".").pop()?.toLowerCase();
     if (!ext) return "plaintext";
     for (const [key, value] of Object.entries(fileLanguage)) {
         if (value.includes(ext)) return key;
     }
     return "plaintext";
-}
+};

@@ -63,7 +63,7 @@ export function formatPermissions(permission: number | string): string {
 }
 
 export function isValidPath(path: string): boolean {
-    return /^\/([^/\0"<>|:*?]+\/?)*$/.test(path) && path.length > 0 && path !== null && path.trim() !== '';
+    return /^\/([^/\0"<>|:*?]+\/?)*$/.test(path) && path.length > 0 && path !== null && path.trim() !== "";
 }
 
 export function validateLinuxFileName(name: string): boolean {
@@ -75,7 +75,5 @@ export function validateLinuxFileName(name: string): boolean {
         return false;
     }
 
-    return name !== null
-        && name.trim() !== ''
-        && /^[0-9a-zA-Z-._]+$/.test(name);
+    return name !== null && name.trim() !== "" && /^[0-9a-zA-Z-._]+$/.test(name);
 }
