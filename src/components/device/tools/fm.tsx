@@ -10,6 +10,7 @@ import {
     Card,
     Checkbox,
     ContextMenu,
+    DropdownMenu,
     Flex,
     IconButton,
     Popover,
@@ -29,19 +30,25 @@ import {
     PiCopyDuotone,
     PiDotsThreeBold,
     PiDownloadDuotone,
+    PiFileDuotone,
     PiFolderDuotone,
-    PiFoldersDuotone,
+    PiFolderPlusDuotone,
     PiHouseDuotone,
+    PiLinkBold,
+    PiPenDuotone,
     PiTrashSimpleDuotone,
+    PiUploadDuotone,
 } from "react-icons/pi";
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
-import { formatPermissions, formatSize, isValidPath } from "@/utils/str";
+import { formatPermissions, formatSize, isValidPath, validateLinuxFileName } from "@/utils/str";
 import { getFileIcon, getFileType } from "@/utils/ext";
 import clsx from "clsx";
 import useDialog from "@/components/dialog/Dialog";
 import { PackageManager } from "@yume-chan/android-bin";
+import { HamburgerMenuIcon } from "@radix-ui/react-icons";
+import TextEditor from "./fm/editor";
 
 const SortFunc = (
     a: AdbSyncEntry,
@@ -73,6 +80,7 @@ const FileManagerItem = memo(
         onDelete,
         adb,
         currentPath,
+        onOpenEditor
     }: {
         file: AdbSyncEntry;
         cd?: () => void;
@@ -81,6 +89,7 @@ const FileManagerItem = memo(
         onDelete?: () => void;
         adb: Adb;
         currentPath: string;
+        onOpenEditor?: () => void;
     }) => {
         const { t, i18n } = useTranslation();
         const dialog = useDialog();
@@ -150,6 +159,7 @@ const FileManagerItem = memo(
                             <IconButton
                                 onClick={() => onSelect?.()}
                                 variant={selected ? "solid" : "soft"}
+                                style={{ position: 'relative' }}
                                 color={
                                     file.type === LinuxFileType.Directory || file.type === LinuxFileType.Link
                                         ? "yellow"
@@ -159,10 +169,11 @@ const FileManagerItem = memo(
                             >
                                 {isInstalling ? (
                                     <Spinner size="2" />
-                                ) : file.type === LinuxFileType.Directory ? (
-                                    <PiFolderDuotone size={18} />
-                                ) : file.type === LinuxFileType.Link ? (
-                                    <PiFoldersDuotone size={18} />
+                                ) : file.type === LinuxFileType.Directory || file.type === LinuxFileType.Link ? (
+                                    <>
+                                        <PiFolderDuotone size={18} />
+                                        {file.type === LinuxFileType.Link && <PiLinkBold style={{ position: 'absolute', bottom: '2px', right: '2px' }} size={11} />}
+                                    </>
                                 ) : (
                                     <FileIcon.icon size={18} />
                                 )}
@@ -228,6 +239,12 @@ const FileManagerItem = memo(
                             {t(isInstalling ? "installing" : "install_apk_to_device")}
                         </ContextMenu.Item>
                     )}
+                    {(fileType === "code" || fileType === "text") &&
+                        <ContextMenu.Item onClick={onOpenEditor}>
+                            <PiPenDuotone size={18} />
+                            {t("edit_this_file")}
+                        </ContextMenu.Item>
+                    }
                     {(file.type === LinuxFileType.Directory || file.type === LinuxFileType.Link) && (
                         <ContextMenu.Item onClick={() => cd?.()}>
                             <PiFolderDuotone size={18} />
@@ -271,6 +288,11 @@ function FileManager({ adb, deviceHash }: { adb: Adb; deviceHash: string }) {
     const [isLoading, setIsLoading] = useState(false);
     const [elemSize, setElemSize] = useState<{ w: number; h: number }>({ w: 0, h: 0 });
     const [selected, setSelected] = useState<string[]>([]);
+    const [showEditor, setShowEditor] = useState(false);
+    const [editorPath, setEditorPath] = useState<{ path: string | null, name: string }>({
+        path: null,
+        name: ""
+    });
     const { t } = useTranslation();
     const [sortMode, setSortMode] = useState<{
         by: "name" | "size" | "modified";
@@ -353,6 +375,45 @@ function FileManager({ adb, deviceHash }: { adb: Adb; deviceHash: string }) {
         [dialog, adb, currentPath, handleListFiles, t],
     );
 
+    const handleCreateFile = useCallback(async (type: "folder" | "file") => {
+        dialog.prompt(t("create_" + type), t("create_" + type + "_description", {
+            currentPath: currentPath === "/" ? "" : currentPath
+        }), [{
+            label: t(type + "_name"),
+        }], async (val, close) => {
+            const name = val[0].trim();
+            const path = currentPath === "/" ? "" : currentPath;
+            if (!validateLinuxFileName(name)) {
+                toast.error(t("invalid_" + type + "_name"));
+                return;
+            }
+            close();
+            try {
+                setIsLoading(true);
+                const res = await adb.subprocess.shellProtocol?.spawnWaitText(
+                    type === "folder" ?
+                        "mkdir -p \"" + path + "/" + name + "\"" :
+                        "touch \"" + path + "/" + name + "\""
+                );
+                if (res?.exitCode !== 0) {
+                    console.error(res?.stderr);
+                    toast.error(t("failed_to_create_" + type, {
+                        name,
+                    }));
+                    setIsLoading(false);
+                    return;
+                }
+                handleListFiles();
+            } catch (error) {
+                console.error(error);
+                toast.error(t("failed_to_create_" + type, {
+                    name,
+                }));
+                setIsLoading(false);
+            }
+        });
+    }, [adb, currentPath, handleListFiles, t]);
+
     useEffect(() => {
         handleListFiles();
     }, [handleListFiles]);
@@ -382,251 +443,302 @@ function FileManager({ adb, deviceHash }: { adb: Adb; deviceHash: string }) {
     }, [breadcrumbItems, elemSize.w]);
 
     return (
-        <div className={clsx(cls.FileManager, elemSize.w < 600 && cls.HidePermission)} ref={fmRef}>
-            <Card size="1" variant="surface" className={cls.FileManagerBreadcrumb}>
-                <IconButton
-                    variant="soft"
-                    color="gray"
-                    size="1"
-                    onClick={() =>
-                        setCurrentPath(
-                            currentPath.split("/").slice(0, -1).join("/") === ""
-                                ? "/"
-                                : currentPath.split("/").slice(0, -1).join("/"),
-                        )
-                    }
-                    disabled={isLoading || currentPath === "/"}
-                >
-                    <PiArrowUp size={18} />
-                </IconButton>
-                <IconButton
-                    variant="soft"
-                    color={currentPath === "/" ? "cyan" : "gray"}
-                    size="1"
-                    onClick={() => setCurrentPath("/")}
-                    disabled={isLoading}
-                >
-                    <PiHouseDuotone />
-                </IconButton>
-                {currentPath !== "/" && breadcrumbDisplayItems.length !== breadcrumbItems.length && (
+        <div className={clsx(cls.FM, showEditor && cls.ShowEditor)}>
+            <TextEditor
+                adb={adb}
+                path={editorPath.path}
+                name={editorPath.name}
+                onBack={() => {
+                    setEditorPath({ path: null, name: "" });
+                    setShowEditor(false);
+                }}
+            />
+            <div className={clsx(cls.FileManager, elemSize.w < 600 && cls.HidePermission)} ref={fmRef}>
+                <Card size="1" variant="surface" className={cls.FileManagerBreadcrumb}>
+                    <IconButton
+                        variant="soft"
+                        color="gray"
+                        size="1"
+                        onClick={() =>
+                            setCurrentPath(
+                                currentPath.split("/").slice(0, -1).join("/") === ""
+                                    ? "/"
+                                    : currentPath.split("/").slice(0, -1).join("/"),
+                            )
+                        }
+                        disabled={isLoading || currentPath === "/"}
+                    >
+                        <PiArrowUp size={18} />
+                    </IconButton>
+                    <IconButton
+                        variant="soft"
+                        color={currentPath === "/" ? "cyan" : "gray"}
+                        size="1"
+                        onClick={() => setCurrentPath("/")}
+                        disabled={isLoading}
+                    >
+                        <PiHouseDuotone />
+                    </IconButton>
+                    {currentPath !== "/" && breadcrumbDisplayItems.length !== breadcrumbItems.length && (
+                        <Popover.Root>
+                            <Popover.Trigger>
+                                <IconButton variant="soft" color="gray" size="1">
+                                    <PiDotsThreeBold />
+                                </IconButton>
+                            </Popover.Trigger>
+                            <Popover.Content size="1">
+                                <Flex direction="column" gap="1">
+                                    {breadcrumbItems.map((item) => (
+                                        <Button
+                                            key={item.label}
+                                            variant="soft"
+                                            color={item.path === currentPath ? "cyan" : "gray"}
+                                            size="1"
+                                            onClick={() => setCurrentPath(item.path)}
+                                            disabled={isLoading}
+                                        >
+                                            {item.label}
+                                        </Button>
+                                    ))}
+                                </Flex>
+                            </Popover.Content>
+                        </Popover.Root>
+                    )}
+                    {currentPath !== "/" &&
+                        breadcrumbDisplayItems.map(
+                            (item, index) =>
+                                item && (
+                                    <Tooltip key={index} content={item.label}>
+                                        <Button
+                                            variant="soft"
+                                            color={index === breadcrumbDisplayItems.length - 1 ? "cyan" : "gray"}
+                                            size="1"
+                                            className={cls.FileManagerBreadcrumbItem}
+                                            onClick={() => setCurrentPath(item.path)}
+                                            disabled={isLoading}
+                                        >
+                                            <Text size="1" weight="medium" className={cls.TextEllipsis}>
+                                                {item.label}
+                                            </Text>
+                                        </Button>
+                                    </Tooltip>
+                                ),
+                        )}
                     <Popover.Root>
                         <Popover.Trigger>
-                            <IconButton variant="soft" color="gray" size="1">
-                                <PiDotsThreeBold />
-                            </IconButton>
+                            <Box style={{ flex: "1", height: "100%" }}></Box>
                         </Popover.Trigger>
                         <Popover.Content size="1">
-                            <Flex direction="column" gap="1">
-                                {breadcrumbItems.map((item) => (
-                                    <Button
-                                        key={item.label}
-                                        variant="soft"
-                                        color={item.path === currentPath ? "cyan" : "gray"}
-                                        size="1"
-                                        onClick={() => setCurrentPath(item.path)}
-                                        disabled={isLoading}
-                                    >
-                                        {item.label}
-                                    </Button>
-                                ))}
-                            </Flex>
+                            <Text size="1" mb="1" weight="bold">
+                                {t("enter_path_to_go")}
+                            </Text>
+                            <TextField.Root
+                                mb="2"
+                                size="1"
+                                placeholder={t("path_name")}
+                                value={goToPath}
+                                onChange={(e) => setGoToPath(e.target.value)}
+                            />
+                            <Popover.Close>
+                                <Button
+                                    variant="soft"
+                                    disabled={!isValidPath(goToPath) || isLoading || goToPath === currentPath}
+                                    color="cyan"
+                                    size="1"
+                                    onClick={() =>
+                                        setCurrentPath(
+                                            goToPath === "/" || goToPath === "" ? "/" : goToPath.replace(/\/$/, ""),
+                                        )
+                                    }
+                                >
+                                    {t("go")}
+                                </Button>
+                            </Popover.Close>
                         </Popover.Content>
                     </Popover.Root>
-                )}
-                {currentPath !== "/" &&
-                    breadcrumbDisplayItems.map(
-                        (item, index) =>
-                            item && (
-                                <Tooltip content={item.label}>
-                                    <Button
-                                        variant="soft"
-                                        color={index === breadcrumbDisplayItems.length - 1 ? "cyan" : "gray"}
-                                        size="1"
-                                        className={cls.FileManagerBreadcrumbItem}
-                                        key={index}
-                                        onClick={() => setCurrentPath(item.path)}
-                                        disabled={isLoading}
-                                    >
-                                        <Text size="1" weight="medium" className={cls.TextEllipsis}>
-                                            {item.label}
-                                        </Text>
-                                    </Button>
-                                </Tooltip>
-                            ),
+                    {isLoading && (
+                        <IconButton variant="soft" color="gray" size="1" disabled>
+                            <Spinner size="2" />
+                        </IconButton>
                     )}
-                <Popover.Root>
-                    <Popover.Trigger>
-                        <Box style={{ flex: "1", height: "100%" }}></Box>
-                    </Popover.Trigger>
-                    <Popover.Content size="1">
-                        <Text size="1" mb="1" weight="bold">
-                            {t("enter_path_to_go")}
-                        </Text>
-                        <TextField.Root
-                            mb="2"
-                            size="1"
-                            placeholder={t("path_name")}
-                            value={goToPath}
-                            onChange={(e) => setGoToPath(e.target.value)}
-                        />
-                        <Popover.Close>
-                            <Button
-                                variant="soft"
-                                disabled={!isValidPath(goToPath) || isLoading || goToPath === currentPath}
-                                color="cyan"
-                                size="1"
+                    <DropdownMenu.Root>
+                        <DropdownMenu.Trigger>
+                            <IconButton variant="soft" color="gray" size="1" disabled={isLoading}>
+                                <HamburgerMenuIcon />
+                            </IconButton>
+                        </DropdownMenu.Trigger>
+                        <DropdownMenu.Content size="1" variant="soft">
+                            <DropdownMenu.Item onClick={() => handleCreateFile("folder")}>
+                                <PiFolderPlusDuotone size={18} />
+                                {t("create_folder")}
+                            </DropdownMenu.Item>
+                            <DropdownMenu.Item onClick={() => handleCreateFile("file")}>
+                                <PiFileDuotone size={18} />
+                                {t("create_file")}
+                            </DropdownMenu.Item>
+                            <DropdownMenu.Item>
+                                <PiUploadDuotone size={18} />
+                                {t("upload_file")}
+                            </DropdownMenu.Item>
+                            <DropdownMenu.Separator />
+                            <DropdownMenu.Item disabled>
+                                {t("selected_count", { count: selected.length })}
+                            </DropdownMenu.Item>
+                            <DropdownMenu.Item disabled={selected.length === 0}>
+                                <PiCopyDuotone size={18} />
+                                {t("copy_selected")}
+                            </DropdownMenu.Item>
+                            <DropdownMenu.Item disabled={selected.length === 0}>
+                                <PiArrowsLeftRightDuotone size={18} />
+                                {t("move_selected")}
+                            </DropdownMenu.Item>
+                            <DropdownMenu.Item disabled={selected.length === 0} color="red">
+                                <PiTrashSimpleDuotone size={18} />
+                                {t("delete_selected")}
+                            </DropdownMenu.Item>
+                        </DropdownMenu.Content>
+                    </DropdownMenu.Root>
+                </Card>
+                <Table.Root
+                    size="1"
+                    variant="surface"
+                    className={cls.FileManagerTable}
+                    layout="fixed"
+                    style={{ pointerEvents: isLoading ? "none" : "unset" }}
+                >
+                    <Table.Header className={cls.FileManagerHeader}>
+                        <Table.Row>
+                            <Table.ColumnHeaderCell style={{ width: "35px" }}>
+                                <Checkbox
+                                    onCheckedChange={(checked) => {
+                                        if (checked === true) {
+                                            setSelected([
+                                                ...listFiles.map((file) => file.name),
+                                                ...listFolders.map((folder) => folder.name),
+                                            ]);
+                                        } else {
+                                            setSelected([]);
+                                        }
+                                    }}
+                                    checked={
+                                        listFiles.length + listFolders.length <= 0
+                                            ? false
+                                            : selected.length === listFiles.length + listFolders.length
+                                                ? true
+                                                : selected.length > 0
+                                                    ? "indeterminate"
+                                                    : false
+                                    }
+                                />
+                            </Table.ColumnHeaderCell>
+                            <Table.ColumnHeaderCell
+                                style={{ minWidth: "120px" }}
                                 onClick={() =>
-                                    setCurrentPath(
-                                        goToPath === "/" || goToPath === "" ? "/" : goToPath.replace(/\/$/, ""),
-                                    )
+                                    setSortMode({
+                                        by: "name",
+                                        order: sortMode.by === "name" ? (sortMode.order === "asc" ? "desc" : "asc") : "asc",
+                                    })
                                 }
                             >
-                                {t("go")}
-                            </Button>
-                        </Popover.Close>
-                    </Popover.Content>
-                </Popover.Root>
-                {isLoading && (
-                    <IconButton variant="soft" color="gray" size="1" disabled>
-                        <Spinner size="1" />
-                    </IconButton>
-                )}
-            </Card>
-            <Table.Root
-                size="1"
-                variant="surface"
-                className={cls.FileManagerTable}
-                layout="fixed"
-                style={{ pointerEvents: isLoading ? "none" : "unset" }}
-            >
-                <Table.Header className={cls.FileManagerHeader}>
-                    <Table.Row>
-                        <Table.ColumnHeaderCell style={{ width: "35px" }}>
-                            <Checkbox
-                                onCheckedChange={(checked) => {
-                                    if (checked === true) {
-                                        setSelected([
-                                            ...listFiles.map((file) => file.name),
-                                            ...listFolders.map((folder) => folder.name),
-                                        ]);
-                                    } else {
-                                        setSelected([]);
-                                    }
-                                }}
-                                checked={
-                                    listFiles.length + listFolders.length <= 0
-                                        ? false
-                                        : selected.length === listFiles.length + listFolders.length
-                                            ? true
-                                            : selected.length > 0
-                                                ? "indeterminate"
-                                                : false
+                                {t("name")}
+                                {sortMode.by === "name" && (
+                                    <IconButton variant="soft" color="gray" size="1" className={cls.SortButton}>
+                                        {sortMode.order === "asc" ? <PiArrowUp size={12} /> : <PiArrowDown size={12} />}
+                                    </IconButton>
+                                )}
+                            </Table.ColumnHeaderCell>
+                            <Table.ColumnHeaderCell
+                                data-col-type="size"
+                                style={{ width: "120px" }}
+                                onClick={() =>
+                                    setSortMode({
+                                        by: "size",
+                                        order: sortMode.by === "size" ? (sortMode.order === "asc" ? "desc" : "asc") : "asc",
+                                    })
                                 }
-                            />
-                        </Table.ColumnHeaderCell>
-                        <Table.ColumnHeaderCell
-                            style={{ minWidth: "120px" }}
-                            onClick={() =>
-                                setSortMode({
-                                    by: "name",
-                                    order: sortMode.by === "name" ? (sortMode.order === "asc" ? "desc" : "asc") : "asc",
-                                })
-                            }
-                        >
-                            {t("name")}
-                            {sortMode.by === "name" && (
-                                <IconButton variant="soft" color="gray" size="1" className={cls.SortButton}>
-                                    {sortMode.order === "asc" ? <PiArrowUp size={12} /> : <PiArrowDown size={12} />}
-                                </IconButton>
-                            )}
-                        </Table.ColumnHeaderCell>
-                        <Table.ColumnHeaderCell
-                            data-col-type="size"
-                            style={{ width: "120px" }}
-                            onClick={() =>
-                                setSortMode({
-                                    by: "size",
-                                    order: sortMode.by === "size" ? (sortMode.order === "asc" ? "desc" : "asc") : "asc",
-                                })
-                            }
-                        >
-                            {t("size")}
-                            {sortMode.by === "size" && (
-                                <IconButton variant="soft" color="gray" size="1" className={cls.SortButton}>
-                                    {sortMode.order === "asc" ? <PiArrowUp size={12} /> : <PiArrowDown size={12} />}
-                                </IconButton>
-                            )}
-                        </Table.ColumnHeaderCell>
-                        <Table.ColumnHeaderCell data-col-type="permission" style={{ width: "100px" }}>
-                            {t("permission")}
-                        </Table.ColumnHeaderCell>
-                        <Table.ColumnHeaderCell
-                            data-col-type="modified"
-                            style={{ width: "170px" }}
-                            onClick={() =>
-                                setSortMode({
-                                    by: "modified",
-                                    order:
-                                        sortMode.by === "modified"
-                                            ? sortMode.order === "asc"
-                                                ? "desc"
-                                                : "asc"
-                                            : "asc",
-                                })
-                            }
-                        >
-                            {t("modified")}
-                            {sortMode.by === "modified" && (
-                                <IconButton variant="soft" color="gray" size="1" className={cls.SortButton}>
-                                    {sortMode.order === "asc" ? <PiArrowUp size={12} /> : <PiArrowDown size={12} />}
-                                </IconButton>
-                            )}
-                        </Table.ColumnHeaderCell>
-                    </Table.Row>
-                </Table.Header>
+                            >
+                                {t("size")}
+                                {sortMode.by === "size" && (
+                                    <IconButton variant="soft" color="gray" size="1" className={cls.SortButton}>
+                                        {sortMode.order === "asc" ? <PiArrowUp size={12} /> : <PiArrowDown size={12} />}
+                                    </IconButton>
+                                )}
+                            </Table.ColumnHeaderCell>
+                            <Table.ColumnHeaderCell data-col-type="permission" style={{ width: "100px" }}>
+                                {t("permission")}
+                            </Table.ColumnHeaderCell>
+                            <Table.ColumnHeaderCell
+                                data-col-type="modified"
+                                style={{ width: "170px" }}
+                                onClick={() =>
+                                    setSortMode({
+                                        by: "modified",
+                                        order:
+                                            sortMode.by === "modified"
+                                                ? sortMode.order === "asc"
+                                                    ? "desc"
+                                                    : "asc"
+                                                : "asc",
+                                    })
+                                }
+                            >
+                                {t("modified")}
+                                {sortMode.by === "modified" && (
+                                    <IconButton variant="soft" color="gray" size="1" className={cls.SortButton}>
+                                        {sortMode.order === "asc" ? <PiArrowUp size={12} /> : <PiArrowDown size={12} />}
+                                    </IconButton>
+                                )}
+                            </Table.ColumnHeaderCell>
+                        </Table.Row>
+                    </Table.Header>
 
-                <Table.Body>
-                    {listFolders
-                        .sort((a, b) => SortFunc(a, b, sortMode))
-                        .map((file) => (
-                            <FileManagerItem
-                                key={file.name}
-                                file={file}
-                                adb={adb}
-                                currentPath={currentPath === "/" ? "" : currentPath}
-                                cd={() => setCurrentPath((currentPath === "/" ? "" : currentPath) + "/" + file.name)}
-                                selected={selected.includes(file.name)}
-                                onDelete={() => handleDelete(file)}
-                                onSelect={() =>
-                                    setSelected(
-                                        selected.includes(file.name)
-                                            ? selected.filter((name) => name !== file.name)
-                                            : [...selected, file.name],
-                                    )
-                                }
-                            />
-                        ))}
-                    {listFiles
-                        .sort((a, b) => SortFunc(a, b, sortMode))
-                        .map((file) => (
-                            <FileManagerItem
-                                key={file.name}
-                                file={file}
-                                selected={selected.includes(file.name)}
-                                adb={adb}
-                                currentPath={currentPath === "/" ? "" : currentPath}
-                                onDelete={() => handleDelete(file)}
-                                onSelect={() =>
-                                    setSelected(
-                                        selected.includes(file.name)
-                                            ? selected.filter((name) => name !== file.name)
-                                            : [...selected, file.name],
-                                    )
-                                }
-                            />
-                        ))}
-                </Table.Body>
-            </Table.Root>
+                    <Table.Body>
+                        {listFolders
+                            .sort((a, b) => SortFunc(a, b, sortMode))
+                            .map((file) => (
+                                <FileManagerItem
+                                    key={file.name}
+                                    file={file}
+                                    adb={adb}
+                                    currentPath={currentPath === "/" ? "" : currentPath}
+                                    cd={() => setCurrentPath((currentPath === "/" ? "" : currentPath) + "/" + file.name)}
+                                    selected={selected.includes(file.name)}
+                                    onDelete={() => handleDelete(file)}
+                                    onSelect={() =>
+                                        setSelected(
+                                            selected.includes(file.name)
+                                                ? selected.filter((name) => name !== file.name)
+                                                : [...selected, file.name],
+                                        )
+                                    }
+                                />
+                            ))}
+                        {listFiles
+                            .sort((a, b) => SortFunc(a, b, sortMode))
+                            .map((file) => (
+                                <FileManagerItem
+                                    key={file.name}
+                                    file={file}
+                                    selected={selected.includes(file.name)}
+                                    adb={adb}
+                                    currentPath={currentPath === "/" ? "" : currentPath}
+                                    onOpenEditor={() => {
+                                        setEditorPath({ path: (currentPath === "/" ? "" : currentPath) + "/" + file.name, name: file.name });
+                                        setShowEditor(true);
+                                    }}
+                                    onDelete={() => handleDelete(file)}
+                                    onSelect={() =>
+                                        setSelected(
+                                            selected.includes(file.name)
+                                                ? selected.filter((name) => name !== file.name)
+                                                : [...selected, file.name],
+                                        )
+                                    }
+                                />
+                            ))}
+                    </Table.Body>
+                </Table.Root>
+            </div>
         </div>
     );
 }

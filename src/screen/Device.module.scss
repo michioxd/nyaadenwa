@@ -242,6 +242,8 @@
             top: 0;
             left: var(--position);
             z-index: 9;
+            overflow: auto;
+            max-height: calc(100dvh - 41.95px - 36px - 1.5rem);
 
             &.Overflow {
                 opacity: 0;

@@ -9,6 +9,7 @@ import { Theme } from "@radix-ui/themes";
 import DialogProvider from "./components/dialog/DialogProvider";
 import { Toaster } from "sonner";
 import App from "./App";
+import "@/controller/init.monaco";
 import "@/controller/manager";
 import "@/locales/i18n";
 import "@radix-ui/themes/styles.css";

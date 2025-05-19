@@ -83,3 +83,16 @@ html {
         font-family: var(--default-font-family);
     }
 }
+
+.monaco-editor {
+    --vscode-editor-background: transparent !important;
+    --vscode-editorGutter-background: transparent !important;
+    --vscode-focusBorder: transparent !important;
+    --vscode-menu-background: #2d2d2d !important;
+
+    .sticky-widget {
+        background-color: #1818181a !important;
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+    }
+}

@@ -1,47 +1,123 @@
-.FileManager {
+.FM {
     width: 100%;
     height: 100%;
     display: flex;
     flex-direction: column;
-    gap: var(--card-padding);
+    overflow: hidden;
+    position: relative;
 
-    .FileManagerTable {
+    .FileManager {
         width: 100%;
         height: 100%;
-        overflow: auto;
-
-        .SortButton {
-            margin-left: 4px;
-            padding: 4px;
-            width: 20px;
-            height: 20px;
-        }
-    }
-
-    .FileManagerBreadcrumb {
         display: flex;
-        align-items: center;
-        padding: 8px;
-        gap: 4px;
+        flex-direction: column;
+        gap: var(--card-padding);
+        transition: 0.2s;
 
-        .FileManagerBreadcrumbItem {
+        .FileManagerTable {
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+
+            .SortButton {
+                margin-left: 4px;
+                padding: 4px;
+                width: 20px;
+                height: 20px;
+            }
+        }
+
+        .FileManagerBreadcrumb {
+            width: 100%;
             display: flex;
             align-items: center;
-            max-width: 150px;
+            padding: 8px;
+            gap: 4px;
 
-            .TextEllipsis {
-                overflow: hidden;
-                text-overflow: ellipsis;
-                white-space: nowrap;
+            .FileManagerBreadcrumbItem {
+                display: flex;
+                align-items: center;
+                max-width: 150px;
+
+                .TextEllipsis {
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    white-space: nowrap;
+                }
+            }
+        }
+
+        &.HidePermission {
+            .FileManagerTable {
+                [data-col-type="permission"] {
+                    display: none;
+                }
             }
         }
     }
 
-    &.HidePermission {
-        .FileManagerTable {
-            [data-col-type="permission"] {
-                display: none;
+    .TextEditor {
+        width: 100%;
+        height: 100%;
+        position: absolute;
+        top: 0;
+        left: 0;
+        z-index: 9;
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+        transition: 0.2s;
+
+        .Header {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            padding: 8px;
+            gap: 6px;
+            margin-bottom: var(--card-padding);
+        }
+
+        .Editor {
+            background: transparent;
+        }
+
+        .EditorContainer {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .EditorLoading {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            .Container {
+                width: fit-content;
+                height: fit-content;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 6px;
             }
+        }
+
+    }
+
+    &.ShowEditor {
+        .FileManager {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .TextEditor {
+            opacity: 1;
+            pointer-events: unset;
+            visibility: visible;
         }
     }
 }
