@@ -78,6 +78,14 @@ const Container = observer(
                         label: t("address"),
                         placeholder: "ws://localhost:5555",
                         defaultValue: localStorage.getItem("last_ws_address") ?? "",
+                        validate: (value) => {
+                            try {
+                                new URL(value);
+                                return true;
+                            } catch {
+                                return false;
+                            }
+                        }
                     },
                 ],
                 (v, close) => {
@@ -286,8 +294,8 @@ const Container = observer(
                                                                         () => {
                                                                             deviceForgot.push(
                                                                                 device.raw.manufacturerName +
-                                                                                    device.name +
-                                                                                    device.serial,
+                                                                                device.name +
+                                                                                device.serial,
                                                                             );
                                                                             try {
                                                                                 device.raw.close();

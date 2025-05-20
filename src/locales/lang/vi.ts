@@ -176,6 +176,14 @@ const Locale: LocaleResourcesType = {
         failed_to_save_file: "Không thể lưu tệp",
         failed_to_load_file: "Không thể tải tệp",
         edit_this_file: "Chỉnh sửa tệp này",
+        rename_file: "Đổi tên tệp",
+        rename_file_description: "Nhập tên mới cho tệp {{name}}",
+        failed_to_rename_file: "Không thể đổi tên tệp {{name}}",
+        new_name: "Tên mới",
+        rename_folder: "Đổi tên thư mục",
+        rename_folder_description: "Nhập tên mới cho thư mục {{name}}",
+        failed_to_rename_folder: "Không thể đổi tên thư mục {{name}}",
+        new_name_is_same_as_old_name: "Tên mới trùng với tên cũ",
     },
 };
 

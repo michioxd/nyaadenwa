@@ -36,6 +36,7 @@ import {
     PiHouseDuotone,
     PiLinkBold,
     PiPenDuotone,
+    PiPenNibDuotone,
     PiTrashSimpleDuotone,
     PiUploadDuotone,
 } from "react-icons/pi";
@@ -82,6 +83,7 @@ const FileManagerItem = memo(
         currentPath,
         onOpenEditor,
         sizeColumn,
+        onRename,
     }: {
         file: AdbSyncEntry;
         cd?: () => void;
@@ -92,6 +94,7 @@ const FileManagerItem = memo(
         currentPath: string;
         onOpenEditor?: () => void;
         sizeColumn?: boolean;
+        onRename?: () => void;
     }) => {
         const { t, i18n } = useTranslation();
         const dialog = useDialog();
@@ -268,6 +271,10 @@ const FileManagerItem = memo(
                             {t("download_file")}
                         </ContextMenu.Item>
                     )}
+                    <ContextMenu.Item onClick={() => onRename?.()}>
+                        <PiPenNibDuotone size={18} />
+                        {t("rename_" + (file.type === LinuxFileType.Directory ? "folder" : "file"))}
+                    </ContextMenu.Item>
                     <ContextMenu.Item>
                         <PiCopyDuotone size={18} />
                         {t("copy_" + (file.type === LinuxFileType.Directory ? "folder" : "file"))}
@@ -312,6 +319,8 @@ function FileManager({ adb, deviceHash }: { adb: Adb; deviceHash: string }) {
         by: "name",
         order: "asc",
     });
+
+    const path = useMemo(() => currentPath === "/" ? "" : currentPath, [currentPath]);
 
     const breadcrumbItems = useMemo(() => {
         const items = currentPath.split("/");
@@ -365,7 +374,7 @@ function FileManager({ adb, deviceHash }: { adb: Adb; deviceHash: string }) {
                 async () => {
                     try {
                         setIsLoading(true);
-                        await adb.rm((currentPath === "/" ? "" : currentPath) + "/" + file.name, {
+                        await adb.rm(path + "/" + file.name, {
                             recursive: file.type === LinuxFileType.Directory,
                             force: true,
                         });
@@ -391,16 +400,16 @@ function FileManager({ adb, deviceHash }: { adb: Adb; deviceHash: string }) {
             dialog.prompt(
                 t("create_" + type),
                 t("create_" + type + "_description", {
-                    currentPath: currentPath === "/" ? "" : currentPath,
+                    currentPath: path,
                 }),
                 [
                     {
                         label: t(type + "_name"),
+                        validate: (value) => validateLinuxFileName(value),
                     },
                 ],
                 async (val, close) => {
                     const name = val[0].trim();
-                    const path = currentPath === "/" ? "" : currentPath;
                     if (!validateLinuxFileName(name)) {
                         toast.error(t("invalid_" + type + "_name"));
                         return;
@@ -436,20 +445,70 @@ function FileManager({ adb, deviceHash }: { adb: Adb; deviceHash: string }) {
                 },
             );
         },
-        [adb, currentPath, handleListFiles, t],
+        [adb, path, handleListFiles, t],
     );
+
+    const handleRenameFile = useCallback(async (file: AdbSyncEntry) => {
+        dialog.prompt(
+            t("rename_" + (file.type === LinuxFileType.Directory ? "folder" : "file")),
+            t("rename_" + (file.type === LinuxFileType.Directory ? "folder" : "file") + "_description", {
+                name: file.name,
+            }),
+            [
+                {
+                    label: t("new_name"),
+                    defaultValue: file.name,
+                    placeholder: file.name,
+                    validate: (value) => validateLinuxFileName(value) && value !== file.name,
+                },
+            ],
+            async (val, close) => {
+                const name = val[0].trim();
+                if (!validateLinuxFileName(name)) {
+                    toast.error(t("invalid_" + (file.type === LinuxFileType.Directory ? "folder" : "file") + "_name"));
+                    return;
+                }
+                if (name === file.name) {
+                    toast.error(t("new_name_is_same_as_old_name"));
+                    return;
+                }
+                close();
+                try {
+                    setIsLoading(true);
+                    if ((await adb.subprocess.shellProtocol?.spawnWaitText(`mv "${path}/${file.name}" "${path}/${name}"`))?.exitCode !== 0) {
+                        toast.error(
+                            t("failed_to_rename_" + (file.type === LinuxFileType.Directory ? "folder" : "file"), {
+                                name: file.name,
+                            }),
+                        );
+                        setIsLoading(false);
+                        return;
+                    }
+                    handleListFiles();
+                } catch (error) {
+                    console.error(error);
+                    toast.error(
+                        t("failed_to_rename_" + (file.type === LinuxFileType.Directory ? "folder" : "file"), {
+                            name: file.name,
+                        }),
+                    );
+                    setIsLoading(false);
+                }
+            },
+        )
+    }, [dialog, adb, path, t]);
 
     useEffect(() => {
         handleListFiles();
     }, [handleListFiles]);
 
     useEffect(() => {
-        setGoToPath(currentPath);
-    }, [currentPath]);
+        setGoToPath(path);
+    }, [path]);
 
     useEffect(() => {
-        localStorage.setItem("fm_path_" + deviceHash, currentPath);
-    }, [currentPath, deviceHash]);
+        localStorage.setItem("fm_path_" + deviceHash, path);
+    }, [path, deviceHash]);
 
     useEffect(() => {
         if (!fmRef.current) return;
@@ -497,7 +556,7 @@ function FileManager({ adb, deviceHash }: { adb: Adb; deviceHash: string }) {
                     </IconButton>
                     <IconButton
                         variant="soft"
-                        color={currentPath === "/" ? "cyan" : "gray"}
+                        color={path === "/" ? "cyan" : "gray"}
                         size="1"
                         onClick={() => setCurrentPath("/")}
                         disabled={isLoading}
@@ -517,7 +576,7 @@ function FileManager({ adb, deviceHash }: { adb: Adb; deviceHash: string }) {
                                         <Button
                                             key={item.label}
                                             variant="soft"
-                                            color={item.path === currentPath ? "cyan" : "gray"}
+                                            color={item.path === path ? "cyan" : "gray"}
                                             size="1"
                                             onClick={() => setCurrentPath(item.path)}
                                             disabled={isLoading}
@@ -567,7 +626,7 @@ function FileManager({ adb, deviceHash }: { adb: Adb; deviceHash: string }) {
                             <Popover.Close>
                                 <Button
                                     variant="soft"
-                                    disabled={!isValidPath(goToPath) || isLoading || goToPath === currentPath}
+                                    disabled={!isValidPath(goToPath) || isLoading || goToPath === path}
                                     color="cyan"
                                     size="1"
                                     onClick={() =>
@@ -738,10 +797,11 @@ function FileManager({ adb, deviceHash }: { adb: Adb; deviceHash: string }) {
                                     file={file}
                                     adb={adb}
                                     sizeColumn={listFiles.length > 0}
-                                    currentPath={currentPath === "/" ? "" : currentPath}
+                                    currentPath={path}
                                     cd={() =>
-                                        setCurrentPath((currentPath === "/" ? "" : currentPath) + "/" + file.name)
+                                        setCurrentPath((path === "/" ? "" : path) + "/" + file.name)
                                     }
+                                    onRename={() => handleRenameFile(file)}
                                     selected={selected.includes(file.name)}
                                     onDelete={() => handleDelete(file)}
                                     onSelect={() =>
@@ -762,14 +822,15 @@ function FileManager({ adb, deviceHash }: { adb: Adb; deviceHash: string }) {
                                     selected={selected.includes(file.name)}
                                     adb={adb}
                                     sizeColumn
-                                    currentPath={currentPath === "/" ? "" : currentPath}
+                                    currentPath={path}
                                     onOpenEditor={() => {
                                         setEditorPath({
-                                            path: (currentPath === "/" ? "" : currentPath) + "/" + file.name,
+                                            path: path + "/" + file.name,
                                             name: file.name,
                                         });
                                         setShowEditor(true);
                                     }}
+                                    onRename={() => handleRenameFile(file)}
                                     onDelete={() => handleDelete(file)}
                                     onSelect={() =>
                                         setSelected(
