@@ -184,6 +184,7 @@ const Locale: LocaleResourcesType = {
         rename_folder_description: "Nhập tên mới cho thư mục {{name}}",
         failed_to_rename_folder: "Không thể đổi tên thư mục {{name}}",
         new_name_is_same_as_old_name: "Tên mới trùng với tên cũ",
+        websocket_device_disconnected: "Thiết bị WebSocket đã bị ngắt kết nối",
     },
 };
 

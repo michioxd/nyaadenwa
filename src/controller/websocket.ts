@@ -17,6 +17,9 @@ export default class AdbDaemonWebSocketDevice implements AdbDaemonDevice {
     private socket: WebSocket | undefined;
     private writable: WritableStream<Consumable<Uint8Array<ArrayBufferLike>>> | undefined;
     private readable: WrapReadableStream<Uint8Array<ArrayBufferLike>> | undefined;
+    private closed: boolean = false;
+    public onClose: ((e: CloseEvent) => void) | undefined;
+    public onError: ((e: Event) => void) | undefined;
 
     constructor(url: string, name?: string) {
         this.serial = url;
@@ -26,6 +29,17 @@ export default class AdbDaemonWebSocketDevice implements AdbDaemonDevice {
     async connect(): Promise<ReadableWritablePair<AdbPacketData, Consumable<AdbPacketInit>>> {
         this.socket = new WebSocket(this.serial);
         this.socket.binaryType = "arraybuffer";
+        this.socket.addEventListener("close", (e) => {
+            if (!this.closed) {
+                this.onClose?.(e);
+            }
+        });
+
+        this.socket.addEventListener("error", (e) => {
+            if (!this.closed) {
+                this.onError?.(e);
+            }
+        });
 
         const socket = this.socket;
 
@@ -84,6 +98,7 @@ export default class AdbDaemonWebSocketDevice implements AdbDaemonDevice {
     }
 
     public async close() {
+        this.closed = true;
         this.writable?.close();
         this.readable?.cancel();
         this.socket?.close();

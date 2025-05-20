@@ -10,6 +10,9 @@ import AdbWebCredentialStore from "@yume-chan/adb-credential-web";
 import type { AdbDaemonWebUsbDevice } from "@yume-chan/adb-daemon-webusb";
 import { makeAutoObservable, observable } from "mobx";
 import AdbDaemonWebSocketDevice from "./websocket";
+import { toast } from "sonner";
+import tabsController from "./tabs";
+import i18next from "i18next";
 
 enum DeviceType {
     USB = "usb",
@@ -65,6 +68,7 @@ class SessionDevices {
     public async addDeviceWebSocket(address: string): Promise<TConnectedDevice> {
         new URL(address); // throw error if invalid
         const deviceHash = getHashFromAddress(address);
+        let connected = false;
 
         const wsDaemon = new AdbDaemonWebSocketDevice(address, deviceHash);
 
@@ -73,8 +77,25 @@ class SessionDevices {
             throw new Error("Timeout waiting for device to connect");
         }, 30000);
 
-        const dvc = await wsDaemon.connect();
+        wsDaemon.onClose = (e) => {
+            clearTimeout(timeout);
+            console.error("WebSocket device disconnected", e);
+            if (connected) {
+                tabsController.closeTab(deviceHash);
+                this.removeDevice(deviceHash, true);
+            }
+        };
 
+        wsDaemon.onError = (e) => {
+            clearTimeout(timeout);
+            console.error("WebSocket device connection error", e);
+            if (connected) {
+                tabsController.closeTab(deviceHash);
+                this.removeDevice(deviceHash, true);
+            }
+        };
+
+        const dvc = await wsDaemon.connect();
         const adb = new Adb(
             await AdbDaemonTransport.authenticate({
                 serial: "",
@@ -88,14 +109,18 @@ class SessionDevices {
             adb,
             type: DeviceType.WEBSOCKET,
         });
+        connected = true;
 
         clearTimeout(timeout);
 
         return { daemon: wsDaemon, adb, type: DeviceType.WEBSOCKET };
     }
 
-    public removeDevice(deviceHash: string) {
+    public removeDevice(deviceHash: string, uncaughtRemove?: boolean) {
         const device = this.connectedDevices.get(deviceHash);
+        if (uncaughtRemove) {
+            toast.error(i18next.t("websocket_device_disconnected"));
+        }
         if (device) {
             try {
                 device.adb.close();

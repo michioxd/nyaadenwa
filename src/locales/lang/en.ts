@@ -184,6 +184,7 @@ const Locale: LocaleResourcesType = {
         rename_folder_description: "Enter the new name of the folder {{name}}",
         failed_to_rename_folder: "Failed to rename folder {{name}}",
         new_name_is_same_as_old_name: "New name is same as old name",
+        websocket_device_disconnected: "WebSocket device disconnected",
     },
 };
 
