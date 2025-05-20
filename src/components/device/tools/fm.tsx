@@ -81,6 +81,7 @@ const FileManagerItem = memo(
         adb,
         currentPath,
         onOpenEditor,
+        sizeColumn,
     }: {
         file: AdbSyncEntry;
         cd?: () => void;
@@ -90,6 +91,7 @@ const FileManagerItem = memo(
         adb: Adb;
         currentPath: string;
         onOpenEditor?: () => void;
+        sizeColumn?: boolean;
     }) => {
         const { t, i18n } = useTranslation();
         const dialog = useDialog();
@@ -201,18 +203,20 @@ const FileManagerItem = memo(
                                 {file.name}
                             </Text>
                         </Table.Cell>
-                        <Table.Cell
-                            data-col-type="size"
-                            onClick={
-                                file.type === LinuxFileType.Directory || file.type === LinuxFileType.Link
-                                    ? () => cd?.()
-                                    : undefined
-                            }
-                        >
-                            <Text size="1" weight="medium" color="gray" align="center">
-                                {formatSize(Number(file.size))}
-                            </Text>
-                        </Table.Cell>
+                        {sizeColumn && (
+                            <Table.Cell
+                                data-col-type="size"
+                                onClick={
+                                    file.type === LinuxFileType.Directory || file.type === LinuxFileType.Link
+                                        ? () => cd?.()
+                                        : undefined
+                                }
+                            >
+                                <Text size="1" weight="medium" color="gray" align="center">
+                                    {file.type === LinuxFileType.File ? formatSize(Number(file.size)) : ""}
+                                </Text>
+                            </Table.Cell>
+                        )}
                         <Table.Cell
                             data-col-type="permission"
                             onClick={
@@ -645,10 +649,10 @@ function FileManager({ adb, deviceHash }: { adb: Adb; deviceHash: string }) {
                                         listFiles.length + listFolders.length <= 0
                                             ? false
                                             : selected.length === listFiles.length + listFolders.length
-                                              ? true
-                                              : selected.length > 0
-                                                ? "indeterminate"
-                                                : false
+                                                ? true
+                                                : selected.length > 0
+                                                    ? "indeterminate"
+                                                    : false
                                     }
                                 />
                             </Table.ColumnHeaderCell>
@@ -673,28 +677,30 @@ function FileManager({ adb, deviceHash }: { adb: Adb; deviceHash: string }) {
                                     </IconButton>
                                 )}
                             </Table.ColumnHeaderCell>
-                            <Table.ColumnHeaderCell
-                                data-col-type="size"
-                                style={{ width: "120px" }}
-                                onClick={() =>
-                                    setSortMode({
-                                        by: "size",
-                                        order:
-                                            sortMode.by === "size"
-                                                ? sortMode.order === "asc"
-                                                    ? "desc"
-                                                    : "asc"
-                                                : "asc",
-                                    })
-                                }
-                            >
-                                {t("size")}
-                                {sortMode.by === "size" && (
-                                    <IconButton variant="soft" color="gray" size="1" className={cls.SortButton}>
-                                        {sortMode.order === "asc" ? <PiArrowUp size={12} /> : <PiArrowDown size={12} />}
-                                    </IconButton>
-                                )}
-                            </Table.ColumnHeaderCell>
+                            {listFiles.length > 0 &&
+                                <Table.ColumnHeaderCell
+                                    data-col-type="size"
+                                    style={{ width: "120px" }}
+                                    onClick={() =>
+                                        setSortMode({
+                                            by: "size",
+                                            order:
+                                                sortMode.by === "size"
+                                                    ? sortMode.order === "asc"
+                                                        ? "desc"
+                                                        : "asc"
+                                                    : "asc",
+                                        })
+                                    }
+                                >
+                                    {t("size")}
+                                    {sortMode.by === "size" && (
+                                        <IconButton variant="soft" color="gray" size="1" className={cls.SortButton}>
+                                            {sortMode.order === "asc" ? <PiArrowUp size={12} /> : <PiArrowDown size={12} />}
+                                        </IconButton>
+                                    )}
+                                </Table.ColumnHeaderCell>
+                            }
                             <Table.ColumnHeaderCell data-col-type="permission" style={{ width: "100px" }}>
                                 {t("permission")}
                             </Table.ColumnHeaderCell>
@@ -731,6 +737,7 @@ function FileManager({ adb, deviceHash }: { adb: Adb; deviceHash: string }) {
                                     key={file.name}
                                     file={file}
                                     adb={adb}
+                                    sizeColumn={listFiles.length > 0}
                                     currentPath={currentPath === "/" ? "" : currentPath}
                                     cd={() =>
                                         setCurrentPath((currentPath === "/" ? "" : currentPath) + "/" + file.name)
@@ -754,6 +761,7 @@ function FileManager({ adb, deviceHash }: { adb: Adb; deviceHash: string }) {
                                     file={file}
                                     selected={selected.includes(file.name)}
                                     adb={adb}
+                                    sizeColumn
                                     currentPath={currentPath === "/" ? "" : currentPath}
                                     onOpenEditor={() => {
                                         setEditorPath({
