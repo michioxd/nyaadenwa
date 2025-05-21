@@ -187,6 +187,10 @@ const FileManagerItem = memo(
                         onOpenEditor?.();
                         return;
                     }
+                    if (fileType === "android_package") {
+                        handleInstallApk();
+                        return;
+                    }
                 } else {
                     lastClick.current = Date.now();
                 }
@@ -195,6 +199,7 @@ const FileManagerItem = memo(
 
             if (isDirectory) cd?.();
             else if (fileType === "code" || fileType === "text") onOpenEditor?.();
+            else if (fileType === "android_package") handleInstallApk();
         }, [file.type, cd, selected, onSelect, fileType, onOpenEditor]);
 
         return (
