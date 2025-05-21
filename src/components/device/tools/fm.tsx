@@ -170,7 +170,7 @@ const FileManagerItem = memo(
 
         const onUserHandle = useCallback((e: MouseEvent<HTMLTableDataCellElement, globalThis.MouseEvent>) => {
             const isDirectory = file.type === LinuxFileType.Directory || file.type === LinuxFileType.Link;
-            const isDesktop = window.innerWidth >= 768;
+            const isDesktop = window.innerWidth >= 600;
 
             if (isDesktop) {
                 if (e.detail === 1) {
@@ -926,6 +926,7 @@ function FileManager({ adb, deviceHash }: { adb: Adb; deviceHash: string }) {
                             <Table.Row>
                                 <Table.ColumnHeaderCell style={{ width: "35px" }}>
                                     <Checkbox
+                                        disabled={isLoading || listFiles.length + listFolders.length <= 0}
                                         onCheckedChange={(checked) => {
                                             if (checked === true) {
                                                 setSelected([
