@@ -14,6 +14,7 @@ import {
     Flex,
     IconButton,
     Popover,
+    Progress,
     Spinner,
     Table,
     Text,
@@ -25,6 +26,7 @@ import cls from "./fm.module.scss";
 import {
     PiAndroidLogoDuotone,
     PiArrowDown,
+    PiArrowsClockwiseDuotone,
     PiArrowsLeftRightDuotone,
     PiArrowUp,
     PiCopyDuotone,
@@ -39,6 +41,7 @@ import {
     PiPenNibDuotone,
     PiTrashSimpleDuotone,
     PiUploadDuotone,
+    PiXBold,
 } from "react-icons/pi";
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
@@ -50,6 +53,7 @@ import useDialog from "@/components/dialog/Dialog";
 import { PackageManager } from "@yume-chan/android-bin";
 import { HamburgerMenuIcon } from "@radix-ui/react-icons";
 import TextEditor from "./fm/editor";
+import { ReadableStream } from "@yume-chan/stream-extra/esm/types";
 
 const SortFunc = (
     a: AdbSyncEntry,
@@ -161,7 +165,7 @@ const FileManagerItem = memo(
         return (
             <ContextMenu.Root>
                 <ContextMenu.Trigger>
-                    <Table.Row style={{ backgroundColor: selected ? "rgba(40,40,40,0.3)" : "transparent" }}>
+                    <Table.Row style={{ backgroundColor: selected ? "rgba(93, 93, 93, 0.6)" : "transparent" }}>
                         <Table.RowHeaderCell>
                             <IconButton
                                 onClick={() => onSelect?.()}
@@ -295,6 +299,7 @@ const FileManagerItem = memo(
 
 function FileManager({ adb, deviceHash }: { adb: Adb; deviceHash: string }) {
     const fmRef = useRef<HTMLDivElement>(null);
+    const uploadInputRef = useRef<HTMLInputElement>(null);
     const dialog = useDialog();
     const [currentPath, setCurrentPath] = useState(() => {
         const path = localStorage.getItem("fm_path_" + deviceHash);
@@ -305,8 +310,18 @@ function FileManager({ adb, deviceHash }: { adb: Adb; deviceHash: string }) {
     const [listFolders, setListFolders] = useState<AdbSyncEntry[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const [elemSize, setElemSize] = useState<{ w: number; h: number }>({ w: 0, h: 0 });
-    const [selected, setSelected] = useState<string[]>([]);
+    const [selected, setSelected] = useState<AdbSyncEntry[]>([]);
     const [showEditor, setShowEditor] = useState(false);
+    const [showUploadArea, setShowUploadArea] = useState(false);
+    const [uploadingFiles, setUploadingFiles] = useState<{
+        uploaded: number;
+        total: number;
+        failed: number;
+    }>({
+        uploaded: 0,
+        total: 0,
+        failed: 0,
+    });
     const [editorPath, setEditorPath] = useState<{ path: string | null; name: string }>({
         path: null,
         name: "",
@@ -364,7 +379,36 @@ function FileManager({ adb, deviceHash }: { adb: Adb; deviceHash: string }) {
     }, [adb, currentPath]);
 
     const handleDelete = useCallback(
-        async (file: AdbSyncEntry) => {
+        async (file: AdbSyncEntry | AdbSyncEntry[]) => {
+            if (Array.isArray(file)) {
+                dialog.confirm(
+                    t("delete_selected_items"),
+                    t("delete_selected_items_description", {
+                        count: file.length,
+                    }),
+                    async () => {
+                        try {
+                            setIsLoading(true);
+                            for (const f of file) {
+                                await adb.rm(path + "/" + f.name, {
+                                    recursive: f.type === LinuxFileType.Directory,
+                                    force: true,
+                                });
+                            }
+                            handleListFiles();
+                        } catch (error) {
+                            console.error(error);
+                            toast.error(
+                                t("failed_to_delete_selected_items"),
+                            );
+                        } finally {
+                            setIsLoading(false);
+                        }
+                    },
+                );
+
+                return;
+            }
             dialog.confirm(
                 t("delete_" + (file.type === LinuxFileType.Directory ? "folder" : "file")),
                 t("delete_" + (file.type === LinuxFileType.Directory ? "folder" : "file") + "_description", {
@@ -503,7 +547,7 @@ function FileManager({ adb, deviceHash }: { adb: Adb; deviceHash: string }) {
     }, [handleListFiles]);
 
     useEffect(() => {
-        setGoToPath(path);
+        setGoToPath(path === "" ? "/" : path);
     }, [path]);
 
     useEffect(() => {
@@ -522,9 +566,75 @@ function FileManager({ adb, deviceHash }: { adb: Adb; deviceHash: string }) {
         return () => observer.disconnect();
     }, []);
 
+    useEffect(() => {
+        if (!uploadInputRef.current) return;
+        const handleChange = async (e: Event) => {
+            if (!e.target) return;
+            setShowUploadArea(false);
+            setUploadingFiles({
+                uploaded: 0,
+                total: (e.target as HTMLInputElement).files?.length ?? 0,
+                failed: 0,
+            });
+            const files = Array.from((e.target as HTMLInputElement).files ?? []);
+
+            for (const file of files) {
+                try {
+                    await (await adb.sync()).write({
+                        filename: `${path}/${file.name}`,
+                        file: file.stream() as never as ReadableStream<Uint8Array>,
+                    });
+                    setUploadingFiles((prev) => ({
+                        ...prev,
+                        uploaded: prev.uploaded + 1,
+                    }));
+                } catch (error) {
+                    console.error(error);
+                    toast.error(t("failed_to_upload_file", { name: file.name }));
+                    setUploadingFiles((prev) => ({
+                        ...prev,
+                        failed: prev.failed + 1,
+                    }));
+                }
+            }
+            setUploadingFiles({
+                uploaded: 0,
+                total: 0,
+                failed: 0,
+            });
+            handleListFiles();
+        }
+        uploadInputRef.current.addEventListener("change", handleChange);
+        return () => {
+            uploadInputRef.current?.removeEventListener("change", handleChange);
+        };
+    }, [uploadInputRef.current, adb, path]);
+
     const breadcrumbDisplayItems = useMemo(() => {
         return breadcrumbItems.slice(Math.max(0, breadcrumbItems.length - Math.floor(elemSize.w / 150)));
     }, [breadcrumbItems, elemSize.w]);
+
+    useEffect(() => {
+        let timeout: NodeJS.Timeout;
+        const handleDrag = (e: DragEvent) => {
+            const dt = e.dataTransfer;
+            if (dt && dt.types && dt.types.includes('Files')) {
+                setShowUploadArea(true)
+                clearTimeout(timeout);
+            }
+        };
+        const handleEndDrag = () => {
+            timeout = setTimeout(() => {
+                setShowUploadArea(false);
+            }, 25);
+        };
+        document.addEventListener("dragover", handleDrag);
+        document.addEventListener("dragleave", handleEndDrag);
+        return () => {
+            document.removeEventListener("dragover", handleDrag);
+            document.removeEventListener("dragleave", handleEndDrag);
+        };
+    }, []);
 
     return (
         <div className={clsx(cls.FM, showEditor && cls.ShowEditor)}>
@@ -556,7 +666,7 @@ function FileManager({ adb, deviceHash }: { adb: Adb; deviceHash: string }) {
                     </IconButton>
                     <IconButton
                         variant="soft"
-                        color={path === "/" ? "cyan" : "gray"}
+                        color={path === "/" || path === "" ? "cyan" : "gray"}
                         size="1"
                         onClick={() => setCurrentPath("/")}
                         disabled={isLoading}
@@ -645,13 +755,35 @@ function FileManager({ adb, deviceHash }: { adb: Adb; deviceHash: string }) {
                             <Spinner size="2" />
                         </IconButton>
                     )}
+                    {uploadingFiles.total > 0 && (
+                        <Popover.Root>
+                            <Popover.Trigger>
+                                <IconButton variant="soft" color="gray" size="1">
+                                    <PiUploadDuotone />
+                                </IconButton>
+                            </Popover.Trigger>
+                            <Popover.Content size="1">
+                                <Flex direction="column" gap="2">
+                                    <Flex direction="row" gap="2" align="center">
+                                        <Spinner size="2" />
+                                        <Text size="1">{t('uploading_files', { uploaded: uploadingFiles.uploaded, total: uploadingFiles.total, failed: uploadingFiles.failed })}</Text>
+                                    </Flex>
+                                    <Progress value={uploadingFiles.uploaded / uploadingFiles.total * 100} />
+                                </Flex>
+                            </Popover.Content>
+                        </Popover.Root>
+                    )}
                     <DropdownMenu.Root>
-                        <DropdownMenu.Trigger>
+                        <DropdownMenu.Trigger disabled={isLoading}>
                             <IconButton variant="soft" color="gray" size="1" disabled={isLoading}>
                                 <HamburgerMenuIcon />
                             </IconButton>
                         </DropdownMenu.Trigger>
                         <DropdownMenu.Content size="1" variant="soft">
+                            <DropdownMenu.Item onClick={() => handleListFiles()}>
+                                <PiArrowsClockwiseDuotone size={18} />
+                                {t("refresh")}
+                            </DropdownMenu.Item>
                             <DropdownMenu.Item onClick={() => handleCreateFile("folder")}>
                                 <PiFolderPlusDuotone size={18} />
                                 {t("create_folder")}
@@ -660,8 +792,8 @@ function FileManager({ adb, deviceHash }: { adb: Adb; deviceHash: string }) {
                                 <PiFileDuotone size={18} />
                                 {t("create_file")}
                             </DropdownMenu.Item>
-                            <DropdownMenu.Item>
-                                <PiUploadDuotone size={18} />
+                            <DropdownMenu.Item onClick={() => uploadInputRef.current?.click()} disabled={uploadingFiles.total > 0}>
+                                {uploadingFiles.total > 0 ? <Spinner size="1" /> : <PiUploadDuotone size={18} />}
                                 {t("upload_file")}
                             </DropdownMenu.Item>
                             <DropdownMenu.Separator />
@@ -670,81 +802,79 @@ function FileManager({ adb, deviceHash }: { adb: Adb; deviceHash: string }) {
                             </DropdownMenu.Item>
                             <DropdownMenu.Item disabled={selected.length === 0}>
                                 <PiCopyDuotone size={18} />
-                                {t("copy_selected")}
+                                {t("copy")}
                             </DropdownMenu.Item>
                             <DropdownMenu.Item disabled={selected.length === 0}>
                                 <PiArrowsLeftRightDuotone size={18} />
-                                {t("move_selected")}
+                                {t("move")}
                             </DropdownMenu.Item>
-                            <DropdownMenu.Item disabled={selected.length === 0} color="red">
+                            <DropdownMenu.Item disabled={selected.length === 0} color="red" onClick={() => handleDelete(selected)}>
                                 <PiTrashSimpleDuotone size={18} />
-                                {t("delete_selected")}
+                                {t("delete")}
                             </DropdownMenu.Item>
                         </DropdownMenu.Content>
                     </DropdownMenu.Root>
                 </Card>
-                <Table.Root
-                    size="1"
-                    variant="surface"
-                    className={cls.FileManagerTable}
-                    layout="fixed"
-                    style={{ pointerEvents: isLoading ? "none" : "unset" }}
-                >
-                    <Table.Header className={cls.FileManagerHeader}>
-                        <Table.Row>
-                            <Table.ColumnHeaderCell style={{ width: "35px" }}>
-                                <Checkbox
-                                    onCheckedChange={(checked) => {
-                                        if (checked === true) {
-                                            setSelected([
-                                                ...listFiles.map((file) => file.name),
-                                                ...listFolders.map((folder) => folder.name),
-                                            ]);
-                                        } else {
-                                            setSelected([]);
+                <div className={cls.FmArea}>
+                    <div className={clsx(cls.UploadArea, (showUploadArea && uploadingFiles.total === 0) && cls.show)}>
+                        <Button variant="soft" color="gray" size="2" className={cls.CancelButton} onClick={() => setShowUploadArea(false)}>
+                            <PiXBold size={18} />
+                            {t("cancel")}
+                        </Button>
+                        <input
+                            ref={uploadInputRef}
+                            type="file"
+                            multiple
+                            accept="*"
+                            className={cls.UploadInput}
+                            disabled={uploadingFiles.total > 0}
+                        />
+                        <div className={cls.Hint}>
+                            <PiUploadDuotone size={60} />
+                            <Text size="3" weight="bold">
+                                {t("drop_files_here_or_click_to_upload")}
+                            </Text>
+                        </div>
+                    </div>
+                    <Table.Root
+                        size="1"
+                        variant="surface"
+                        className={cls.FileManagerTable}
+                        layout="fixed"
+                        style={{ pointerEvents: isLoading ? "none" : "unset" }}
+                    >
+                        <Table.Header className={cls.FileManagerHeader}>
+                            <Table.Row>
+                                <Table.ColumnHeaderCell style={{ width: "35px" }}>
+                                    <Checkbox
+                                        onCheckedChange={(checked) => {
+                                            if (checked === true) {
+                                                setSelected([
+                                                    ...listFiles,
+                                                    ...listFolders,
+                                                ]);
+                                            } else {
+                                                setSelected([]);
+                                            }
+                                        }}
+                                        checked={
+                                            listFiles.length + listFolders.length <= 0
+                                                ? false
+                                                : selected.length === listFiles.length + listFolders.length
+                                                    ? true
+                                                    : selected.length > 0
+                                                        ? "indeterminate"
+                                                        : false
                                         }
-                                    }}
-                                    checked={
-                                        listFiles.length + listFolders.length <= 0
-                                            ? false
-                                            : selected.length === listFiles.length + listFolders.length
-                                                ? true
-                                                : selected.length > 0
-                                                    ? "indeterminate"
-                                                    : false
-                                    }
-                                />
-                            </Table.ColumnHeaderCell>
-                            <Table.ColumnHeaderCell
-                                style={{ minWidth: "120px" }}
-                                onClick={() =>
-                                    setSortMode({
-                                        by: "name",
-                                        order:
-                                            sortMode.by === "name"
-                                                ? sortMode.order === "asc"
-                                                    ? "desc"
-                                                    : "asc"
-                                                : "asc",
-                                    })
-                                }
-                            >
-                                {t("name")}
-                                {sortMode.by === "name" && (
-                                    <IconButton variant="soft" color="gray" size="1" className={cls.SortButton}>
-                                        {sortMode.order === "asc" ? <PiArrowUp size={12} /> : <PiArrowDown size={12} />}
-                                    </IconButton>
-                                )}
-                            </Table.ColumnHeaderCell>
-                            {listFiles.length > 0 &&
+                                    />
+                                </Table.ColumnHeaderCell>
                                 <Table.ColumnHeaderCell
-                                    data-col-type="size"
-                                    style={{ width: "120px" }}
+                                    style={{ minWidth: "120px" }}
                                     onClick={() =>
                                         setSortMode({
-                                            by: "size",
+                                            by: "name",
                                             order:
-                                                sortMode.by === "size"
+                                                sortMode.by === "name"
                                                     ? sortMode.order === "asc"
                                                         ? "desc"
                                                         : "asc"
@@ -752,97 +882,121 @@ function FileManager({ adb, deviceHash }: { adb: Adb; deviceHash: string }) {
                                         })
                                     }
                                 >
-                                    {t("size")}
-                                    {sortMode.by === "size" && (
+                                    {t("name")}
+                                    {sortMode.by === "name" && (
                                         <IconButton variant="soft" color="gray" size="1" className={cls.SortButton}>
                                             {sortMode.order === "asc" ? <PiArrowUp size={12} /> : <PiArrowDown size={12} />}
                                         </IconButton>
                                     )}
                                 </Table.ColumnHeaderCell>
-                            }
-                            <Table.ColumnHeaderCell data-col-type="permission" style={{ width: "100px" }}>
-                                {t("permission")}
-                            </Table.ColumnHeaderCell>
-                            <Table.ColumnHeaderCell
-                                data-col-type="modified"
-                                style={{ width: "170px" }}
-                                onClick={() =>
-                                    setSortMode({
-                                        by: "modified",
-                                        order:
-                                            sortMode.by === "modified"
-                                                ? sortMode.order === "asc"
-                                                    ? "desc"
-                                                    : "asc"
-                                                : "asc",
-                                    })
+                                {listFiles.length > 0 &&
+                                    <Table.ColumnHeaderCell
+                                        data-col-type="size"
+                                        style={{ width: "120px" }}
+                                        onClick={() =>
+                                            setSortMode({
+                                                by: "size",
+                                                order:
+                                                    sortMode.by === "size"
+                                                        ? sortMode.order === "asc"
+                                                            ? "desc"
+                                                            : "asc"
+                                                        : "asc",
+                                            })
+                                        }
+                                    >
+                                        {t("size")}
+                                        {sortMode.by === "size" && (
+                                            <IconButton variant="soft" color="gray" size="1" className={cls.SortButton}>
+                                                {sortMode.order === "asc" ? <PiArrowUp size={12} /> : <PiArrowDown size={12} />}
+                                            </IconButton>
+                                        )}
+                                    </Table.ColumnHeaderCell>
                                 }
-                            >
-                                {t("modified")}
-                                {sortMode.by === "modified" && (
-                                    <IconButton variant="soft" color="gray" size="1" className={cls.SortButton}>
-                                        {sortMode.order === "asc" ? <PiArrowUp size={12} /> : <PiArrowDown size={12} />}
-                                    </IconButton>
-                                )}
-                            </Table.ColumnHeaderCell>
-                        </Table.Row>
-                    </Table.Header>
+                                <Table.ColumnHeaderCell data-col-type="permission" style={{ width: "100px" }}>
+                                    {t("permission")}
+                                </Table.ColumnHeaderCell>
+                                <Table.ColumnHeaderCell
+                                    data-col-type="modified"
+                                    style={{ width: "170px" }}
+                                    onClick={() =>
+                                        setSortMode({
+                                            by: "modified",
+                                            order:
+                                                sortMode.by === "modified"
+                                                    ? sortMode.order === "asc"
+                                                        ? "desc"
+                                                        : "asc"
+                                                    : "asc",
+                                        })
+                                    }
+                                >
+                                    {t("modified")}
+                                    {sortMode.by === "modified" && (
+                                        <IconButton variant="soft" color="gray" size="1" className={cls.SortButton}>
+                                            {sortMode.order === "asc" ? <PiArrowUp size={12} /> : <PiArrowDown size={12} />}
+                                        </IconButton>
+                                    )}
+                                </Table.ColumnHeaderCell>
+                            </Table.Row>
+                        </Table.Header>
 
-                    <Table.Body>
-                        {listFolders
-                            .sort((a, b) => SortFunc(a, b, sortMode))
-                            .map((file) => (
-                                <FileManagerItem
-                                    key={file.name}
-                                    file={file}
-                                    adb={adb}
-                                    sizeColumn={listFiles.length > 0}
-                                    currentPath={path}
-                                    cd={() =>
-                                        setCurrentPath((path === "/" ? "" : path) + "/" + file.name)
-                                    }
-                                    onRename={() => handleRenameFile(file)}
-                                    selected={selected.includes(file.name)}
-                                    onDelete={() => handleDelete(file)}
-                                    onSelect={() =>
-                                        setSelected(
-                                            selected.includes(file.name)
-                                                ? selected.filter((name) => name !== file.name)
-                                                : [...selected, file.name],
-                                        )
-                                    }
-                                />
-                            ))}
-                        {listFiles
-                            .sort((a, b) => SortFunc(a, b, sortMode))
-                            .map((file) => (
-                                <FileManagerItem
-                                    key={file.name}
-                                    file={file}
-                                    selected={selected.includes(file.name)}
-                                    adb={adb}
-                                    sizeColumn
-                                    currentPath={path}
-                                    onOpenEditor={() => {
-                                        setEditorPath({
-                                            path: path + "/" + file.name,
-                                            name: file.name,
-                                        });
-                                        setShowEditor(true);
-                                    }}
-                                    onRename={() => handleRenameFile(file)}
-                                    onDelete={() => handleDelete(file)}
-                                    onSelect={() =>
-                                        setSelected(
-                                            selected.includes(file.name)
-                                                ? selected.filter((name) => name !== file.name)
-                                                : [...selected, file.name],
-                                        )
-                                    }
-                                />
-                            ))}
-                    </Table.Body>
-                </Table.Root>
+                        <Table.Body>
+                            {listFolders
+                                .sort((a, b) => SortFunc(a, b, sortMode))
+                                .map((file) => (
+                                    <FileManagerItem
+                                        key={file.name}
+                                        file={file}
+                                        adb={adb}
+                                        sizeColumn={listFiles.length > 0}
+                                        currentPath={path}
+                                        cd={() =>
+                                            setCurrentPath((path === "/" ? "" : path) + "/" + file.name)
+                                        }
+                                        onRename={() => handleRenameFile(file)}
+                                        selected={selected.includes(file)}
+                                        onDelete={() => handleDelete(file)}
+                                        onSelect={() =>
+                                            setSelected(
+                                                selected.includes(file)
+                                                    ? selected.filter((name) => name !== file)
+                                                    : [...selected, file],
+                                            )
+                                        }
+                                    />
+                                ))}
+                            {listFiles
+                                .sort((a, b) => SortFunc(a, b, sortMode))
+                                .map((file) => (
+                                    <FileManagerItem
+                                        key={file.name}
+                                        file={file}
+                                        selected={selected.includes(file)}
+                                        adb={adb}
+                                        sizeColumn
+                                        currentPath={path}
+                                        onOpenEditor={() => {
+                                            setEditorPath({
+                                                path: path + "/" + file.name,
+                                                name: file.name,
+                                            });
+                                            setShowEditor(true);
+                                        }}
+                                        onRename={() => handleRenameFile(file)}
+                                        onDelete={() => handleDelete(file)}
+                                        onSelect={() =>
+                                            setSelected(
+                                                selected.includes(file)
+                                                    ? selected.filter((name) => name !== file)
+                                                    : [...selected, file],
+                                            )
+                                        }
+                                    />
+                                ))}
+                        </Table.Body>
+                    </Table.Root>
+                </div>
             </div>
         </div>
     );

@@ -35,6 +35,7 @@
         "@yume-chan/scrcpy-decoder-tinyh264": "^2.0.1",
         "@yume-chan/scrcpy-decoder-webcodecs": "^2.0.1",
         "@yume-chan/stream-extra": "^2.0.1",
+        "chrome-devtools-frontend": "^1.0.1445635",
         "clsx": "^2.1.1",
         "hash-object": "^5.0.1",
         "i18next": "^25.1.2",
