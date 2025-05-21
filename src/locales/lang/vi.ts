@@ -199,6 +199,13 @@ const Locale: LocaleResourcesType = {
         move_task_description: "Di chuyển {{count}} tệp từ {{from}}",
         copy_to_here: "Sao chép vào đây",
         move_to_here: "Di chuyển vào đây",
+        doing_copy_task: "Đang sao chép tệp...",
+        doing_move_task: "Đang di chuyển tệp...",
+        failed_to_copy_selected_files: "Không thể sao chép các tệp đã chọn",
+        failed_to_move_selected_files: "Không thể di chuyển các tệp đã chọn",
+        success_to_copy_selected_files: "Đã sao chép các tệp đã chọn",
+        success_to_move_selected_files: "Đã di chuyển các tệp đã chọn",
+        clear_task: "Xóa hàng đợi",
     },
 };
 

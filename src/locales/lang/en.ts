@@ -198,7 +198,14 @@ const Locale: LocaleResourcesType = {
         copy_task_description: "Copy {{count}} files from {{from}}",
         move_task_description: "Move {{count}} files from {{from}}",
         copy_to_here: "Copy to here",
-        move_to_here: "Move to here"
+        move_to_here: "Move to here",
+        doing_copy_task: "Copying files...",
+        doing_move_task: "Moving files...",
+        failed_to_copy_selected_files: "Failed to copy selected files",
+        failed_to_move_selected_files: "Failed to move selected files",
+        success_to_copy_selected_files: "Successfully copied selected files",
+        success_to_move_selected_files: "Successfully moved selected files",
+        clear_task: "Clear task",
     },
 };
 

@@ -198,7 +198,7 @@ const FileManagerItem = memo(
         }, [file.type, cd, selected, onSelect, fileType, onOpenEditor]);
 
         return (
-            <ContextMenu.Root>
+            <ContextMenu.Root onOpenChange={() => onSelect?.(true)}>
                 <ContextMenu.Trigger>
                     <Table.Row style={{ backgroundColor: selected ? "rgba(93, 93, 93, 0.6)" : "transparent" }}>
                         <Table.RowHeaderCell>
@@ -570,6 +570,22 @@ function FileManager({ adb, deviceHash }: { adb: Adb; deviceHash: string }) {
         )
     }, [dialog, adb, path, t]);
 
+    const handleCopyMove = useCallback(async () => {
+        if (!copyTask) return;
+        setIsLoading(true);
+        try {
+            for (const file of copyTask.source) {
+                await adb.subprocess.shellProtocol?.spawnWaitText(`${(copyTask.type === "move" ? "mv" : "cp")} "${copyTask.from}/${file.name}" "${path}/${file.name}"`);
+            }
+            handleListFiles();
+        } catch (error) {
+            console.error(error);
+            toast.error(t("failed_to_" + copyTask.type + "_selected_files"));
+        } finally {
+            setIsLoading(false);
+        }
+    }, [copyTask, path, adb, t, handleListFiles]);
+
     useEffect(() => {
         handleListFiles();
     }, [handleListFiles]);
@@ -792,10 +808,14 @@ function FileManager({ adb, deviceHash }: { adb: Adb; deviceHash: string }) {
                         <Popover.Content size="1">
                             <Text size="1">{t(copyTask.type + "_task_description", { count: copyTask.source.length, from: !copyTask.from ? "/" : copyTask.from })}</Text>
                             <Button variant="soft" mt="1" disabled={copyTask.from === path} size="1" onClick={() => {
+                                handleCopyMove();
                                 setCopyTask(null);
                             }}>
                                 {copyTask.type === "copy" ? <PiCopyDuotone /> : <PiArrowsLeftRightDuotone />}
                                 {t(copyTask.type + "_to_here")}
+                            </Button>
+                            <Button size="1" color="red" mt="1" variant="soft" onClick={() => setCopyTask(null)}>
+                                {t('clear_task')}
                             </Button>
                         </Popover.Content>
                     </Popover.Root>
