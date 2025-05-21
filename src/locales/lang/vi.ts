@@ -195,6 +195,10 @@ const Locale: LocaleResourcesType = {
         delete_selected_items: "Xóa các mục đã chọn",
         delete_selected_items_description: "Bạn có chắc chắn muốn xóa {{count}} mục không?",
         failed_to_delete_selected_items: "Không thể xóa các mục đã chọn",
+        copy_task_description: "Sao chép {{count}} tệp từ {{from}}",
+        move_task_description: "Di chuyển {{count}} tệp từ {{from}}",
+        copy_to_here: "Sao chép vào đây",
+        move_to_here: "Di chuyển vào đây",
     },
 };
 

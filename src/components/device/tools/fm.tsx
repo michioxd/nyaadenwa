@@ -29,6 +29,7 @@ import {
     PiArrowsClockwiseDuotone,
     PiArrowsLeftRightDuotone,
     PiArrowUp,
+    PiClipboardDuotone,
     PiCopyDuotone,
     PiDotsThreeBold,
     PiDownloadDuotone,
@@ -43,7 +44,7 @@ import {
     PiUploadDuotone,
     PiXBold,
 } from "react-icons/pi";
-import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { memo, MouseEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
 import { formatPermissions, formatSize, isValidPath, validateLinuxFileName } from "@/utils/str";
@@ -88,21 +89,26 @@ const FileManagerItem = memo(
         onOpenEditor,
         sizeColumn,
         onRename,
+        onCopy,
+        onMove,
     }: {
         file: AdbSyncEntry;
         cd?: () => void;
         selected?: boolean;
-        onSelect?: () => void;
+        onSelect?: (one?: boolean) => void;
         onDelete?: () => void;
         adb: Adb;
         currentPath: string;
         onOpenEditor?: () => void;
         sizeColumn?: boolean;
         onRename?: () => void;
+        onCopy?: () => void;
+        onMove?: () => void;
     }) => {
         const { t, i18n } = useTranslation();
         const dialog = useDialog();
         const [isInstalling, setIsInstalling] = useState(false);
+        const lastClick = useRef<number>(0);
 
         const fileType = useMemo(() => {
             if (file.type === LinuxFileType.Directory || file.type === LinuxFileType.Link) return "folder";
@@ -162,6 +168,35 @@ const FileManagerItem = memo(
             );
         }, [dialog, adb, file.name, t, currentPath]);
 
+        const onUserHandle = useCallback((e: MouseEvent<HTMLTableDataCellElement, globalThis.MouseEvent>) => {
+            const isDirectory = file.type === LinuxFileType.Directory || file.type === LinuxFileType.Link;
+            const isDesktop = window.innerWidth >= 768;
+
+            if (isDesktop) {
+                if (e.detail === 1) {
+                    onSelect?.(true);
+                    return;
+                }
+
+                if (e.detail === 2 && Date.now() - lastClick.current < 300) {
+                    if (isDirectory) {
+                        cd?.();
+                        return;
+                    }
+                    if (fileType === "code" || fileType === "text") {
+                        onOpenEditor?.();
+                        return;
+                    }
+                } else {
+                    lastClick.current = Date.now();
+                }
+                return;
+            }
+
+            if (isDirectory) cd?.();
+            else if (fileType === "code" || fileType === "text") onOpenEditor?.();
+        }, [file.type, cd, selected, onSelect, fileType, onOpenEditor]);
+
         return (
             <ContextMenu.Root>
                 <ContextMenu.Trigger>
@@ -196,11 +231,8 @@ const FileManagerItem = memo(
                             </IconButton>
                         </Table.RowHeaderCell>
                         <Table.Cell
-                            onClick={
-                                file.type === LinuxFileType.Directory || file.type === LinuxFileType.Link
-                                    ? () => cd?.()
-                                    : undefined
-                            }
+                            onDoubleClick={onUserHandle}
+                            onClick={onUserHandle}
                         >
                             <Text
                                 size="1"
@@ -213,11 +245,8 @@ const FileManagerItem = memo(
                         {sizeColumn && (
                             <Table.Cell
                                 data-col-type="size"
-                                onClick={
-                                    file.type === LinuxFileType.Directory || file.type === LinuxFileType.Link
-                                        ? () => cd?.()
-                                        : undefined
-                                }
+                                onDoubleClick={onUserHandle}
+                                onClick={onUserHandle}
                             >
                                 <Text size="1" weight="medium" color="gray" align="center">
                                     {file.type === LinuxFileType.File ? formatSize(Number(file.size)) : ""}
@@ -226,11 +255,8 @@ const FileManagerItem = memo(
                         )}
                         <Table.Cell
                             data-col-type="permission"
-                            onClick={
-                                file.type === LinuxFileType.Directory || file.type === LinuxFileType.Link
-                                    ? () => cd?.()
-                                    : undefined
-                            }
+                            onDoubleClick={onUserHandle}
+                            onClick={onUserHandle}
                         >
                             <Text size="1" weight="medium" color="gray" align="center">
                                 {formatPermissions(file.permission)}
@@ -238,11 +264,8 @@ const FileManagerItem = memo(
                         </Table.Cell>
                         <Table.Cell
                             data-col-type="size"
-                            onClick={
-                                file.type === LinuxFileType.Directory || file.type === LinuxFileType.Link
-                                    ? () => cd?.()
-                                    : undefined
-                            }
+                            onDoubleClick={onUserHandle}
+                            onClick={onUserHandle}
                         >
                             <Text size="1" weight="medium" color="gray" align="center">
                                 {new Date(Number(file.mtime) * 1000).toLocaleString(i18n.language)}
@@ -279,11 +302,11 @@ const FileManagerItem = memo(
                         <PiPenNibDuotone size={18} />
                         {t("rename_" + (file.type === LinuxFileType.Directory ? "folder" : "file"))}
                     </ContextMenu.Item>
-                    <ContextMenu.Item>
+                    <ContextMenu.Item onClick={() => onCopy?.()}>
                         <PiCopyDuotone size={18} />
                         {t("copy_" + (file.type === LinuxFileType.Directory ? "folder" : "file"))}
                     </ContextMenu.Item>
-                    <ContextMenu.Item>
+                    <ContextMenu.Item onClick={() => onMove?.()}>
                         <PiArrowsLeftRightDuotone size={18} />
                         {t("move_" + (file.type === LinuxFileType.Directory ? "folder" : "file"))}
                     </ContextMenu.Item>
@@ -313,6 +336,11 @@ function FileManager({ adb, deviceHash }: { adb: Adb; deviceHash: string }) {
     const [selected, setSelected] = useState<AdbSyncEntry[]>([]);
     const [showEditor, setShowEditor] = useState(false);
     const [showUploadArea, setShowUploadArea] = useState(false);
+    const [copyTask, setCopyTask] = useState<{
+        source: AdbSyncEntry[];
+        type: "copy" | "move";
+        from: string;
+    } | null>(null);
     const [uploadingFiles, setUploadingFiles] = useState<{
         uploaded: number;
         total: number;
@@ -755,6 +783,23 @@ function FileManager({ adb, deviceHash }: { adb: Adb; deviceHash: string }) {
                             <Spinner size="2" />
                         </IconButton>
                     )}
+                    {copyTask && <Popover.Root>
+                        <Popover.Trigger>
+                            <IconButton variant="soft" color="gray" size="1">
+                                <PiClipboardDuotone />
+                            </IconButton>
+                        </Popover.Trigger>
+                        <Popover.Content size="1">
+                            <Text size="1">{t(copyTask.type + "_task_description", { count: copyTask.source.length, from: !copyTask.from ? "/" : copyTask.from })}</Text>
+                            <Button variant="soft" mt="1" disabled={copyTask.from === path} size="1" onClick={() => {
+                                setCopyTask(null);
+                            }}>
+                                {copyTask.type === "copy" ? <PiCopyDuotone /> : <PiArrowsLeftRightDuotone />}
+                                {t(copyTask.type + "_to_here")}
+                            </Button>
+                        </Popover.Content>
+                    </Popover.Root>
+                    }
                     {uploadingFiles.total > 0 && (
                         <Popover.Root>
                             <Popover.Trigger>
@@ -800,11 +845,25 @@ function FileManager({ adb, deviceHash }: { adb: Adb; deviceHash: string }) {
                             <DropdownMenu.Item disabled>
                                 {t("selected_count", { count: selected.length })}
                             </DropdownMenu.Item>
-                            <DropdownMenu.Item disabled={selected.length === 0}>
+                            <DropdownMenu.Item disabled={selected.length === 0} onClick={() => {
+                                setCopyTask({
+                                    type: "copy",
+                                    source: selected,
+                                    from: path,
+                                });
+                                setSelected([]);
+                            }}>
                                 <PiCopyDuotone size={18} />
                                 {t("copy")}
                             </DropdownMenu.Item>
-                            <DropdownMenu.Item disabled={selected.length === 0}>
+                            <DropdownMenu.Item disabled={selected.length === 0} onClick={() => {
+                                setCopyTask({
+                                    type: "move",
+                                    source: selected,
+                                    from: path,
+                                });
+                                setSelected([]);
+                            }}>
                                 <PiArrowsLeftRightDuotone size={18} />
                                 {t("move")}
                             </DropdownMenu.Item>
@@ -951,13 +1010,27 @@ function FileManager({ adb, deviceHash }: { adb: Adb; deviceHash: string }) {
                                         adb={adb}
                                         sizeColumn={listFiles.length > 0}
                                         currentPath={path}
+                                        onCopy={() => {
+                                            setCopyTask({
+                                                type: "copy",
+                                                source: [file],
+                                                from: path,
+                                            });
+                                        }}
+                                        onMove={() => {
+                                            setCopyTask({
+                                                type: "move",
+                                                source: [file],
+                                                from: path,
+                                            });
+                                        }}
                                         cd={() =>
                                             setCurrentPath((path === "/" ? "" : path) + "/" + file.name)
                                         }
                                         onRename={() => handleRenameFile(file)}
                                         selected={selected.includes(file)}
                                         onDelete={() => handleDelete(file)}
-                                        onSelect={() =>
+                                        onSelect={(one) => one ? setSelected([file]) :
                                             setSelected(
                                                 selected.includes(file)
                                                     ? selected.filter((name) => name !== file)
@@ -976,6 +1049,20 @@ function FileManager({ adb, deviceHash }: { adb: Adb; deviceHash: string }) {
                                         adb={adb}
                                         sizeColumn
                                         currentPath={path}
+                                        onCopy={() => {
+                                            setCopyTask({
+                                                type: "copy",
+                                                source: [file],
+                                                from: path,
+                                            });
+                                        }}
+                                        onMove={() => {
+                                            setCopyTask({
+                                                type: "move",
+                                                source: [file],
+                                                from: path,
+                                            });
+                                        }}
                                         onOpenEditor={() => {
                                             setEditorPath({
                                                 path: path + "/" + file.name,
@@ -985,7 +1072,7 @@ function FileManager({ adb, deviceHash }: { adb: Adb; deviceHash: string }) {
                                         }}
                                         onRename={() => handleRenameFile(file)}
                                         onDelete={() => handleDelete(file)}
-                                        onSelect={() =>
+                                        onSelect={(one) => one ? setSelected([file]) :
                                             setSelected(
                                                 selected.includes(file)
                                                     ? selected.filter((name) => name !== file)

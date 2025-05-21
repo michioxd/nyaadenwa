@@ -195,6 +195,10 @@ const Locale: LocaleResourcesType = {
         delete_selected_items: "Delete selected items",
         delete_selected_items_description: "Are you sure you want to delete {{count}} items?",
         failed_to_delete_selected_items: "Failed to delete selected items",
+        copy_task_description: "Copy {{count}} files from {{from}}",
+        move_task_description: "Move {{count}} files from {{from}}",
+        copy_to_here: "Copy to here",
+        move_to_here: "Move to here"
     },
 };
 
