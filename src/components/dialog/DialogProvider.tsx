@@ -55,29 +55,29 @@ type DialogCustomButtons = ((onConfirm: () => void, onCancel: () => void) => Rea
 
 type DialogData =
     | {
-        type: DialogType.Alert;
-        title: React.ReactNode;
-        content?: React.ReactNode;
-        buttons?: DialogCustomButtons;
-        onConfirm?: () => void;
-    }
+          type: DialogType.Alert;
+          title: React.ReactNode;
+          content?: React.ReactNode;
+          buttons?: DialogCustomButtons;
+          onConfirm?: () => void;
+      }
     | {
-        type: DialogType.Confirm;
-        title: React.ReactNode;
-        content?: React.ReactNode;
-        buttons?: DialogCustomButtons;
-        onConfirm?: () => void;
-        onCancel?: () => void;
-    }
+          type: DialogType.Confirm;
+          title: React.ReactNode;
+          content?: React.ReactNode;
+          buttons?: DialogCustomButtons;
+          onConfirm?: () => void;
+          onCancel?: () => void;
+      }
     | {
-        type: DialogType.Prompt;
-        title: React.ReactNode;
-        content?: React.ReactNode;
-        inputs: DialogField[];
-        buttons?: DialogCustomButtons;
-        onConfirm?: (value: string[], close: () => void) => void;
-        onCancel?: () => void;
-    };
+          type: DialogType.Prompt;
+          title: React.ReactNode;
+          content?: React.ReactNode;
+          inputs: DialogField[];
+          buttons?: DialogCustomButtons;
+          onConfirm?: (value: string[], close: () => void) => void;
+          onCancel?: () => void;
+      };
 
 export default function DialogProvider({ children }: { children: React.ReactNode }) {
     const { t } = useTranslation();
@@ -86,7 +86,7 @@ export default function DialogProvider({ children }: { children: React.ReactNode
         type: DialogType.Alert,
         title: "",
         content: "",
-        onConfirm: () => { },
+        onConfirm: () => {},
     });
     const [fieldData, setFieldData] = useState<string[]>([]);
 
@@ -201,16 +201,16 @@ export default function DialogProvider({ children }: { children: React.ReactNode
                                         typeof data.onConfirm === "function"
                                             ? () => data.onConfirm?.(fieldData, () => setOpen(false))
                                             : () => {
-                                                setOpen(false);
-                                            },
+                                                  setOpen(false);
+                                              },
                                         "onCancel" in data && typeof data.onCancel === "function"
                                             ? () => {
-                                                setOpen(false);
-                                                data.onCancel?.();
-                                            }
+                                                  setOpen(false);
+                                                  data.onCancel?.();
+                                              }
                                             : () => {
-                                                setOpen(false);
-                                            },
+                                                  setOpen(false);
+                                              },
                                     )}
                                 </Flex>
                             ) : (
@@ -256,7 +256,9 @@ export default function DialogProvider({ children }: { children: React.ReactNode
                                     }}
                                     disabled={
                                         data.type === DialogType.Prompt &&
-                                        data.inputs.some((input, index) => input.validate && !input.validate(fieldData[index]))
+                                        data.inputs.some(
+                                            (input, index) => input.validate && !input.validate(fieldData[index]),
+                                        )
                                     }
                                 >
                                     {t("confirm")}

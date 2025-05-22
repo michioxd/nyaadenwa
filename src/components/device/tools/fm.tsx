@@ -95,51 +95,77 @@ const SortFunc = (
     return 0;
 };
 
-const FileAlreadyExistsAction = ({ ok, res, filesLength }: { ok: () => void, res: (value: number) => void, filesLength: number }) => {
+const FileAlreadyExistsAction = ({
+    ok,
+    res,
+    filesLength,
+}: {
+    ok: () => void;
+    res: (value: number) => void;
+    filesLength: number;
+}) => {
     const [applyToAll, setApplyToAll] = useState(false);
     const { t } = useTranslation();
 
-    return <>
-        {filesLength > 1 &&
-            <Flex direction="row" gap="2" align="center">
-                <Checkbox
-                    checked={applyToAll}
-                    onCheckedChange={(c) => setApplyToAll(c === "indeterminate" ? false : c)}
-                />
-                <Text size="1">{t("apply_to_all")}</Text>
-            </Flex>
-        }
-        <Button onClick={() => {
-            res(applyToAll ? 3 : 0);
-            ok?.();
-        }}>
-            {t("skip")}
-        </Button>
-        <Button variant="soft" color="yellow" onClick={() => {
-            res(applyToAll ? 4 : 1);
-            ok?.();
-        }}>
-            {t("rename")}
-        </Button>
-        <Button variant="soft" color="red" onClick={() => {
-            res(applyToAll ? 5 : 2);
-            ok?.();
-        }}>
-            {t("overwrite")}
-        </Button>
-    </>
-}
+    return (
+        <>
+            {filesLength > 1 && (
+                <Flex direction="row" gap="2" align="center">
+                    <Checkbox
+                        checked={applyToAll}
+                        onCheckedChange={(c) => setApplyToAll(c === "indeterminate" ? false : c)}
+                    />
+                    <Text size="1">{t("apply_to_all")}</Text>
+                </Flex>
+            )}
+            <Button
+                onClick={() => {
+                    res(applyToAll ? 3 : 0);
+                    ok?.();
+                }}
+            >
+                {t("skip")}
+            </Button>
+            <Button
+                variant="soft"
+                color="yellow"
+                onClick={() => {
+                    res(applyToAll ? 4 : 1);
+                    ok?.();
+                }}
+            >
+                {t("rename")}
+            </Button>
+            <Button
+                variant="soft"
+                color="red"
+                onClick={() => {
+                    res(applyToAll ? 5 : 2);
+                    ok?.();
+                }}
+            >
+                {t("overwrite")}
+            </Button>
+        </>
+    );
+};
 
-const fileAlreadyExistsConfirm = (dialog: DialogContextType['dialog'], filesLength: number, fileName: string, t: TFunction) => {
+const fileAlreadyExistsConfirm = (
+    dialog: DialogContextType["dialog"],
+    filesLength: number,
+    fileName: string,
+    t: TFunction,
+) => {
     return new Promise<number>((res) => {
         dialog.confirm(
             t("file_already_exists", { name: fileName }),
             t("file_already_exists_description", { name: fileName }),
-            undefined, undefined,
-            (ok) => <FileAlreadyExistsAction ok={ok} res={res} filesLength={filesLength} />
+            undefined,
+            undefined,
+            (ok) => <FileAlreadyExistsAction ok={ok} res={res} filesLength={filesLength} />,
         );
     });
-}
+};
 
 const FileManagerItem = memo(
     ({
@@ -243,82 +269,97 @@ const FileManagerItem = memo(
 
                 handle = await window.showSaveFilePicker({
                     suggestedName: file.name,
-                    types: [{
-                        description: t("file"),
-                        accept: {
-                            [getMimeType(file.name)]: [`.${file.name.split('.').pop()}`]
-                        }
-                    }]
+                    types: [
+                        {
+                            description: t("file"),
+                            accept: {
+                                [getMimeType(file.name)]: [`.${file.name.split(".").pop()}`],
+                            },
+                        },
+                    ],
                 });
 
                 const writable = await handle.createWritable();
                 let downloaded = 0;
-                await res.pipeTo(new WritableStream({
-                    write(chunk: Uint8Array) {
-                        downloaded += chunk.length;
-                        setDownloadProgress(Math.round((downloaded / fileSize) * 100));
-                        const u8a = new Uint8Array(chunk);
-                        const blob = new Blob([u8a]);
-                        return writable.write(blob);
-                    },
-                    close() {
-                        return writable.close();
-                    }
-                }));
+                await res.pipeTo(
+                    new WritableStream({
+                        write(chunk: Uint8Array) {
+                            downloaded += chunk.length;
+                            setDownloadProgress(Math.round((downloaded / fileSize) * 100));
+                            const u8a = new Uint8Array(chunk);
+                            const blob = new Blob([u8a]);
+                            return writable.write(blob);
+                        },
+                        close() {
+                            return writable.close();
+                        },
+                    }),
+                );
                 toast.success(t("download_file_success"));
             } catch (error: unknown) {
-                if (error instanceof Error && error.name === 'AbortError') {
+                if (error instanceof Error && error.name === "AbortError") {
                     toast.warning(t("user_cancelled_download"));
                     return;
                 }
                 console.error(error);
-                toast.error(t("failed_to_download_file", {
-                    name: file.name,
-                }));
+                toast.error(
+                    t("failed_to_download_file", {
+                        name: file.name,
+                    }),
+                );
             } finally {
                 setDownloadProgress(null);
             }
         }, [dialog, adb, file.name, t, currentPath]);
 
-        const onUserHandle = useCallback((e: MouseEvent<HTMLTableDataCellElement, globalThis.MouseEvent>) => {
-            const isDirectory = file.type === LinuxFileType.Directory || file.type === LinuxFileType.Link;
-            const isDesktop = window.innerWidth >= 600;
+        const onUserHandle = useCallback(
+            (e: MouseEvent<HTMLTableDataCellElement, globalThis.MouseEvent>) => {
+                const isDirectory = file.type === LinuxFileType.Directory || file.type === LinuxFileType.Link;
+                const isDesktop = window.innerWidth >= 600;
 
-            if (isDesktop) {
-                if (e.detail === 1) {
-                    onSelect?.(true);
+                if (isDesktop) {
+                    if (e.detail === 1) {
+                        onSelect?.(true);
+                        return;
+                    }
+
+                    if (e.detail === 2 && Date.now() - lastClick.current < 300) {
+                        if (isDirectory) {
+                            cd?.();
+                            return;
+                        }
+                        if (fileType === "code" || fileType === "text") {
+                            onOpenEditor?.();
+                            return;
+                        }
+                        if (fileType === "android_package") {
+                            handleInstallApk();
+                            return;
+                        }
+                    } else {
+                        lastClick.current = Date.now();
+                    }
                     return;
                 }
 
-                if (e.detail === 2 && Date.now() - lastClick.current < 300) {
-                    if (isDirectory) {
-                        cd?.();
-                        return;
-                    }
-                    if (fileType === "code" || fileType === "text") {
-                        onOpenEditor?.();
-                        return;
-                    }
-                    if (fileType === "android_package") {
-                        handleInstallApk();
-                        return;
-                    }
-                } else {
-                    lastClick.current = Date.now();
-                }
-                return;
-            }
-
-            if (isDirectory) cd?.();
-            else if (fileType === "code" || fileType === "text") onOpenEditor?.();
-            else if (fileType === "android_package") handleInstallApk();
-        }, [file.type, cd, selected, onSelect, fileType, onOpenEditor]);
+                if (isDirectory) cd?.();
+                else if (fileType === "code" || fileType === "text") onOpenEditor?.();
+                else if (fileType === "android_package") handleInstallApk();
+            },
+            [file.type, cd, selected, onSelect, fileType, onOpenEditor],
+        );
 
         return (
             <ContextMenu.Root onOpenChange={() => onSelect?.(true)}>
                 <ContextMenu.Trigger>
-                    <Table.Row className={clsx(cls.FileManagerItem, selected && cls.Selected)}
-                        style={downloadProgress ? { "--download-progress": `${downloadProgress}%` } as React.CSSProperties : {}}>
+                    <Table.Row
+                        className={clsx(cls.FileManagerItem, selected && cls.Selected)}
+                        style={
+                            downloadProgress
+                                ? ({ "--download-progress": `${downloadProgress}%` } as React.CSSProperties)
+                                : {}
+                        }
+                    >
                         <Table.RowHeaderCell>
                             <IconButton
                                 onClick={() => onSelect?.()}
@@ -348,10 +389,7 @@ const FileManagerItem = memo(
                                 )}
                             </IconButton>
                         </Table.RowHeaderCell>
-                        <Table.Cell
-                            onDoubleClick={onUserHandle}
-                            onClick={onUserHandle}
-                        >
+                        <Table.Cell onDoubleClick={onUserHandle} onClick={onUserHandle}>
                             <Text
                                 size="1"
                                 weight="medium"
@@ -361,30 +399,18 @@ const FileManagerItem = memo(
                             </Text>
                         </Table.Cell>
                         {sizeColumn && (
-                            <Table.Cell
-                                data-col-type="size"
-                                onDoubleClick={onUserHandle}
-                                onClick={onUserHandle}
-                            >
+                            <Table.Cell data-col-type="size" onDoubleClick={onUserHandle} onClick={onUserHandle}>
                                 <Text size="1" weight="medium" color="gray" align="center">
                                     {file.type === LinuxFileType.File ? formatSize(Number(file.size)) : ""}
                                 </Text>
                             </Table.Cell>
                         )}
-                        <Table.Cell
-                            data-col-type="permission"
-                            onDoubleClick={onUserHandle}
-                            onClick={onUserHandle}
-                        >
+                        <Table.Cell data-col-type="permission" onDoubleClick={onUserHandle} onClick={onUserHandle}>
                             <Text size="1" weight="medium" color="gray" align="center">
                                 {formatPermissions(file.permission)}
                             </Text>
                         </Table.Cell>
-                        <Table.Cell
-                            data-col-type="size"
-                            onDoubleClick={onUserHandle}
-                            onClick={onUserHandle}
-                        >
+                        <Table.Cell data-col-type="size" onDoubleClick={onUserHandle} onClick={onUserHandle}>
                             <Text size="1" weight="medium" color="gray" align="center">
                                 {new Date(Number(file.mtime) * 1000).toLocaleString(i18n.language)}
                             </Text>
@@ -493,7 +519,7 @@ function FileManager({ adb, deviceHash }: { adb: Adb; deviceHash: string }) {
         order: "asc",
     });
 
-    const path = useMemo(() => currentPath === "/" ? "" : currentPath, [currentPath]);
+    const path = useMemo(() => (currentPath === "/" ? "" : currentPath), [currentPath]);
 
     const breadcrumbItems = useMemo(() => {
         const items = currentPath.split("/");
@@ -556,9 +582,7 @@ function FileManager({ adb, deviceHash }: { adb: Adb; deviceHash: string }) {
                             handleListFiles();
                         } catch (error) {
                             console.error(error);
-                            toast.error(
-                                t("failed_to_delete_selected_items"),
-                            );
+                            toast.error(t("failed_to_delete_selected_items"));
                         } finally {
                             setIsLoading(false);
                         }
@@ -650,62 +674,75 @@ function FileManager({ adb, deviceHash }: { adb: Adb; deviceHash: string }) {
         [adb, path, handleListFiles, t],
     );
 
-    const handleRenameFile = useCallback(async (file: AdbSyncEntry) => {
-        dialog.prompt(
-            t("rename_" + (file.type === LinuxFileType.Directory ? "folder" : "file")),
-            t("rename_" + (file.type === LinuxFileType.Directory ? "folder" : "file") + "_description", {
-                name: file.name,
-            }),
-            [
-                {
-                    label: t("new_name"),
-                    defaultValue: file.name,
-                    placeholder: file.name,
-                    validate: (value) => validateLinuxFileName(value) && value !== file.name,
-                },
-            ],
-            async (val, close) => {
-                const name = val[0].trim();
-                if (!validateLinuxFileName(name)) {
-                    toast.error(t("invalid_" + (file.type === LinuxFileType.Directory ? "folder" : "file") + "_name"));
-                    return;
-                }
-                if (name === file.name) {
-                    toast.error(t("new_name_is_same_as_old_name"));
-                    return;
-                }
-                close();
-                try {
-                    setIsLoading(true);
-                    if ((await adb.subprocess.shellProtocol?.spawnWaitText(`mv "${path}/${file.name}" "${path}/${name}"`))?.exitCode !== 0) {
+    const handleRenameFile = useCallback(
+        async (file: AdbSyncEntry) => {
+            dialog.prompt(
+                t("rename_" + (file.type === LinuxFileType.Directory ? "folder" : "file")),
+                t("rename_" + (file.type === LinuxFileType.Directory ? "folder" : "file") + "_description", {
+                    name: file.name,
+                }),
+                [
+                    {
+                        label: t("new_name"),
+                        defaultValue: file.name,
+                        placeholder: file.name,
+                        validate: (value) => validateLinuxFileName(value) && value !== file.name,
+                    },
+                ],
+                async (val, close) => {
+                    const name = val[0].trim();
+                    if (!validateLinuxFileName(name)) {
+                        toast.error(
+                            t("invalid_" + (file.type === LinuxFileType.Directory ? "folder" : "file") + "_name"),
+                        );
+                        return;
+                    }
+                    if (name === file.name) {
+                        toast.error(t("new_name_is_same_as_old_name"));
+                        return;
+                    }
+                    close();
+                    try {
+                        setIsLoading(true);
+                        if (
+                            (
+                                await adb.subprocess.shellProtocol?.spawnWaitText(
+                                    `mv "${path}/${file.name}" "${path}/${name}"`,
+                                )
+                            )?.exitCode !== 0
+                        ) {
+                            toast.error(
+                                t("failed_to_rename_" + (file.type === LinuxFileType.Directory ? "folder" : "file"), {
+                                    name: file.name,
+                                }),
+                            );
+                            setIsLoading(false);
+                            return;
+                        }
+                        handleListFiles();
+                    } catch (error) {
+                        console.error(error);
                         toast.error(
                             t("failed_to_rename_" + (file.type === LinuxFileType.Directory ? "folder" : "file"), {
                                 name: file.name,
                             }),
                         );
                         setIsLoading(false);
-                        return;
                     }
-                    handleListFiles();
-                } catch (error) {
-                    console.error(error);
-                    toast.error(
-                        t("failed_to_rename_" + (file.type === LinuxFileType.Directory ? "folder" : "file"), {
-                            name: file.name,
-                        }),
-                    );
-                    setIsLoading(false);
-                }
-            },
-        )
-    }, [dialog, adb, path, t]);
+                },
+            );
+        },
+        [dialog, adb, path, t],
+    );
 
     const handleCopyMove = useCallback(async () => {
         if (!copyTask) return;
         setIsLoading(true);
         try {
             for (const file of copyTask.source) {
-                await adb.subprocess.shellProtocol?.spawnWaitText(`${(copyTask.type === "move" ? "mv" : "cp")} "${copyTask.from}/${file.name}" "${path}/${file.name}"`);
+                await adb.subprocess.shellProtocol?.spawnWaitText(
+                    `${copyTask.type === "move" ? "mv" : "cp"} "${copyTask.from}/${file.name}" "${path}/${file.name}"`,
+                );
             }
             handleListFiles();
         } catch (error) {
@@ -760,8 +797,8 @@ function FileManager({ adb, deviceHash }: { adb: Adb; deviceHash: string }) {
                 let fileName = file.name;
                 try {
                     if (listFiles.find((f) => f.name === fileName)) {
-                        let action = applyToAllAction ||
-                            (await fileAlreadyExistsConfirm(dialog, files.length, file.name, t));
+                        let action =
+                            applyToAllAction || (await fileAlreadyExistsConfirm(dialog, files.length, file.name, t));
 
                         if (!applyToAllAction && action > 2) {
                             applyToAllAction = action - 2;
@@ -779,7 +816,9 @@ function FileManager({ adb, deviceHash }: { adb: Adb; deviceHash: string }) {
                             fileName = `${parts.join(".")}-${uuid}${ext}`;
                         }
                     }
-                    await (await adb.sync()).write({
+                    await (
+                        await adb.sync()
+                    ).write({
                         filename: `${path}/${fileName}`,
                         file: file.stream() as never as ReadableStream<Uint8Array>,
                     });
@@ -806,7 +845,7 @@ function FileManager({ adb, deviceHash }: { adb: Adb; deviceHash: string }) {
                 failed: 0,
             });
             handleListFiles();
-        }
+        };
         uploadInputRef.current.addEventListener("change", handleChange);
         return () => {
             uploadInputRef.current?.removeEventListener("change", handleChange);
@@ -821,8 +860,8 @@ function FileManager({ adb, deviceHash }: { adb: Adb; deviceHash: string }) {
         let timeout: NodeJS.Timeout;
         const handleDrag = (e: DragEvent) => {
             const dt = e.dataTransfer;
-            if (dt && dt.types && dt.types.includes('Files')) {
-                setShowUploadArea(true)
+            if (dt && dt.types && dt.types.includes("Files")) {
+                setShowUploadArea(true);
                 clearTimeout(timeout);
             }
         };
@@ -958,27 +997,39 @@ function FileManager({ adb, deviceHash }: { adb: Adb; deviceHash: string }) {
                             <Spinner size="2" />
                         </IconButton>
                     )}
-                    {copyTask && <Popover.Root>
-                        <Popover.Trigger>
-                            <IconButton variant="soft" color={copyTask.from !== path ? "cyan" : "gray"} size="1">
-                                <PiClipboardDuotone />
-                            </IconButton>
-                        </Popover.Trigger>
-                        <Popover.Content size="1">
-                            <Text size="1">{t(copyTask.type + "_task_description", { count: copyTask.source.length, from: !copyTask.from ? "/" : copyTask.from })}</Text>
-                            <Button variant="soft" mt="1" disabled={copyTask.from === path} size="1" onClick={() => {
-                                handleCopyMove();
-                                setCopyTask(null);
-                            }}>
-                                {copyTask.type === "copy" ? <PiCopyDuotone /> : <PiArrowsLeftRightDuotone />}
-                                {t(copyTask.type + "_to_here")}
-                            </Button>
-                            <Button size="1" color="red" mt="1" variant="soft" onClick={() => setCopyTask(null)}>
-                                {t('clear_task')}
-                            </Button>
-                        </Popover.Content>
-                    </Popover.Root>
-                    }
+                    {copyTask && (
+                        <Popover.Root>
+                            <Popover.Trigger>
+                                <IconButton variant="soft" color={copyTask.from !== path ? "cyan" : "gray"} size="1">
+                                    <PiClipboardDuotone />
+                                </IconButton>
+                            </Popover.Trigger>
+                            <Popover.Content size="1">
+                                <Text size="1">
+                                    {t(copyTask.type + "_task_description", {
+                                        count: copyTask.source.length,
+                                        from: !copyTask.from ? "/" : copyTask.from,
+                                    })}
+                                </Text>
+                                <Button
+                                    variant="soft"
+                                    mt="1"
+                                    disabled={copyTask.from === path}
+                                    size="1"
+                                    onClick={() => {
+                                        handleCopyMove();
+                                        setCopyTask(null);
+                                    }}
+                                >
+                                    {copyTask.type === "copy" ? <PiCopyDuotone /> : <PiArrowsLeftRightDuotone />}
+                                    {t(copyTask.type + "_to_here")}
+                                </Button>
+                                <Button size="1" color="red" mt="1" variant="soft" onClick={() => setCopyTask(null)}>
+                                    {t("clear_task")}
+                                </Button>
+                            </Popover.Content>
+                        </Popover.Root>
+                    )}
                     {uploadingFiles.total > 0 && (
                         <Popover.Root>
                             <Popover.Trigger>
@@ -990,9 +1041,15 @@ function FileManager({ adb, deviceHash }: { adb: Adb; deviceHash: string }) {
                                 <Flex direction="column" gap="2">
                                     <Flex direction="row" gap="2" align="center">
                                         <Spinner size="2" />
-                                        <Text size="1">{t('uploading_files', { uploaded: uploadingFiles.uploaded, total: uploadingFiles.total, failed: uploadingFiles.failed })}</Text>
+                                        <Text size="1">
+                                            {t("uploading_files", {
+                                                uploaded: uploadingFiles.uploaded,
+                                                total: uploadingFiles.total,
+                                                failed: uploadingFiles.failed,
+                                            })}
+                                        </Text>
                                     </Flex>
-                                    <Progress value={uploadingFiles.uploaded / uploadingFiles.total * 100} />
+                                    <Progress value={(uploadingFiles.uploaded / uploadingFiles.total) * 100} />
                                 </Flex>
                             </Popover.Content>
                         </Popover.Root>
@@ -1016,7 +1073,10 @@ function FileManager({ adb, deviceHash }: { adb: Adb; deviceHash: string }) {
                                 <PiFileDuotone size={18} />
                                 {t("create_file")}
                             </DropdownMenu.Item>
-                            <DropdownMenu.Item onClick={() => uploadInputRef.current?.click()} disabled={uploadingFiles.total > 0}>
+                            <DropdownMenu.Item
+                                onClick={() => uploadInputRef.current?.click()}
+                                disabled={uploadingFiles.total > 0}
+                            >
                                 {uploadingFiles.total > 0 ? <Spinner size="1" /> : <PiUploadDuotone size={18} />}
                                 {t("upload_file")}
                             </DropdownMenu.Item>
@@ -1024,29 +1084,39 @@ function FileManager({ adb, deviceHash }: { adb: Adb; deviceHash: string }) {
                             <DropdownMenu.Item disabled>
                                 {t("selected_count", { count: selected.length })}
                             </DropdownMenu.Item>
-                            <DropdownMenu.Item disabled={selected.length === 0} onClick={() => {
-                                setCopyTask({
-                                    type: "copy",
-                                    source: selected,
-                                    from: path,
-                                });
-                                setSelected([]);
-                            }}>
+                            <DropdownMenu.Item
+                                disabled={selected.length === 0}
+                                onClick={() => {
+                                    setCopyTask({
+                                        type: "copy",
+                                        source: selected,
+                                        from: path,
+                                    });
+                                    setSelected([]);
+                                }}
+                            >
                                 <PiCopyDuotone size={18} />
                                 {t("copy")}
                             </DropdownMenu.Item>
-                            <DropdownMenu.Item disabled={selected.length === 0} onClick={() => {
-                                setCopyTask({
-                                    type: "move",
-                                    source: selected,
-                                    from: path,
-                                });
-                                setSelected([]);
-                            }}>
+                            <DropdownMenu.Item
+                                disabled={selected.length === 0}
+                                onClick={() => {
+                                    setCopyTask({
+                                        type: "move",
+                                        source: selected,
+                                        from: path,
+                                    });
+                                    setSelected([]);
+                                }}
+                            >
                                 <PiArrowsLeftRightDuotone size={18} />
                                 {t("move")}
                             </DropdownMenu.Item>
-                            <DropdownMenu.Item disabled={selected.length === 0} color="red" onClick={() => handleDelete(selected)}>
+                            <DropdownMenu.Item
+                                disabled={selected.length === 0}
+                                color="red"
+                                onClick={() => handleDelete(selected)}
+                            >
                                 <PiTrashSimpleDuotone size={18} />
                                 {t("delete")}
                             </DropdownMenu.Item>
@@ -1054,13 +1124,19 @@ function FileManager({ adb, deviceHash }: { adb: Adb; deviceHash: string }) {
                     </DropdownMenu.Root>
                 </Card>
                 <div className={cls.FmArea}>
-                    <div className={clsx(cls.UploadArea, (showUploadArea && uploadingFiles.total === 0) && cls.show)}>
-                        <Button variant="soft" color="gray" size="2" className={cls.CancelButton} onClick={() => {
-                            if (uploadInputRef.current) {
-                                uploadInputRef.current.value = "";
-                            }
-                            setShowUploadArea(false)
-                        }}>
+                    <div className={clsx(cls.UploadArea, showUploadArea && uploadingFiles.total === 0 && cls.show)}>
+                        <Button
+                            variant="soft"
+                            color="gray"
+                            size="2"
+                            className={cls.CancelButton}
+                            onClick={() => {
+                                if (uploadInputRef.current) {
+                                    uploadInputRef.current.value = "";
+                                }
+                                setShowUploadArea(false);
+                            }}
+                        >
                             <PiXBold size={18} />
                             {t("cancel")}
                         </Button>
@@ -1094,10 +1170,7 @@ function FileManager({ adb, deviceHash }: { adb: Adb; deviceHash: string }) {
                                         disabled={isLoading || listFiles.length + listFolders.length <= 0}
                                         onCheckedChange={(checked) => {
                                             if (checked === true) {
-                                                setSelected([
-                                                    ...listFiles,
-                                                    ...listFolders,
-                                                ]);
+                                                setSelected([...listFiles, ...listFolders]);
                                             } else {
                                                 setSelected([]);
                                             }
@@ -1106,10 +1179,10 @@ function FileManager({ adb, deviceHash }: { adb: Adb; deviceHash: string }) {
                                             listFiles.length + listFolders.length <= 0
                                                 ? false
                                                 : selected.length === listFiles.length + listFolders.length
-                                                    ? true
-                                                    : selected.length > 0
-                                                        ? "indeterminate"
-                                                        : false
+                                                  ? true
+                                                  : selected.length > 0
+                                                    ? "indeterminate"
+                                                    : false
                                         }
                                     />
                                 </Table.ColumnHeaderCell>
@@ -1130,11 +1203,15 @@ function FileManager({ adb, deviceHash }: { adb: Adb; deviceHash: string }) {
                                     {t("name")}
                                     {sortMode.by === "name" && (
                                         <IconButton variant="soft" color="gray" size="1" className={cls.SortButton}>
-                                            {sortMode.order === "asc" ? <PiArrowUp size={12} /> : <PiArrowDown size={12} />}
+                                            {sortMode.order === "asc" ? (
+                                                <PiArrowUp size={12} />
+                                            ) : (
+                                                <PiArrowDown size={12} />
+                                            )}
                                         </IconButton>
                                     )}
                                 </Table.ColumnHeaderCell>
-                                {listFiles.length > 0 &&
+                                {listFiles.length > 0 && (
                                     <Table.ColumnHeaderCell
                                         data-col-type="size"
                                         style={{ width: "120px" }}
@@ -1153,11 +1230,15 @@ function FileManager({ adb, deviceHash }: { adb: Adb; deviceHash: string }) {
                                         {t("size")}
                                         {sortMode.by === "size" && (
                                             <IconButton variant="soft" color="gray" size="1" className={cls.SortButton}>
-                                                {sortMode.order === "asc" ? <PiArrowUp size={12} /> : <PiArrowDown size={12} />}
+                                                {sortMode.order === "asc" ? (
+                                                    <PiArrowUp size={12} />
+                                                ) : (
+                                                    <PiArrowDown size={12} />
+                                                )}
                                             </IconButton>
                                         )}
                                     </Table.ColumnHeaderCell>
-                                }
+                                )}
                                 <Table.ColumnHeaderCell data-col-type="permission" style={{ width: "100px" }}>
                                     {t("permission")}
                                 </Table.ColumnHeaderCell>
@@ -1179,7 +1260,11 @@ function FileManager({ adb, deviceHash }: { adb: Adb; deviceHash: string }) {
                                     {t("modified")}
                                     {sortMode.by === "modified" && (
                                         <IconButton variant="soft" color="gray" size="1" className={cls.SortButton}>
-                                            {sortMode.order === "asc" ? <PiArrowUp size={12} /> : <PiArrowDown size={12} />}
+                                            {sortMode.order === "asc" ? (
+                                                <PiArrowUp size={12} />
+                                            ) : (
+                                                <PiArrowDown size={12} />
+                                            )}
                                         </IconButton>
                                     )}
                                 </Table.ColumnHeaderCell>
@@ -1210,18 +1295,18 @@ function FileManager({ adb, deviceHash }: { adb: Adb; deviceHash: string }) {
                                                 from: path,
                                             });
                                         }}
-                                        cd={() =>
-                                            setCurrentPath((path === "/" ? "" : path) + "/" + file.name)
-                                        }
+                                        cd={() => setCurrentPath((path === "/" ? "" : path) + "/" + file.name)}
                                         onRename={() => handleRenameFile(file)}
                                         selected={selected.includes(file)}
                                         onDelete={() => handleDelete(file)}
-                                        onSelect={(one) => one ? setSelected([file]) :
-                                            setSelected(
-                                                selected.includes(file)
-                                                    ? selected.filter((name) => name !== file)
-                                                    : [...selected, file],
-                                            )
+                                        onSelect={(one) =>
+                                            one
+                                                ? setSelected([file])
+                                                : setSelected(
+                                                      selected.includes(file)
+                                                          ? selected.filter((name) => name !== file)
+                                                          : [...selected, file],
+                                                  )
                                         }
                                     />
                                 ))}
@@ -1258,12 +1343,14 @@ function FileManager({ adb, deviceHash }: { adb: Adb; deviceHash: string }) {
                                         }}
                                         onRename={() => handleRenameFile(file)}
                                         onDelete={() => handleDelete(file)}
-                                        onSelect={(one) => one ? setSelected([file]) :
-                                            setSelected(
-                                                selected.includes(file)
-                                                    ? selected.filter((name) => name !== file)
-                                                    : [...selected, file],
-                                            )
+                                        onSelect={(one) =>
+                                            one
+                                                ? setSelected([file])
+                                                : setSelected(
+                                                      selected.includes(file)
+                                                          ? selected.filter((name) => name !== file)
+                                                          : [...selected, file],
+                                                  )
                                         }
                                     />
                                 ))}

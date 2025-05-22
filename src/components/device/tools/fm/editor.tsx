@@ -128,9 +128,11 @@ export default function TextEditor({
                 <DropdownMenu.Root>
                     <DropdownMenu.Trigger>
                         <IconButton size="2" variant="soft" color="gray">
-                            <Tooltip content={t("select_editor_language", {
-                                current: fileLanguage,
-                            })}>
+                            <Tooltip
+                                content={t("select_editor_language", {
+                                    current: fileLanguage,
+                                })}
+                            >
                                 <PiPenDuotone size={20} />
                             </Tooltip>
                         </IconButton>

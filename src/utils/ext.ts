@@ -245,22 +245,9 @@ export const fileExtension = {
         "svh",
         "tcl",
         "twig",
-        "zig"
+        "zig",
     ],
-    text: [
-        "txt",
-        "md",
-        "rst",
-        "log",
-        "ini",
-        "conf",
-        "cfg",
-        "nfo",
-        "me",
-        "readme",
-        "changelog",
-        "license",
-    ],
+    text: ["txt", "md", "rst", "log", "ini", "conf", "cfg", "nfo", "me", "readme", "changelog", "license"],
     subtitle: ["srt", "sub", "ass", "ssa", "vtt", "sbv", "mpl"],
     database: [
         "db",
@@ -465,7 +452,7 @@ export const editorFileLanguage = {
     vhdl: ["vhdl"],
     xml: ["xml", "xsd", "xsl", "xslt"],
     yaml: ["yaml", "yml"],
-    zig: ["zig"]
+    zig: ["zig"],
 };
 
 const mimeType = {
@@ -631,7 +618,7 @@ const mimeType = {
     "application/x-gtar": ["tgz"],
     "application/x-bzip2-compressed-tar": ["tbz2"],
     "application/x-xz-compressed-tar": ["txz"],
-    "application/x-efi": ["efi"]
+    "application/x-efi": ["efi"],
 };
 
 export const getFileType = (ext: string): keyof typeof fileExtension | "file" => {
