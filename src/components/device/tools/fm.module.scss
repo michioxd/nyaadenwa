@@ -98,6 +98,7 @@
                     height: 100%;
                     background-color: rgba(80, 238, 255, 0.2);
                     z-index: -1;
+                    transition: 0.2s;
                 }
 
                 &.Selected {
