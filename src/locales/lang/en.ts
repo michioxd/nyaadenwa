@@ -212,6 +212,8 @@ const Locale: LocaleResourcesType = {
         overwrite: "Overwrite",
         file_already_exists: "File already exists",
         file_already_exists_description: "What do you want to do with the file {{name}}?",
+        select_editor_language: "Select editor language ({{current}})",
+        selected_language: "Selected: {{current}}",
     },
 };
 

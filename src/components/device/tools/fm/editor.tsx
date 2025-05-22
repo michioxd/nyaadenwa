@@ -7,14 +7,15 @@
 import Editor from "@monaco-editor/react";
 import { Adb, encodeUtf8 } from "@yume-chan/adb";
 import cls from "@/components/device/tools/fm.module.scss";
-import { useCallback, useEffect, useState } from "react";
-import { Box, Card, Flex, IconButton, Spinner, Text, Tooltip } from "@radix-ui/themes";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { Box, Card, DropdownMenu, Flex, IconButton, Spinner, Text, Tooltip } from "@radix-ui/themes";
 import { ArrowLeftIcon } from "@radix-ui/react-icons";
 import { ReadableStream, WritableStream } from "@yume-chan/stream-extra";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
-import { PiFloppyDiskDuotone } from "react-icons/pi";
-import { getFileLanguage } from "@/utils/ext";
+import { PiFloppyDiskDuotone, PiPenDuotone } from "react-icons/pi";
+import { editorFileLanguage, getFileLanguage } from "@/utils/ext";
+import { editor } from "monaco-editor";
 
 const fontBase = "IntelOne Mono, monospace, Consolas, Courier New, sans-serif";
 
@@ -29,10 +30,16 @@ export default function TextEditor({
     name: string;
     onBack: () => void;
 }) {
+    const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
     const [content, setContent] = useState("");
     const [loaded, setLoaded] = useState(false);
     const [saving, setSaving] = useState(false);
+    const [fileLanguage, setFileLanguage] = useState<string>("plaintext");
     const { t } = useTranslation();
+
+    useEffect(() => {
+        setFileLanguage(getFileLanguage(name));
+    }, [name]);
 
     const handleLoadFile = useCallback(async () => {
         if (!path) {
@@ -118,6 +125,36 @@ export default function TextEditor({
                     </Text>
                 </Flex>
                 <Box style={{ flex: 1 }} />
+                <DropdownMenu.Root>
+                    <DropdownMenu.Trigger>
+                        <IconButton size="2" variant="soft" color="gray">
+                            <Tooltip content={t("select_editor_language", {
+                                current: fileLanguage,
+                            })}>
+                                <PiPenDuotone size={20} />
+                            </Tooltip>
+                        </IconButton>
+                    </DropdownMenu.Trigger>
+                    <DropdownMenu.Content size="1" variant="soft">
+                        <DropdownMenu.Item disabled>
+                            {t("selected_language", {
+                                current: fileLanguage,
+                            })}
+                        </DropdownMenu.Item>
+                        <DropdownMenu.Item key="plaintext" onClick={() => setFileLanguage("plaintext")}>
+                            <Text size="1" weight={fileLanguage === "plaintext" ? "bold" : "regular"}>
+                                plaintext
+                            </Text>
+                        </DropdownMenu.Item>
+                        {Object.entries(editorFileLanguage).map(([key]) => (
+                            <DropdownMenu.Item key={key} onClick={() => setFileLanguage(key)}>
+                                <Text size="1" weight={key === fileLanguage ? "bold" : "regular"}>
+                                    {key}
+                                </Text>
+                            </DropdownMenu.Item>
+                        ))}
+                    </DropdownMenu.Content>
+                </DropdownMenu.Root>
                 <Tooltip content={t("save_file")}>
                     <IconButton
                         size="2"
@@ -128,7 +165,7 @@ export default function TextEditor({
                             handleSaveFile();
                         }}
                     >
-                        {saving ? <Spinner size="2" /> : <PiFloppyDiskDuotone size={18} />}
+                        {saving ? <Spinner size="2" /> : <PiFloppyDiskDuotone size={20} />}
                     </IconButton>
                 </Tooltip>
             </Card>
@@ -136,9 +173,9 @@ export default function TextEditor({
                 <div className={cls.EditorContainer}>
                     <Editor
                         className={cls.Editor}
-                        defaultLanguage={getFileLanguage(name)}
                         defaultValue=""
                         value={content}
+                        language={fileLanguage}
                         loading={
                             <div className={cls.EditorLoading}>
                                 <Card className={cls.Container}>
@@ -150,6 +187,9 @@ export default function TextEditor({
                             </div>
                         }
                         theme="vs-dark"
+                        onMount={(editor) => {
+                            editorRef.current = editor;
+                        }}
                         options={{
                             fontFamily: fontBase,
                             fontSize: 12,

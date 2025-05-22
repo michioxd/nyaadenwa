@@ -371,7 +371,7 @@ export const fileExtensionIcon: {
     },
 };
 
-const fileLanguage = {
+export const editorFileLanguage = {
     abap: ["abap"],
     aes: ["aes"],
     apex: ["apex", "cls", "trigger"],
@@ -488,7 +488,7 @@ export const getFileIcon = (
 export const getFileLanguage = (fileName: string): string => {
     const ext = fileName.split(".").pop()?.toLowerCase();
     if (!ext) return "plaintext";
-    for (const [key, value] of Object.entries(fileLanguage)) {
+    for (const [key, value] of Object.entries(editorFileLanguage)) {
         if (value.includes(ext)) return key;
     }
     return "plaintext";

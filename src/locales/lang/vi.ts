@@ -212,6 +212,8 @@ const Locale: LocaleResourcesType = {
         overwrite: "Ghi đè",
         file_already_exists: "Tệp đã tồn tại",
         file_already_exists_description: "Bạn muốn làm gì với tệp {{name}}?",
+        select_editor_language: "Chọn ngôn ngữ cho trình soạn thảo ({{current}})",
+        selected_language: "Đã chọn: {{current}}",
     },
 };
 
