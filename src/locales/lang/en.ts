@@ -206,6 +206,12 @@ const Locale: LocaleResourcesType = {
         success_to_copy_selected_files: "Successfully copied selected files",
         success_to_move_selected_files: "Successfully moved selected files",
         clear_task: "Clear task",
+        apply_to_all: "Apply to all",
+        skip: "Skip",
+        rename: "Rename",
+        overwrite: "Overwrite",
+        file_already_exists: "File already exists",
+        file_already_exists_description: "What do you want to do with the file {{name}}?",
     },
 };
 

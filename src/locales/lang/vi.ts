@@ -206,6 +206,12 @@ const Locale: LocaleResourcesType = {
         success_to_copy_selected_files: "Đã sao chép các tệp đã chọn",
         success_to_move_selected_files: "Đã di chuyển các tệp đã chọn",
         clear_task: "Xóa hàng đợi",
+        apply_to_all: "Áp dụng cho tất cả",
+        skip: "Bỏ qua",
+        rename: "Đổi tên",
+        overwrite: "Ghi đè",
+        file_already_exists: "Tệp đã tồn tại",
+        file_already_exists_description: "Bạn muốn làm gì với tệp {{name}}?",
     },
 };
 

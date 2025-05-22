@@ -51,7 +51,7 @@ interface DialogField {
     validate?: (value: string) => boolean;
 }
 
-type DialogCustomButtons = ((onConfirm?: () => void, onCancel?: () => void) => React.ReactNode) | null;
+type DialogCustomButtons = ((onConfirm: () => void, onCancel: () => void) => React.ReactNode) | null;
 
 type DialogData =
     | {
@@ -196,14 +196,21 @@ export default function DialogProvider({ children }: { children: React.ReactNode
 
                         {data.buttons !== undefined ? (
                             data.buttons !== null ? (
-                                <Flex gap="3" mt="4" justify="end">
+                                <Flex gap="3" mt="4" justify="end" align="center">
                                     {data.buttons(
                                         typeof data.onConfirm === "function"
                                             ? () => data.onConfirm?.(fieldData, () => setOpen(false))
-                                            : () => { },
+                                            : () => {
+                                                setOpen(false);
+                                            },
                                         "onCancel" in data && typeof data.onCancel === "function"
-                                            ? data.onCancel
-                                            : () => { },
+                                            ? () => {
+                                                setOpen(false);
+                                                data.onCancel?.();
+                                            }
+                                            : () => {
+                                                setOpen(false);
+                                            },
                                     )}
                                 </Flex>
                             ) : (

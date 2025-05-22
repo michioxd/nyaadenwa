@@ -55,6 +55,9 @@ import { PackageManager } from "@yume-chan/android-bin";
 import { HamburgerMenuIcon } from "@radix-ui/react-icons";
 import TextEditor from "./fm/editor";
 import { ReadableStream } from "@yume-chan/stream-extra/esm/types";
+import { v4 as uuidv4 } from "uuid";
+import { TFunction } from "i18next";
+import { DialogContextType } from "@/components/dialog/DialogProvider";
 
 const SortFunc = (
     a: AdbSyncEntry,
@@ -76,6 +79,52 @@ const SortFunc = (
     }
     return 0;
 };
+
+const FileAlreadyExistsAction = ({ ok, res, filesLength }: { ok: () => void, res: (value: number) => void, filesLength: number }) => {
+    const [applyToAll, setApplyToAll] = useState(false);
+    const { t } = useTranslation();
+
+    return <>
+        {filesLength > 1 &&
+            <Flex direction="row" gap="2" align="center">
+                <Checkbox
+                    checked={applyToAll}
+                    onCheckedChange={(c) => setApplyToAll(c === "indeterminate" ? false : c)}
+                />
+                <Text size="1">{t("apply_to_all")}</Text>
+            </Flex>
+        }
+        <Button onClick={() => {
+            res(applyToAll ? 3 : 0);
+            ok?.();
+        }}>
+            {t("skip")}
+        </Button>
+        <Button variant="soft" color="yellow" onClick={() => {
+            res(applyToAll ? 4 : 1);
+            ok?.();
+        }}>
+            {t("rename")}
+        </Button>
+        <Button variant="soft" color="red" onClick={() => {
+            res(applyToAll ? 5 : 2);
+            ok?.();
+        }}>
+            {t("overwrite")}
+        </Button>
+    </>
+}
+
+const fileAlreadyExistsConfirm = (dialog: DialogContextType['dialog'], filesLength: number, fileName: string, t: TFunction) => {
+    return new Promise<number>((res) => {
+        dialog.confirm(
+            t("file_already_exists", { name: fileName }),
+            t("file_already_exists_description", { name: fileName }),
+            undefined, undefined,
+            (ok) => <FileAlreadyExistsAction ok={ok} res={res} filesLength={filesLength} />
+        );
+    });
+}
 
 const FileManagerItem = memo(
     ({
@@ -329,6 +378,7 @@ function FileManager({ adb, deviceHash }: { adb: Adb; deviceHash: string }) {
     const fmRef = useRef<HTMLDivElement>(null);
     const uploadInputRef = useRef<HTMLInputElement>(null);
     const dialog = useDialog();
+    const stillUploading = useRef<boolean>(false);
     const [currentPath, setCurrentPath] = useState(() => {
         const path = localStorage.getItem("fm_path_" + deviceHash);
         return isValidPath(path ?? "") ? (path ?? "/") : "/";
@@ -619,18 +669,43 @@ function FileManager({ adb, deviceHash }: { adb: Adb; deviceHash: string }) {
         if (!uploadInputRef.current) return;
         const handleChange = async (e: Event) => {
             if (!e.target) return;
+            if (stillUploading.current) return;
+            const files = Array.from((e.target as HTMLInputElement).files ?? []);
+            if (files.length === 0) return;
+            stillUploading.current = true;
             setShowUploadArea(false);
             setUploadingFiles({
                 uploaded: 0,
                 total: (e.target as HTMLInputElement).files?.length ?? 0,
                 failed: 0,
             });
-            const files = Array.from((e.target as HTMLInputElement).files ?? []);
+            let applyToAllAction = 0;
 
             for (const file of files) {
+                let fileName = file.name;
                 try {
+                    if (listFiles.find((f) => f.name === fileName)) {
+                        let action = applyToAllAction ||
+                            (await fileAlreadyExistsConfirm(dialog, files.length, file.name, t));
+
+                        if (!applyToAllAction && action > 2) {
+                            applyToAllAction = action - 2;
+                        }
+
+                        if (applyToAllAction) {
+                            action = applyToAllAction - 1;
+                        }
+
+                        if (action % 3 === 0) continue;
+                        if (action % 3 === 1) {
+                            const uuid = uuidv4().substring(0, 8);
+                            const parts = fileName.split(".");
+                            const ext = parts.length > 1 ? `.${parts.pop()}` : "";
+                            fileName = `${parts.join(".")}-${uuid}${ext}`;
+                        }
+                    }
                     await (await adb.sync()).write({
-                        filename: `${path}/${file.name}`,
+                        filename: `${path}/${fileName}`,
                         file: file.stream() as never as ReadableStream<Uint8Array>,
                     });
                     setUploadingFiles((prev) => ({
@@ -646,6 +721,10 @@ function FileManager({ adb, deviceHash }: { adb: Adb; deviceHash: string }) {
                     }));
                 }
             }
+            stillUploading.current = false;
+            if (uploadInputRef.current) {
+                uploadInputRef.current.value = "";
+            }
             setUploadingFiles({
                 uploaded: 0,
                 total: 0,
@@ -657,7 +736,7 @@ function FileManager({ adb, deviceHash }: { adb: Adb; deviceHash: string }) {
         return () => {
             uploadInputRef.current?.removeEventListener("change", handleChange);
         };
-    }, [uploadInputRef.current, adb, path]);
+    }, [uploadInputRef.current, adb, path, listFiles, dialog, t]);
 
     const breadcrumbDisplayItems = useMemo(() => {
         return breadcrumbItems.slice(Math.max(0, breadcrumbItems.length - Math.floor(elemSize.w / 150)));
@@ -901,7 +980,12 @@ function FileManager({ adb, deviceHash }: { adb: Adb; deviceHash: string }) {
                 </Card>
                 <div className={cls.FmArea}>
                     <div className={clsx(cls.UploadArea, (showUploadArea && uploadingFiles.total === 0) && cls.show)}>
-                        <Button variant="soft" color="gray" size="2" className={cls.CancelButton} onClick={() => setShowUploadArea(false)}>
+                        <Button variant="soft" color="gray" size="2" className={cls.CancelButton} onClick={() => {
+                            if (uploadInputRef.current) {
+                                uploadInputRef.current.value = "";
+                            }
+                            setShowUploadArea(false)
+                        }}>
                             <PiXBold size={18} />
                             {t("cancel")}
                         </Button>
