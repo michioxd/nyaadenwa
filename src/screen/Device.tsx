@@ -113,7 +113,7 @@ const ScreenDevice = observer(
     }) => {
         const [state, setState] = useState<DeviceState>(DeviceState.Connecting);
         const dialog = useDialog();
-        const [sidebarLevel, setSidebarLevel] = useState(parseInt(localStorage.getItem("sbl_" + deviceHash) ?? "0"));
+        const [sidebarLevel, setSidebarLevel] = useState(parseInt(localStorage.getItem("sbl_" + deviceHash) ?? "1"));
         const { t } = useTranslation();
         const [adb, setAdb] = useState<Adb | null>(null);
         const dumpSys = useMemo(() => (adb ? new DumpSys(adb) : null), [adb]);
@@ -128,8 +128,8 @@ const ScreenDevice = observer(
                 usbDetails
                     ? `${usbDetails?.name} (${usbDetails?.serial})`
                     : webSocketURL
-                      ? `${webSocketURL} (WebSocket)`
-                      : "Unknown",
+                        ? `${webSocketURL} (WebSocket)`
+                        : "Unknown",
             [usbDetails, webSocketURL],
         );
 
