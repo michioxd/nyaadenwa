@@ -214,6 +214,12 @@ const Locale: LocaleResourcesType = {
         file_already_exists_description: "What do you want to do with the file {{name}}?",
         select_editor_language: "Select editor language ({{current}})",
         selected_language: "Selected: {{current}}",
+        loading_editor: "Loading editor...",
+        downloading: "Downloading {{progress}}%",
+        failed_to_download_file: "Failed to download file {{name}}",
+        user_cancelled_download: "User cancelled the download",
+        file: "File",
+        download_file_success: "Download successful",
     },
 };
 

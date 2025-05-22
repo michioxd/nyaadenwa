@@ -48,16 +48,31 @@ import { memo, MouseEvent, useCallback, useEffect, useMemo, useRef, useState } f
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
 import { formatPermissions, formatSize, isValidPath, validateLinuxFileName } from "@/utils/str";
-import { getFileIcon, getFileType } from "@/utils/ext";
+import { getFileIcon, getFileType, getMimeType } from "@/utils/ext";
 import clsx from "clsx";
 import useDialog from "@/components/dialog/Dialog";
 import { PackageManager } from "@yume-chan/android-bin";
 import { HamburgerMenuIcon } from "@radix-ui/react-icons";
 import TextEditor from "./fm/editor";
-import { ReadableStream } from "@yume-chan/stream-extra/esm/types";
+import { ReadableStream, WritableStream } from "@yume-chan/stream-extra";
 import { v4 as uuidv4 } from "uuid";
 import { TFunction } from "i18next";
 import { DialogContextType } from "@/components/dialog/DialogProvider";
+
+// Add type declarations for File System Access API
+declare global {
+    interface Window {
+        showSaveFilePicker(options?: SaveFilePickerOptions): Promise<FileSystemFileHandle>;
+    }
+}
+
+interface SaveFilePickerOptions {
+    suggestedName?: string;
+    types?: Array<{
+        description: string;
+        accept: Record<string, string[]>;
+    }>;
+}
 
 const SortFunc = (
     a: AdbSyncEntry,
@@ -158,6 +173,7 @@ const FileManagerItem = memo(
         const dialog = useDialog();
         const [isInstalling, setIsInstalling] = useState(false);
         const lastClick = useRef<number>(0);
+        const [downloadProgress, setDownloadProgress] = useState<number | null>(null);
 
         const fileType = useMemo(() => {
             if (file.type === LinuxFileType.Directory || file.type === LinuxFileType.Link) return "folder";
@@ -217,6 +233,53 @@ const FileManagerItem = memo(
             );
         }, [dialog, adb, file.name, t, currentPath]);
 
+        const handleDownloadFile = useCallback(async () => {
+            if (downloadProgress !== null || fileType === "folder") return;
+            const fileSize = Number(file.size);
+            let handle: FileSystemFileHandle | null = null;
+            try {
+                setDownloadProgress(0);
+                const res = (await adb.sync()).read(currentPath + "/" + file.name);
+
+                handle = await window.showSaveFilePicker({
+                    suggestedName: file.name,
+                    types: [{
+                        description: t("file"),
+                        accept: {
+                            [getMimeType(file.name)]: [`.${file.name.split('.').pop()}`]
+                        }
+                    }]
+                });
+
+                const writable = await handle.createWritable();
+                let downloaded = 0;
+                await res.pipeTo(new WritableStream({
+                    write(chunk: Uint8Array) {
+                        downloaded += chunk.length;
+                        setDownloadProgress(Math.round((downloaded / fileSize) * 100));
+                        const u8a = new Uint8Array(chunk);
+                        const blob = new Blob([u8a]);
+                        return writable.write(blob);
+                    },
+                    close() {
+                        return writable.close();
+                    }
+                }));
+                toast.success(t("download_file_success"));
+            } catch (error: unknown) {
+                if (error instanceof Error && error.name === 'AbortError') {
+                    toast.warning(t("user_cancelled_download"));
+                    return;
+                }
+                console.error(error);
+                toast.error(t("failed_to_download_file", {
+                    name: file.name,
+                }));
+            } finally {
+                setDownloadProgress(null);
+            }
+        }, [dialog, adb, file.name, t, currentPath]);
+
         const onUserHandle = useCallback((e: MouseEvent<HTMLTableDataCellElement, globalThis.MouseEvent>) => {
             const isDirectory = file.type === LinuxFileType.Directory || file.type === LinuxFileType.Link;
             const isDesktop = window.innerWidth >= 600;
@@ -254,7 +317,8 @@ const FileManagerItem = memo(
         return (
             <ContextMenu.Root onOpenChange={() => onSelect?.(true)}>
                 <ContextMenu.Trigger>
-                    <Table.Row style={{ backgroundColor: selected ? "rgba(93, 93, 93, 0.6)" : "transparent" }}>
+                    <Table.Row className={clsx(cls.FileManagerItem, selected && cls.Selected)}
+                        style={downloadProgress ? { "--download-progress": `${downloadProgress}%` } as React.CSSProperties : {}}>
                         <Table.RowHeaderCell>
                             <IconButton
                                 onClick={() => onSelect?.()}
@@ -347,9 +411,20 @@ const FileManagerItem = memo(
                         </ContextMenu.Item>
                     )}
                     {file.type === LinuxFileType.File && (
-                        <ContextMenu.Item onClick={() => cd?.()}>
-                            <PiDownloadDuotone size={18} />
-                            {t("download_file")}
+                        <ContextMenu.Item onClick={handleDownloadFile} disabled={downloadProgress !== null}>
+                            {downloadProgress !== null ? (
+                                <>
+                                    <Spinner size="1" />
+                                    {t("downloading", {
+                                        progress: `${downloadProgress}%`,
+                                    })}
+                                </>
+                            ) : (
+                                <>
+                                    <PiDownloadDuotone size={18} />
+                                    {t("download_file")}
+                                </>
+                            )}
                         </ContextMenu.Item>
                     )}
                     <ContextMenu.Item onClick={() => onRename?.()}>
@@ -1013,6 +1088,7 @@ function FileManager({ adb, deviceHash }: { adb: Adb; deviceHash: string }) {
                     >
                         <Table.Header className={cls.FileManagerHeader}>
                             <Table.Row>
+                                <Table.ColumnHeaderCell style={{ width: "0px", padding: 0 }}></Table.ColumnHeaderCell>
                                 <Table.ColumnHeaderCell style={{ width: "35px" }}>
                                     <Checkbox
                                         disabled={isLoading || listFiles.length + listFolders.length <= 0}

@@ -214,6 +214,12 @@ const Locale: LocaleResourcesType = {
         file_already_exists_description: "Bạn muốn làm gì với tệp {{name}}?",
         select_editor_language: "Chọn ngôn ngữ cho trình soạn thảo ({{current}})",
         selected_language: "Đã chọn: {{current}}",
+        loading_editor: "Đang tải trình soạn thảo...",
+        downloading: "Đang tải xuống {{progress}}",
+        failed_to_download_file: "Không thể tải xuống tệp {{name}}",
+        user_cancelled_download: "Người dùng đã hủy tải xuống",
+        file: "Tệp",
+        download_file_success: "Tải xuống tệp thành công",
     },
 };
 

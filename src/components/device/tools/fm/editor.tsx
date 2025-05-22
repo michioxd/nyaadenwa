@@ -181,7 +181,7 @@ export default function TextEditor({
                                 <Card className={cls.Container}>
                                     <Spinner />
                                     <Text size="1" color="gray">
-                                        Loading editor...
+                                        {t("loading_editor")}
                                     </Text>
                                 </Card>
                             </div>
@@ -209,7 +209,7 @@ export default function TextEditor({
                     <Card className={cls.Container}>
                         <Spinner />
                         <Text size="1" color="gray">
-                            Loading...
+                            {t("loading_editor")}
                         </Text>
                     </Card>
                 </div>
