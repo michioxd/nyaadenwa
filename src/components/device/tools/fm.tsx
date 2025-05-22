@@ -885,7 +885,7 @@ function FileManager({ adb, deviceHash }: { adb: Adb; deviceHash: string }) {
                     )}
                     {copyTask && <Popover.Root>
                         <Popover.Trigger>
-                            <IconButton variant="soft" color="gray" size="1">
+                            <IconButton variant="soft" color={copyTask.from !== path ? "cyan" : "gray"} size="1">
                                 <PiClipboardDuotone />
                             </IconButton>
                         </Popover.Trigger>
