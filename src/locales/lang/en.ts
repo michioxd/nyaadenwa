@@ -214,7 +214,7 @@ const Locale: LocaleResourcesType = {
         select_editor_language: "Select editor language ({{current}})",
         selected_language: "Selected: {{current}}",
         loading_editor: "Loading editor...",
-        downloading: "Downloading {{progress}}%",
+        downloading: "Downloading {{progress}}",
         failed_to_download_file: "Failed to download file {{name}}",
         user_cancelled_download: "User cancelled the download",
         file: "File",
