@@ -269,6 +269,8 @@ const Locale: LocaleResourcesType = {
         scrcpy_log_level_info: "Info",
         scrcpy_log_level_warn: "Warn",
         scrcpy_log_level_error: "Error",
+        clear_settings_description: "Bạn có chắc chắn muốn xóa cài đặt cho thiết bị này không?",
+        reset_settings_description: "Bạn có chắc chắn muốn đặt lại cài đặt cho tất cả thiết bị không?",
     },
 };
 

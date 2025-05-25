@@ -14,6 +14,7 @@ import tabsController from "@/controller/tabs";
 import ConfigController, { type TConfig } from "@/controller/config";
 import SettingsScrcpy from "@/components/settings/scrcpy";
 import _ from "lodash";
+import useDialog from "@/components/dialog/Dialog";
 
 type SettingsSectionType = "scrcpy" | "device";
 
@@ -45,6 +46,7 @@ const SettingsList: {
     ];
 
 const Settings = observer(() => {
+    const dialog = useDialog();
     const { t } = useTranslation();
     const [selectedSection, setSelectedSection] = useState<SettingsSectionType>("scrcpy");
     const [selectedDevice, setSelectedDevice] = useState<{
@@ -154,21 +156,43 @@ const Settings = observer(() => {
                     </Button>
 
                     {selectedDevice ?
-                        <Button variant="soft" color="red" size="2" style={{ width: "100%" }} onClick={() => {
-                            const cfg = new ConfigController(selectedDevice?.id ?? "global", selectedDevice?.type ?? "usb");
-                            cfg.clearConfig();
-                            setConfig(ConfigController.defaultConfig);
-                            setConfigBackup(ConfigController.defaultConfig);
-                            setSelectedDevice(null);
+                        <Button variant="soft" color="red" size="2" style={{ width: "100%" }} onClick={async () => {
+                            const confirm = await (() => new Promise((resolve) => {
+                                dialog.confirm(
+                                    t('clear_settings'),
+                                    t('clear_settings_description'),
+                                    () => resolve(true),
+                                    () => resolve(false),
+                                );
+                            }))();
+
+                            if (confirm) {
+                                const cfg = new ConfigController(selectedDevice?.id ?? "global", selectedDevice?.type ?? "usb");
+                                cfg.clearConfig();
+                                setConfig(ConfigController.defaultConfig);
+                                setConfigBackup(ConfigController.defaultConfig);
+                                setSelectedDevice(null);
+                            }
                         }}>
                             <PiTrashDuotone size={18} />
                             {t('clear_settings')}
                         </Button>
-                        : <Button variant="soft" color="red" size="2" style={{ width: "100%" }} onClick={() => {
-                            const cfg = new ConfigController("global", "usb");
-                            cfg.clearConfig();
-                            setConfig(ConfigController.defaultConfig);
-                            setConfigBackup(ConfigController.defaultConfig);
+                        : <Button variant="soft" color="red" size="2" style={{ width: "100%" }} onClick={async () => {
+                            const confirm = await (() => new Promise((resolve) => {
+                                dialog.confirm(
+                                    t('reset_settings'),
+                                    t('reset_settings_description'),
+                                    () => resolve(true),
+                                    () => resolve(false),
+                                );
+                            }))();
+
+                            if (confirm) {
+                                const cfg = new ConfigController("global", "usb");
+                                cfg.clearConfig();
+                                setConfig(ConfigController.defaultConfig);
+                                setConfigBackup(ConfigController.defaultConfig);
+                            }
                         }}>
                             <PiArrowCounterClockwise size={18} />
                             {t('reset_settings')}

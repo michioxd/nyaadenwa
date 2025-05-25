@@ -269,6 +269,8 @@ const Locale: LocaleResourcesType = {
         scrcpy_log_level_info: "Info",
         scrcpy_log_level_warn: "Warn",
         scrcpy_log_level_error: "Error",
+        clear_settings_description: "Are you sure you want to clear the settings for this device?",
+        reset_settings_description: "Are you sure you want to reset the settings for all devices?",
     },
 };
 
