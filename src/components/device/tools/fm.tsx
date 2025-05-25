@@ -397,11 +397,13 @@ const FileManagerItem = memo(
                                 )}
                             </IconButton>
                         </Table.RowHeaderCell>
-                        <Table.Cell onDoubleClick={onUserHandle} onClick={onUserHandle}
+                        <Table.Cell
+                            onDoubleClick={onUserHandle}
+                            onClick={onUserHandle}
                             style={{
-                                width: '100%',
-                                overflow: 'hidden',
-                                position: 'relative',
+                                width: "100%",
+                                overflow: "hidden",
+                                position: "relative",
                             }}
                         >
                             <Text
@@ -412,7 +414,7 @@ const FileManagerItem = memo(
                                     textOverflow: "ellipsis",
                                     overflow: "hidden",
                                     whiteSpace: "nowrap",
-                                    maxWidth: '100%',
+                                    maxWidth: "100%",
                                 }}
                             >
                                 {file.name}
@@ -805,9 +807,11 @@ function FileManager({ adb, deviceHash }: { adb: Adb; deviceHash: string }) {
             const files = Array.from((e.target as HTMLInputElement).files ?? []);
             if (files.length === 0) return;
             stillUploading.current = true;
-            toast.info(t("uploading_files", {
-                count: files.length,
-            }))
+            toast.info(
+                t("uploading_files", {
+                    count: files.length,
+                }),
+            );
             setShowUploadArea(false);
             setUploadingFiles({
                 uploaded: 0,
@@ -1203,10 +1207,10 @@ function FileManager({ adb, deviceHash }: { adb: Adb; deviceHash: string }) {
                                             listFiles.length + listFolders.length <= 0
                                                 ? false
                                                 : selected.length === listFiles.length + listFolders.length
-                                                    ? true
-                                                    : selected.length > 0
-                                                        ? "indeterminate"
-                                                        : false
+                                                  ? true
+                                                  : selected.length > 0
+                                                    ? "indeterminate"
+                                                    : false
                                         }
                                     />
                                 </Table.ColumnHeaderCell>
@@ -1327,10 +1331,10 @@ function FileManager({ adb, deviceHash }: { adb: Adb; deviceHash: string }) {
                                             one
                                                 ? setSelected([file])
                                                 : setSelected(
-                                                    selected.includes(file)
-                                                        ? selected.filter((name) => name !== file)
-                                                        : [...selected, file],
-                                                )
+                                                      selected.includes(file)
+                                                          ? selected.filter((name) => name !== file)
+                                                          : [...selected, file],
+                                                  )
                                         }
                                     />
                                 ))}
@@ -1371,10 +1375,10 @@ function FileManager({ adb, deviceHash }: { adb: Adb; deviceHash: string }) {
                                             one
                                                 ? setSelected([file])
                                                 : setSelected(
-                                                    selected.includes(file)
-                                                        ? selected.filter((name) => name !== file)
-                                                        : [...selected, file],
-                                                )
+                                                      selected.includes(file)
+                                                          ? selected.filter((name) => name !== file)
+                                                          : [...selected, file],
+                                                  )
                                         }
                                     />
                                 ))}

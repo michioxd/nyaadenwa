@@ -1,0 +1,32 @@
+.pm {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: var(--card-padding);
+    transition: 0.2s;
+
+    .pmTable {
+        width: 100%;
+        height: calc(100% - 6.05rem);
+
+        .SortButton {
+            margin-left: 4px;
+            padding: 4px;
+            width: 20px;
+            height: 20px;
+        }
+    }
+
+    .pmHeader {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        padding: 8px;
+        gap: 4px;
+
+        .pmSearch {
+            width: 100%;
+        }
+    }
+}

@@ -74,7 +74,7 @@ export default class ScrcpyStream {
                 audioBitRate: 128_000,
                 audioSource: "output",
                 ...this.options,
-                video: true
+                video: true,
             }),
         );
 

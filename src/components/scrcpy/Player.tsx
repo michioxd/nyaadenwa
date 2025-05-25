@@ -51,7 +51,7 @@ const PointerEventButtonToAndroidButton = [
     AndroidMotionEventButton.Forward,
 ];
 
-function ScrcpyPlayer({ dev, config }: { dev: Adb, config: TConfig }) {
+function ScrcpyPlayer({ dev, config }: { dev: Adb; config: TConfig }) {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const playerRef = useRef<HTMLDivElement>(null);
     const touchAreaRef = useRef<HTMLDivElement>(null);

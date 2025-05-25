@@ -5,16 +5,24 @@
  */
 
 import { AdbScrcpyOptions3_1 } from "@yume-chan/adb-scrcpy";
+import {
+    PackageManagerInstallLocation,
+    PackageManagerInstallOptions,
+    PackageManagerInstallReason,
+} from "@yume-chan/android-bin";
 
 export interface TConfig {
     scrcpy: {
-        enable: boolean,
-        config: AdbScrcpyOptions3_1.Init<boolean>
-    }
+        enable: boolean;
+        config: AdbScrcpyOptions3_1.Init<boolean>;
+    };
+    install_apk: {
+        useOptions: boolean;
+        options: PackageManagerInstallOptions;
+    };
 }
 
 class ConfigController {
-
     private deviceHash: string | "global" = "";
     private deviceType: "usb" | "websocket" = "usb";
     public static defaultConfig: TConfig = {
@@ -34,9 +42,42 @@ class ConfigController {
                 audio: true,
                 audioBitRate: 128_000,
                 audioSource: "output",
-            }
-        }
-    }
+            },
+        },
+        install_apk: {
+            useOptions: false,
+            options: {
+                abi: "",
+                allowTest: false,
+                apex: false,
+                bypassLowTargetSdkBlock: false,
+                doNotKill: false,
+                enableRollback: false,
+                forceNonStaged: false,
+                forceQueryable: false,
+                forceUuid: "",
+                full: false,
+                grantRuntimePermissions: false,
+                installLocation: PackageManagerInstallLocation.Auto,
+                installReason: PackageManagerInstallReason.Unknown,
+                originatingUri: "",
+                refererUri: "",
+                restrictPermissions: false,
+                inheritFrom: "",
+                installerPackageName: "",
+                instantApp: false,
+                internalStorage: false,
+                packageName: "",
+                preload: false,
+                skipExisting: false,
+                requestDowngrade: false,
+                skipVerification: false,
+                staged: false,
+                stagedReadyTimeout: 0,
+                user: "all",
+            },
+        },
+    };
 
     constructor(deviceHash: typeof this.deviceHash, deviceType: typeof this.deviceType) {
         this.deviceHash = deviceHash;
@@ -44,7 +85,7 @@ class ConfigController {
     }
 
     private storage() {
-        const key = `config:${(this.deviceHash === "global" ? "global" : this.deviceType + ":" + this.deviceHash)}`;
+        const key = `config:${this.deviceHash === "global" ? "global" : this.deviceType + ":" + this.deviceHash}`;
         const keyGlobal = `config:global`;
         return {
             get: () => {
@@ -59,8 +100,8 @@ class ConfigController {
             },
             clear: () => {
                 localStorage.removeItem(key);
-            }
-        }
+            },
+        };
     }
 
     public getConfig() {

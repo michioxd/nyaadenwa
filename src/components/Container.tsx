@@ -295,8 +295,8 @@ const Container = observer(
                                                                         () => {
                                                                             deviceForgot.push(
                                                                                 device.raw.manufacturerName +
-                                                                                device.name +
-                                                                                device.serial,
+                                                                                    device.name +
+                                                                                    device.serial,
                                                                             );
                                                                             try {
                                                                                 device.raw.close();

@@ -130,8 +130,8 @@ const ScreenDevice = observer(
                 usbDetails
                     ? `${usbDetails?.name} (${usbDetails?.serial})`
                     : webSocketURL
-                        ? `${webSocketURL} (WebSocket)`
-                        : "Unknown",
+                      ? `${webSocketURL} (WebSocket)`
+                      : "Unknown",
             [usbDetails, webSocketURL],
         );
 
@@ -270,12 +270,14 @@ const ScreenDevice = observer(
                         <Card className={cls.Loading}>
                             <Spinner size="3" /> <Text size="1">{t("waiting_for_device")}</Text>
                         </Card>
-                    ) : !config.scrcpy.enable ? <Card className={cls.Loading} style={{ zIndex: 0 }}>
-                        <Text size="1" style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-                            <RxExclamationTriangle size={18} />
-                            {t("scrcpy_disabled")}
-                        </Text>
-                    </Card> : (
+                    ) : !config.scrcpy.enable ? (
+                        <Card className={cls.Loading} style={{ zIndex: 0 }}>
+                            <Text size="1" style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                                <RxExclamationTriangle size={18} />
+                                {t("scrcpy_disabled")}
+                            </Text>
+                        </Card>
+                    ) : (
                         <>{adb && <ScrcpyPlayer dev={adb} config={config} />}</>
                     )}
                 </div>
