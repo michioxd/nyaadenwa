@@ -261,7 +261,7 @@ const Locale: LocaleResourcesType = {
         scrcpy_video_display_id: "ID màn hình",
         scrcpy_video_display_id_description: "ID màn hình nếu bạn có nhiều màn hình. Nếu bạn không cái này là gì, hãy để nó là 0",
         scrcpy_useful_tip_title: "Một số mẹo hữu ích",
-        scrcpy_useful_tip_description: "- Một số thiết bị không thể sử dụng tính năng điều khiển. MIUI một là ví dụ.\n- Nếu thiết bị của bạn đang chạy Android 13 trở lên, bạn có thể sử dụng nguồn phát lại để chuyển âm thanh từ thiết bị đến trình duyệt.\n- Tốc độ bit càng cao, chất lượng càng tốt, băng thông sử dụng càng nhiều. Nếu bạn đang sử dụng USB 2.0, tốc độ bit cao không được khuyến khích.\n- Hãy thử giảm tốc độ bit hoặc kích thước tối đa nếu bạn cảm thấy lag.",
+        scrcpy_useful_tip_description: "- Một số thiết bị không thể sử dụng tính năng điều khiển. MIUI là một ví dụ.\n- Nếu thiết bị của bạn đang chạy Android 13 trở lên, bạn có thể sử dụng nguồn phát lại để chuyển âm thanh từ thiết bị đến trình duyệt.\n- Tốc độ bit càng cao, chất lượng càng tốt, băng thông sử dụng càng nhiều. Nếu bạn đang sử dụng USB 2.0, tốc độ bit cao không được khuyến khích.\n- Hãy thử giảm tốc độ bit hoặc kích thước tối đa nếu bạn cảm thấy lag.",
         scrcpy_log_level: "Mức độ log",
         scrcpy_log_level_description: "Đặt mức độ log cho scrcpy server. Log sẽ được in ra console.",
         scrcpy_log_level_verbose: "Verbose (tất cả log)",
