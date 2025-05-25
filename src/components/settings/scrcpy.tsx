@@ -60,40 +60,40 @@ const SettingsScrcpy = observer(({ config, setConfig }: { config: TConfig, setCo
             label={t('scrcpy_enable')}
             description={t('scrcpy_enable_description')}
         />
-        <SettingContainer label={t('scrcpy_log_level')} description={t('scrcpy_log_level_description')}>
-            <Select.Root value={config.scrcpy.config.logLevel} onValueChange={(value) => {
-                setConfig(p => ({
-                    ...p,
-                    scrcpy: {
-                        ...p.scrcpy,
-                        config: {
-                            ...p.scrcpy.config,
-                            logLevel: value as "verbose" | "debug" | "info" | "warn" | "error"
-                        }
-                    }
-                }));
-            }}>
-                <Select.Trigger />
-                <Select.Content>
-                    <Select.Item value="verbose">
-                        {t('scrcpy_log_level_verbose')}
-                    </Select.Item>
-                    <Select.Item value="debug">
-                        {t('scrcpy_log_level_debug')}
-                    </Select.Item>
-                    <Select.Item value="info">
-                        {t('scrcpy_log_level_info')}
-                    </Select.Item>
-                    <Select.Item value="warn">
-                        {t('scrcpy_log_level_warn')}
-                    </Select.Item>
-                    <Select.Item value="error">
-                        {t('scrcpy_log_level_error')}
-                    </Select.Item>
-                </Select.Content>
-            </Select.Root>
-        </SettingContainer>
         {config.scrcpy.enable && <>
+            <SettingContainer label={t('scrcpy_log_level')} description={t('scrcpy_log_level_description')}>
+                <Select.Root value={config.scrcpy.config.logLevel} onValueChange={(value) => {
+                    setConfig(p => ({
+                        ...p,
+                        scrcpy: {
+                            ...p.scrcpy,
+                            config: {
+                                ...p.scrcpy.config,
+                                logLevel: value as "verbose" | "debug" | "info" | "warn" | "error"
+                            }
+                        }
+                    }));
+                }}>
+                    <Select.Trigger />
+                    <Select.Content>
+                        <Select.Item value="verbose">
+                            {t('scrcpy_log_level_verbose')}
+                        </Select.Item>
+                        <Select.Item value="debug">
+                            {t('scrcpy_log_level_debug')}
+                        </Select.Item>
+                        <Select.Item value="info">
+                            {t('scrcpy_log_level_info')}
+                        </Select.Item>
+                        <Select.Item value="warn">
+                            {t('scrcpy_log_level_warn')}
+                        </Select.Item>
+                        <Select.Item value="error">
+                            {t('scrcpy_log_level_error')}
+                        </Select.Item>
+                    </Select.Content>
+                </Select.Root>
+            </SettingContainer>
             <SettingSwitch
                 checked={config.scrcpy.config.control ?? true}
                 onCheckedChange={(checked) => {
