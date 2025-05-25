@@ -46,6 +46,7 @@ export default function Power({ close, adb }: { close: () => void; adb: Adb }) {
                         {
                             label: t("command"),
                             placeholder: "recovery",
+                            validate: (value) => value.trim() !== "" && value.trim() !== "recovery" && value.trim() !== "bootloader" && value.trim() !== "fastboot" && value.trim() !== "sideload",
                         },
                     ],
                     (value, close) => {
