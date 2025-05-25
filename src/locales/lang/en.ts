@@ -189,7 +189,6 @@ const Locale: LocaleResourcesType = {
         new_name_is_same_as_old_name: "New name is same as old name",
         websocket_device_disconnected: "WebSocket device disconnected",
         refresh: "Refresh",
-        uploading_files: "Uploading files ({{uploaded}}/{{total}}) ({{failed}} failed)",
         failed_to_upload_file: "Failed to upload file {{name}}",
         drop_files_here_or_click_to_upload: "Drop files here or click to upload",
         delete_selected_items: "Delete selected items",
@@ -220,6 +219,9 @@ const Locale: LocaleResourcesType = {
         user_cancelled_download: "User cancelled the download",
         file: "File",
         download_file_success: "Download successful",
+        download_file_not_supported: "Download file is not supported in this browser",
+        upload_files_success: "Upload files successful",
+        uploading_files: "Uploading {{count}} files",
     },
 };
 

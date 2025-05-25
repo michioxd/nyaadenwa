@@ -189,7 +189,6 @@ const Locale: LocaleResourcesType = {
         new_name_is_same_as_old_name: "Tên mới trùng với tên cũ",
         websocket_device_disconnected: "Thiết bị WebSocket đã bị ngắt kết nối",
         refresh: "Làm mới",
-        uploading_files: "Đang tải lên tệp ({{uploaded}}/{{total}}) ({{failed}} thất bại)",
         failed_to_upload_file: "Không thể tải lên tệp {{name}}",
         drop_files_here_or_click_to_upload: "Thả tệp vào đây hoặc nhấn để tải lên",
         delete_selected_items: "Xóa các mục đã chọn",
@@ -220,6 +219,9 @@ const Locale: LocaleResourcesType = {
         user_cancelled_download: "Người dùng đã hủy tải xuống",
         file: "Tệp",
         download_file_success: "Tải xuống tệp thành công",
+        download_file_not_supported: "Tải xuống tệp không được hỗ trợ trong trình duyệt này",
+        upload_files_success: "Tải lên tệp thành công",
+        uploading_files: "Đang tải lên {{count}} tệp",
     },
 };
 

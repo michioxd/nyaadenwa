@@ -260,6 +260,10 @@ const FileManagerItem = memo(
         }, [dialog, adb, file.name, t, currentPath]);
 
         const handleDownloadFile = useCallback(async () => {
+            if (!window.showSaveFilePicker) {
+                toast.warning(t("download_file_not_supported"));
+                return;
+            }
             if (downloadProgress !== null || fileType === "folder") return;
             const fileSize = Number(file.size);
             let handle: FileSystemFileHandle | null = null;
@@ -336,6 +340,8 @@ const FileManagerItem = memo(
                             handleInstallApk();
                             return;
                         }
+
+                        handleDownloadFile();
                     } else {
                         lastClick.current = Date.now();
                     }
@@ -345,8 +351,9 @@ const FileManagerItem = memo(
                 if (isDirectory) cd?.();
                 else if (fileType === "code" || fileType === "text") onOpenEditor?.();
                 else if (fileType === "android_package") handleInstallApk();
+                else handleDownloadFile();
             },
-            [file.type, cd, selected, onSelect, fileType, onOpenEditor],
+            [file.type, cd, selected, onSelect, fileType, onOpenEditor, handleDownloadFile, handleInstallApk],
         );
 
         return (
@@ -785,6 +792,9 @@ function FileManager({ adb, deviceHash }: { adb: Adb; deviceHash: string }) {
             const files = Array.from((e.target as HTMLInputElement).files ?? []);
             if (files.length === 0) return;
             stillUploading.current = true;
+            toast.info(t("uploading_files", {
+                count: files.length,
+            }))
             setShowUploadArea(false);
             setUploadingFiles({
                 uploaded: 0,
@@ -839,6 +849,7 @@ function FileManager({ adb, deviceHash }: { adb: Adb; deviceHash: string }) {
             if (uploadInputRef.current) {
                 uploadInputRef.current.value = "";
             }
+            toast.success(t("upload_files_success"));
             setUploadingFiles({
                 uploaded: 0,
                 total: 0,
@@ -1179,10 +1190,10 @@ function FileManager({ adb, deviceHash }: { adb: Adb; deviceHash: string }) {
                                             listFiles.length + listFolders.length <= 0
                                                 ? false
                                                 : selected.length === listFiles.length + listFolders.length
-                                                  ? true
-                                                  : selected.length > 0
-                                                    ? "indeterminate"
-                                                    : false
+                                                    ? true
+                                                    : selected.length > 0
+                                                        ? "indeterminate"
+                                                        : false
                                         }
                                     />
                                 </Table.ColumnHeaderCell>
@@ -1303,10 +1314,10 @@ function FileManager({ adb, deviceHash }: { adb: Adb; deviceHash: string }) {
                                             one
                                                 ? setSelected([file])
                                                 : setSelected(
-                                                      selected.includes(file)
-                                                          ? selected.filter((name) => name !== file)
-                                                          : [...selected, file],
-                                                  )
+                                                    selected.includes(file)
+                                                        ? selected.filter((name) => name !== file)
+                                                        : [...selected, file],
+                                                )
                                         }
                                     />
                                 ))}
@@ -1347,10 +1358,10 @@ function FileManager({ adb, deviceHash }: { adb: Adb; deviceHash: string }) {
                                             one
                                                 ? setSelected([file])
                                                 : setSelected(
-                                                      selected.includes(file)
-                                                          ? selected.filter((name) => name !== file)
-                                                          : [...selected, file],
-                                                  )
+                                                    selected.includes(file)
+                                                        ? selected.filter((name) => name !== file)
+                                                        : [...selected, file],
+                                                )
                                         }
                                     />
                                 ))}
