@@ -20,6 +20,8 @@ import sessionDevices from "@/controller/devices";
 import { observer } from "mobx-react";
 import { RiSideBarFill, RiSidebarFoldLine, RiSidebarUnfoldLine } from "react-icons/ri";
 import DeviceTools from "@/components/device/Tools";
+import ConfigController from "@/controller/config";
+import { RxExclamationTriangle } from "react-icons/rx";
 
 enum DeviceState {
     Connecting = "CONNECTING",
@@ -128,8 +130,8 @@ const ScreenDevice = observer(
                 usbDetails
                     ? `${usbDetails?.name} (${usbDetails?.serial})`
                     : webSocketURL
-                      ? `${webSocketURL} (WebSocket)`
-                      : "Unknown",
+                        ? `${webSocketURL} (WebSocket)`
+                        : "Unknown",
             [usbDetails, webSocketURL],
         );
 
@@ -140,6 +142,10 @@ const ScreenDevice = observer(
             },
             [dialog, t, close, usbDetails],
         );
+
+        const config = useMemo(() => {
+            return new ConfigController(deviceHash, usbDetails ? "usb" : "websocket").getConfig();
+        }, [deviceHash, usbDetails]);
 
         const handleConnect = useCallback(async () => {
             setAdb(null);
@@ -264,8 +270,13 @@ const ScreenDevice = observer(
                         <Card className={cls.Loading}>
                             <Spinner size="3" /> <Text size="1">{t("waiting_for_device")}</Text>
                         </Card>
-                    ) : (
-                        <>{adb && <ScrcpyPlayer dev={adb} />}</>
+                    ) : !config.scrcpy.enable ? <Card className={cls.Loading}>
+                        <Text size="1" style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                            <RxExclamationTriangle size={18} />
+                            {t("scrcpy_disabled")}
+                        </Text>
+                    </Card> : (
+                        <>{adb && <ScrcpyPlayer dev={adb} config={config} />}</>
                     )}
                 </div>
             </div>

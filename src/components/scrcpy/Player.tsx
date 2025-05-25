@@ -41,6 +41,7 @@ import { TbKeyboard, TbKeyboardOff } from "react-icons/tb";
 import { RxExclamationTriangle } from "react-icons/rx";
 import clsx from "clsx";
 import { toast } from "sonner";
+import { TConfig } from "@/controller/config";
 
 const PointerEventButtonToAndroidButton = [
     AndroidMotionEventButton.Primary,
@@ -50,7 +51,7 @@ const PointerEventButtonToAndroidButton = [
     AndroidMotionEventButton.Forward,
 ];
 
-function ScrcpyPlayer({ dev }: { dev: Adb }) {
+function ScrcpyPlayer({ dev, config }: { dev: Adb, config: TConfig }) {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const playerRef = useRef<HTMLDivElement>(null);
     const touchAreaRef = useRef<HTMLDivElement>(null);
@@ -373,9 +374,7 @@ function ScrcpyPlayer({ dev }: { dev: Adb }) {
             device: dev,
             canvas: canvasRef.current,
             options: {
-                maxSize: 2400,
-                videoBitRate: 10_000_000,
-                maxFps: 60,
+                ...config.scrcpy.config,
             },
             onResize: (w, h) => {
                 setReady(true);

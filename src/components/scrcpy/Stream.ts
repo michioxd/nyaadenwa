@@ -67,14 +67,14 @@ export default class ScrcpyStream {
                 sendFrameMeta: true,
                 displayId: 0,
                 control: true,
-                video: true,
                 videoBitRate: 10_000_000,
                 videoSource: "display",
                 audioCodec: "opus",
                 audio: true,
                 audioBitRate: 128_000,
-                audioSource: "playback",
+                audioSource: "output",
                 ...this.options,
+                video: true
             }),
         );
 

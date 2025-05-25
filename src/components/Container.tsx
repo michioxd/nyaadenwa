@@ -37,6 +37,7 @@ import { MdAdb, MdUsb } from "react-icons/md";
 import { toast } from "sonner";
 import { useCallback } from "react";
 import DeviceManager from "@/controller/manager";
+import Settings from "@/screen/Settings";
 
 const deviceForgot: string[] = [];
 
@@ -174,7 +175,7 @@ const Container = observer(
                                                         id: "settings",
                                                         title: t("settings"),
                                                         type: ContentTypeProperties.Settings,
-                                                        content: () => <div>Settings</div>,
+                                                        content: () => <Settings />,
                                                         stackNo: stackNo,
                                                     },
                                                     stackNo,
@@ -294,8 +295,8 @@ const Container = observer(
                                                                         () => {
                                                                             deviceForgot.push(
                                                                                 device.raw.manufacturerName +
-                                                                                    device.name +
-                                                                                    device.serial,
+                                                                                device.name +
+                                                                                device.serial,
                                                                             );
                                                                             try {
                                                                                 device.raw.close();

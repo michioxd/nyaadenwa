@@ -77,3 +77,15 @@ export function validateLinuxFileName(name: string): boolean {
 
     return name !== null && name.trim() !== "" && /^[0-9a-zA-Z-._]+$/.test(name);
 }
+
+export function formatBitrate(bitrate: number): string {
+    const units = ["bps", "kbps", "Mbps", "Gbps", "Tbps"];
+    let unitIndex = 0;
+
+    while (bitrate >= 1000 && unitIndex < units.length - 1) {
+        bitrate /= 1000;
+        unitIndex++;
+    }
+
+    return `${bitrate.toFixed(2)} ${units[unitIndex]}`;
+}

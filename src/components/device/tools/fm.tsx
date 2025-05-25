@@ -361,6 +361,7 @@ const FileManagerItem = memo(
                 <ContextMenu.Trigger>
                     <Table.Row
                         className={clsx(cls.FileManagerItem, selected && cls.Selected)}
+                        title={file.name}
                         style={
                             downloadProgress
                                 ? ({ "--download-progress": `${downloadProgress}%` } as React.CSSProperties)
@@ -396,11 +397,23 @@ const FileManagerItem = memo(
                                 )}
                             </IconButton>
                         </Table.RowHeaderCell>
-                        <Table.Cell onDoubleClick={onUserHandle} onClick={onUserHandle}>
+                        <Table.Cell onDoubleClick={onUserHandle} onClick={onUserHandle}
+                            style={{
+                                width: '100%',
+                                overflow: 'hidden',
+                                position: 'relative',
+                            }}
+                        >
                             <Text
                                 size="1"
                                 weight="medium"
-                                style={{ fontStyle: file.type === LinuxFileType.Link ? "italic" : "normal" }}
+                                style={{
+                                    fontStyle: file.type === LinuxFileType.Link ? "italic" : "normal",
+                                    textOverflow: "ellipsis",
+                                    overflow: "hidden",
+                                    whiteSpace: "nowrap",
+                                    maxWidth: '100%',
+                                }}
                             >
                                 {file.name}
                             </Text>
