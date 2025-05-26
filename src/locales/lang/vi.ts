@@ -293,7 +293,7 @@ const Locale: LocaleResourcesType = {
         install_apk_cfg_use_options: "Sử dụng tùy chọn nâng cao",
         install_apk_cfg_use_options_description:
             "Sử dụng các tùy chọn này để tùy chỉnh quá trình cài đặt. Nếu bạn không biết các tùy chọn này là gì, hãy để nó là mặc định.",
-        install_apk_cfg_more_info_link: "Thêm thông tin về các tùy chọn này có thể được tìm thấy trong <0>tệp này</0>",
+        install_apk_cfg_more_info_link: "Thông tin chi tiết về các tùy chọn này có thể được tìm thấy trong <0>tệp này</0>",
         install_apk_cfg_abi: "ABI",
         install_apk_cfg_abi_description: "Ghi đè ABI mặc định của nền tảng",
         install_apk_cfg_allow_test: "Cho phép gói thử nghiệm",
@@ -354,6 +354,10 @@ const Locale: LocaleResourcesType = {
         install_apk_cfg_staged_description: "Cài đặt ứng dụng ở chế độ theo giai đoạn",
         install_apk_cfg_user: "Người dùng",
         install_apk_cfg_user_description: "Cài đặt cho người dùng đã cho (tất cả, hiện tại hoặc ID người dùng)",
+        install_apk_cfg_user_all: "Tất cả người dùng",
+        install_apk_cfg_user_current: "Người dùng hiện tại",
+        install_apk_cfg_user_uid: "ID người dùng",
+        install_apk_cfg_user_uid_placeholder: "Nhập ID người dùng",
     },
 };
 

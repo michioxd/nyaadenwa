@@ -612,18 +612,44 @@ export default function SettingsInstallApk({
                         }
                         description={t("install_apk_cfg_user_description")}
                     >
-                        <TextField.Root
-                            value={config.install_apk.options.user?.toString() ?? ""}
-                            onChange={(e) => {
+                        <Select.Root
+                            value={typeof config.install_apk.options.user === "number" ? "uid" : config.install_apk.options.user}
+                            onValueChange={(value) => {
                                 setConfig((p) => ({
                                     ...p,
                                     install_apk: {
                                         ...p.install_apk,
-                                        options: { ...p.install_apk.options, user: e.target.value as SingleUserOrAll },
+                                        options: {
+                                            ...p.install_apk.options,
+                                            user: value === "uid" ? 0 : value as SingleUserOrAll,
+                                        },
                                     },
                                 }));
                             }}
-                        />
+                        >
+                            <Select.Trigger />
+                            <Select.Content>
+                                <Select.Item value="all">{t("install_apk_cfg_user_all")}</Select.Item>
+                                <Select.Item value="current">{t("install_apk_cfg_user_current")}</Select.Item>
+                                <Select.Item value="uid">{t("install_apk_cfg_user_uid")}</Select.Item>
+                            </Select.Content>
+                        </Select.Root>
+                        {typeof config.install_apk.options.user === "number" && (
+                            <TextField.Root
+                                value={config.install_apk.options.user?.toString() ?? ""}
+                                type="number"
+                                placeholder={t("install_apk_cfg_user_uid_placeholder")}
+                                onChange={(e) => {
+                                    setConfig((p) => ({
+                                        ...p,
+                                        install_apk: {
+                                            ...p.install_apk,
+                                            options: { ...p.install_apk.options, user: parseInt(e.target.value) as SingleUserOrAll },
+                                        },
+                                    }));
+                                }}
+                            />
+                        )}
                     </SettingContainer>
                 </>
             )}

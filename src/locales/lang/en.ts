@@ -352,6 +352,10 @@ const Locale: LocaleResourcesType = {
         install_apk_cfg_staged_description: "Install the app in staged mode",
         install_apk_cfg_user: "User",
         install_apk_cfg_user_description: "Install under the given user (all, current, or user ID)",
+        install_apk_cfg_user_all: "All users",
+        install_apk_cfg_user_current: "Current user",
+        install_apk_cfg_user_uid: "User ID",
+        install_apk_cfg_user_uid_placeholder: "Enter the user ID",
     },
 };
 
