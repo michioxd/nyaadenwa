@@ -21,7 +21,7 @@ import {
     TextField,
     Tooltip,
 } from "@radix-ui/themes";
-import { Adb, AdbShellProtocolSpawner, AdbSyncEntry, LinuxFileType } from "@yume-chan/adb";
+import { Adb, AdbSyncEntry, LinuxFileType } from "@yume-chan/adb";
 import cls from "./fm.module.scss";
 import {
     PiAndroidLogoDuotone,
@@ -58,6 +58,8 @@ import { ReadableStream, WritableStream } from "@yume-chan/stream-extra";
 import { v4 as uuidv4 } from "uuid";
 import { TFunction } from "i18next";
 import { DialogContextType } from "@/components/dialog/DialogProvider";
+import { runAdbCmd } from "@/utils/adb";
+import { TConfig } from "@/controller/config";
 
 // Add type declarations for File System Access API
 declare global {
@@ -181,6 +183,7 @@ const FileManagerItem = memo(
         onRename,
         onCopy,
         onMove,
+        config,
     }: {
         file: AdbSyncEntry;
         cd?: () => void;
@@ -194,6 +197,7 @@ const FileManagerItem = memo(
         onRename?: () => void;
         onCopy?: () => void;
         onMove?: () => void;
+        config: TConfig;
     }) => {
         const { t, i18n } = useTranslation();
         const dialog = useDialog();
@@ -221,28 +225,17 @@ const FileManagerItem = memo(
                     size: formatSize(Number(file.size)),
                 }),
                 async () => {
+                    const tmpName = "nyaadenwa_tmp_" + Date.now() + ".apk";
                     try {
                         setIsInstalling(true);
-                        const tmpName = "nyaadenwa_tmp_" + Date.now() + ".apk";
-                        let res: AdbShellProtocolSpawner.WaitResult<string> | undefined = undefined;
-                        res = await adb.subprocess.shellProtocol?.spawnWaitText(
-                            'cp -T "' + currentPath + "/" + file.name + '" /data/local/tmp/' + tmpName,
-                        );
-
-                        if (res?.exitCode !== 0) {
-                            console.error(res?.stderr);
-                            toast.error(t("failed_to_install_apk"));
-                            return;
-                        }
+                        await runAdbCmd(adb, `cp -T "${currentPath}/${file.name}" /data/local/tmp/${tmpName}`);
 
                         const pm = new PackageManager(adb);
-                        await pm.install(["/data/local/tmp/" + tmpName]);
-                        res = await adb.subprocess.shellProtocol?.spawnWaitText("rm -f /data/local/tmp/" + tmpName);
-                        if (res?.exitCode !== 0) {
-                            console.error(res?.stderr);
-                            toast.error(t("failed_to_install_apk"));
-                            return;
-                        }
+                        await pm.install(["/data/local/tmp/" + tmpName], {
+                            ...(config.install_apk.useOptions ? config.install_apk.options : {}),
+                            apex: file.name.toLocaleLowerCase().endsWith(".apex"),
+                        });
+                        await runAdbCmd(adb, "rm -f /data/local/tmp/" + tmpName);
 
                         toast.success(t("install_apk_to_device_success"));
                     } catch (error) {
@@ -253,11 +246,13 @@ const FileManagerItem = memo(
                             }),
                         );
                     } finally {
+                        // try to clean up one more time if it failed
+                        await runAdbCmd(adb, "rm -f /data/local/tmp/" + tmpName);
                         setIsInstalling(false);
                     }
                 },
             );
-        }, [dialog, adb, file.name, t, currentPath]);
+        }, [dialog, adb, file.name, t, currentPath, config]);
 
         const handleDownloadFile = useCallback(async () => {
             if (!window.showSaveFilePicker) {
@@ -497,7 +492,7 @@ const FileManagerItem = memo(
     },
 );
 
-function FileManager({ adb, deviceHash }: { adb: Adb; deviceHash: string }) {
+function FileManager({ adb, deviceHash, config }: { adb: Adb; deviceHash: string; config: TConfig }) {
     const fmRef = useRef<HTMLDivElement>(null);
     const uploadInputRef = useRef<HTMLInputElement>(null);
     const dialog = useDialog();
@@ -1207,10 +1202,10 @@ function FileManager({ adb, deviceHash }: { adb: Adb; deviceHash: string }) {
                                             listFiles.length + listFolders.length <= 0
                                                 ? false
                                                 : selected.length === listFiles.length + listFolders.length
-                                                  ? true
-                                                  : selected.length > 0
-                                                    ? "indeterminate"
-                                                    : false
+                                                    ? true
+                                                    : selected.length > 0
+                                                        ? "indeterminate"
+                                                        : false
                                         }
                                     />
                                 </Table.ColumnHeaderCell>
@@ -1331,11 +1326,12 @@ function FileManager({ adb, deviceHash }: { adb: Adb; deviceHash: string }) {
                                             one
                                                 ? setSelected([file])
                                                 : setSelected(
-                                                      selected.includes(file)
-                                                          ? selected.filter((name) => name !== file)
-                                                          : [...selected, file],
-                                                  )
+                                                    selected.includes(file)
+                                                        ? selected.filter((name) => name !== file)
+                                                        : [...selected, file],
+                                                )
                                         }
+                                        config={config}
                                     />
                                 ))}
                             {listFiles
@@ -1375,11 +1371,12 @@ function FileManager({ adb, deviceHash }: { adb: Adb; deviceHash: string }) {
                                             one
                                                 ? setSelected([file])
                                                 : setSelected(
-                                                      selected.includes(file)
-                                                          ? selected.filter((name) => name !== file)
-                                                          : [...selected, file],
-                                                  )
+                                                    selected.includes(file)
+                                                        ? selected.filter((name) => name !== file)
+                                                        : [...selected, file],
+                                                )
                                         }
+                                        config={config}
                                     />
                                 ))}
                         </Table.Body>

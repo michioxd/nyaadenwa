@@ -26,7 +26,7 @@ import {
 } from "react-icons/pi";
 
 export const fileExtension = {
-    android_package: ["apk"],
+    android_package: ["apk", "apex"],
     archive: [
         "zip",
         "7z",
@@ -546,7 +546,7 @@ const mimeType = {
     "application/x-msdos-program": ["bat", "cmd"],
     "application/x-sh": ["sh"],
     "application/x-executable": ["bin", "run"],
-    "application/vnd.android.package-archive": ["apk"],
+    "application/vnd.android.package-archive": ["apk", "apex"],
     "application/x-ms-gadget": ["gadget"],
     "application/x-ms-windows-script": ["wsf"],
     "application/javascript": ["js", "jsx", "cjs", "mjs"],

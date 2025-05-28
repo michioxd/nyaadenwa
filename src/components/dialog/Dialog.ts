@@ -7,13 +7,19 @@
 import { createContext, useContext } from "react";
 import type { DialogContextType } from "./DialogProvider";
 
+export enum DialogType {
+    Alert = "alert",
+    Confirm = "confirm",
+    Prompt = "prompt",
+}
+
 export const DialogContext = createContext<DialogContextType>({
     dialog: {
-        alert: () => {},
-        confirm: () => {},
-        prompt: () => {},
-        show: () => {},
-        close: () => {},
+        alert: () => { },
+        confirm: () => { },
+        prompt: () => { },
+        show: () => { },
+        close: () => { },
     },
 });
 

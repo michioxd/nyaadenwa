@@ -130,8 +130,8 @@ const ScreenDevice = observer(
                 usbDetails
                     ? `${usbDetails?.name} (${usbDetails?.serial})`
                     : webSocketURL
-                      ? `${webSocketURL} (WebSocket)`
-                      : "Unknown",
+                        ? `${webSocketURL} (WebSocket)`
+                        : "Unknown",
             [usbDetails, webSocketURL],
         );
 
@@ -264,6 +264,7 @@ const ScreenDevice = observer(
                             adb={adb}
                             close={close}
                             mainDeviceSize={mainDeviceSize}
+                            config={config}
                         />
                     )}
                     {state === DeviceState.Connecting ? (

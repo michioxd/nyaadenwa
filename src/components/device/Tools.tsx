@@ -18,6 +18,7 @@ import Power from "./sidebar/Power";
 import Terminal from "./tools/terminal";
 import FileManager from "./tools/fm";
 import ToolsAppManager from "./tools/pm";
+import { TConfig } from "@/controller/config";
 
 export default function DeviceTools({
     sidebarLevel,
@@ -25,12 +26,14 @@ export default function DeviceTools({
     close,
     mainDeviceSize,
     deviceHash,
+    config,
 }: {
     sidebarLevel: number;
     adb: Adb;
     close: () => void;
     mainDeviceSize: { w: number; h: number };
     deviceHash: string;
+    config: TConfig;
 }) {
     const { t } = useTranslation();
     const [section, setSection] = useState(parseInt(localStorage.getItem("sbs_" + deviceHash) ?? "0"));
@@ -255,8 +258,8 @@ export default function DeviceTools({
                         </Flex>
                         <div className={cls.DeviceToolsContent}>
                             {section === 2 && <Terminal adb={adb} onTerminalClose={() => setSection(0)} />}
-                            {section === 3 && <FileManager adb={adb} deviceHash={deviceHash} />}
-                            {section === 4 && <ToolsAppManager adb={adb} />}
+                            {section === 3 && <FileManager adb={adb} deviceHash={deviceHash} config={config} />}
+                            {section === 4 && <ToolsAppManager adb={adb} config={config} />}
                         </div>
                     </Card>
                     {!toolFullScreen && <div className={cls.ResizeHandle} onMouseDown={handleMouseDown} />}

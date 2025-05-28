@@ -4,7 +4,7 @@
  * Repository: https://github.com/michioxd/nyaadenwa
  */
 
-import ConfigController, { TConfig } from "@/controller/config";
+import { TConfig } from "@/controller/config";
 import type { Dispatch, SetStateAction } from "react";
 import { SettingContainer, SettingSwitch } from "./useful_component";
 import { Trans, useTranslation } from "react-i18next";
@@ -94,26 +94,6 @@ export default function SettingsInstallApk({
                             }}
                         />
                     </SettingContainer>
-                    <SettingSwitch
-                        checked={
-                            config.install_apk.options.apex ?? ConfigController.defaultConfig.install_apk.options.apex
-                        }
-                        onCheckedChange={(checked) => {
-                            setConfig((p) => ({
-                                ...p,
-                                install_apk: { ...p.install_apk, options: { ...p.install_apk.options, apex: checked } },
-                            }));
-                        }}
-                        label={
-                            <>
-                                {t("install_apk_cfg_apex")}
-                                <Badge size="1" ml="2" color="gray">
-                                    --apex
-                                </Badge>
-                            </>
-                        }
-                        description={t("install_apk_cfg_apex_description")}
-                    />
                     <SettingSwitch
                         checked={config.install_apk.options.bypassLowTargetSdkBlock}
                         onCheckedChange={(checked) => {
