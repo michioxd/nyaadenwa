@@ -38,6 +38,7 @@ import {
     PiFolderPlusDuotone,
     PiHouseDuotone,
     PiLinkBold,
+    PiMagnifyingGlassDuotone,
     PiPenDuotone,
     PiPenNibDuotone,
     PiTrashSimpleDuotone,
@@ -509,6 +510,9 @@ function FileManager({ adb, deviceHash, config }: { adb: Adb; deviceHash: string
     const [selected, setSelected] = useState<AdbSyncEntry[]>([]);
     const [showEditor, setShowEditor] = useState(false);
     const [showUploadArea, setShowUploadArea] = useState(false);
+    const [search, setSearch] = useState("");
+    const [realSearch, setRealSearch] = useState("");
+    const searchTimeout = useRef<NodeJS.Timeout | null>(null);
     const [copyTask, setCopyTask] = useState<{
         source: AdbSyncEntry[];
         type: "copy" | "move";
@@ -901,6 +905,15 @@ function FileManager({ adb, deviceHash, config }: { adb: Adb; deviceHash: string
         };
     }, []);
 
+    useEffect(() => {
+        if (searchTimeout.current) {
+            clearTimeout(searchTimeout.current);
+        }
+        searchTimeout.current = setTimeout(() => {
+            setRealSearch(search);
+        }, 500);
+    }, [search]);
+
     return (
         <div className={clsx(cls.FM, showEditor && cls.ShowEditor)}>
             <TextEditor
@@ -985,9 +998,32 @@ function FileManager({ adb, deviceHash, config }: { adb: Adb; deviceHash: string
                         )}
                     <Popover.Root>
                         <Popover.Trigger>
-                            <Box style={{ flex: "1", height: "100%" }}></Box>
+                            <Box
+                                style={{
+                                    display: "flex",
+                                    alignItems: "center",
+                                    gap: "0.5rem",
+                                    flex: "1",
+                                    height: "100%",
+                                }}
+                            >
+                                <Box style={{ flex: "1", height: "100%" }}></Box>
+                                <IconButton variant="soft" color={realSearch.length > 0 ? "cyan" : "gray"} size="1">
+                                    <PiMagnifyingGlassDuotone />
+                                </IconButton>
+                            </Box>
                         </Popover.Trigger>
                         <Popover.Content size="1">
+                            <Text size="1" mb="1" weight="bold">
+                                {t("search")}
+                            </Text>
+                            <TextField.Root
+                                mb="2"
+                                size="1"
+                                placeholder={t("search")}
+                                value={search}
+                                onChange={(e) => setSearch(e.target.value)}
+                            />
                             <Text size="1" mb="1" weight="bold">
                                 {t("enter_path_to_go")}
                             </Text>
@@ -1296,6 +1332,7 @@ function FileManager({ adb, deviceHash, config }: { adb: Adb; deviceHash: string
 
                         <Table.Body>
                             {listFolders
+                                .filter((file) => file.name.toLocaleLowerCase().includes(realSearch))
                                 .sort((a, b) => SortFunc(a, b, sortMode))
                                 .map((file) => (
                                     <FileManagerItem
@@ -1335,6 +1372,7 @@ function FileManager({ adb, deviceHash, config }: { adb: Adb; deviceHash: string
                                     />
                                 ))}
                             {listFiles
+                                .filter((file) => file.name.toLocaleLowerCase().includes(realSearch))
                                 .sort((a, b) => SortFunc(a, b, sortMode))
                                 .map((file) => (
                                     <FileManagerItem
