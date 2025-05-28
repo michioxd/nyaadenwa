@@ -664,21 +664,7 @@ function FileManager({ adb, deviceHash, config }: { adb: Adb; deviceHash: string
                     close();
                     try {
                         setIsLoading(true);
-                        const res = await adb.subprocess.shellProtocol?.spawnWaitText(
-                            type === "folder"
-                                ? 'mkdir -p "' + path + "/" + name + '"'
-                                : 'touch "' + path + "/" + name + '"',
-                        );
-                        if (res?.exitCode !== 0) {
-                            console.error(res?.stderr);
-                            toast.error(
-                                t("failed_to_create_" + type, {
-                                    name,
-                                }),
-                            );
-                            setIsLoading(false);
-                            return;
-                        }
+                        await runAdbCmd(adb, type === "folder" ? `mkdir -p "${path}/${name}"` : `touch "${path}/${name}"`);
                         handleListFiles();
                     } catch (error) {
                         console.error(error);
@@ -725,21 +711,7 @@ function FileManager({ adb, deviceHash, config }: { adb: Adb; deviceHash: string
                     close();
                     try {
                         setIsLoading(true);
-                        if (
-                            (
-                                await adb.subprocess.shellProtocol?.spawnWaitText(
-                                    `mv "${path}/${file.name}" "${path}/${name}"`,
-                                )
-                            )?.exitCode !== 0
-                        ) {
-                            toast.error(
-                                t("failed_to_rename_" + (file.type === LinuxFileType.Directory ? "folder" : "file"), {
-                                    name: file.name,
-                                }),
-                            );
-                            setIsLoading(false);
-                            return;
-                        }
+                        await runAdbCmd(adb, `mv "${path}/${file.name}" "${path}/${name}"`);
                         handleListFiles();
                     } catch (error) {
                         console.error(error);
@@ -1238,10 +1210,10 @@ function FileManager({ adb, deviceHash, config }: { adb: Adb; deviceHash: string
                                             listFiles.length + listFolders.length <= 0
                                                 ? false
                                                 : selected.length === listFiles.length + listFolders.length
-                                                  ? true
-                                                  : selected.length > 0
-                                                    ? "indeterminate"
-                                                    : false
+                                                    ? true
+                                                    : selected.length > 0
+                                                        ? "indeterminate"
+                                                        : false
                                         }
                                     />
                                 </Table.ColumnHeaderCell>
@@ -1363,10 +1335,10 @@ function FileManager({ adb, deviceHash, config }: { adb: Adb; deviceHash: string
                                             one
                                                 ? setSelected([file])
                                                 : setSelected(
-                                                      selected.includes(file)
-                                                          ? selected.filter((name) => name !== file)
-                                                          : [...selected, file],
-                                                  )
+                                                    selected.includes(file)
+                                                        ? selected.filter((name) => name !== file)
+                                                        : [...selected, file],
+                                                )
                                         }
                                         config={config}
                                     />
@@ -1409,10 +1381,10 @@ function FileManager({ adb, deviceHash, config }: { adb: Adb; deviceHash: string
                                             one
                                                 ? setSelected([file])
                                                 : setSelected(
-                                                      selected.includes(file)
-                                                          ? selected.filter((name) => name !== file)
-                                                          : [...selected, file],
-                                                  )
+                                                    selected.includes(file)
+                                                        ? selected.filter((name) => name !== file)
+                                                        : [...selected, file],
+                                                )
                                         }
                                         config={config}
                                     />
