@@ -75,7 +75,7 @@ export function validateLinuxFileName(name: string): boolean {
         return false;
     }
 
-    return name !== null && name.trim() !== "" && /^[0-9a-zA-Z-._]+$/.test(name);
+    return name !== null && name.trim() !== "" && /^[0-9a-zA-Z-._ ]+$/.test(name);
 }
 
 export function formatBitrate(bitrate: number): string {
