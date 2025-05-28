@@ -4,14 +4,34 @@
  * Repository: https://github.com/michioxd/nyaadenwa
  */
 
-import { Button, Card, Checkbox, DropdownMenu, IconButton, Progress, Spinner, Table, Tabs, Text, TextField } from "@radix-ui/themes";
+import {
+    Button,
+    Card,
+    Checkbox,
+    DropdownMenu,
+    IconButton,
+    Progress,
+    Spinner,
+    Table,
+    Tabs,
+    Text,
+    TextField,
+} from "@radix-ui/themes";
 import cls from "./pm.module.scss";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { PackageManager, PackageManagerListPackagesResult } from "@yume-chan/android-bin";
 import { Adb } from "@yume-chan/adb";
 import { useTranslation } from "react-i18next";
 import { HamburgerMenuIcon, MagnifyingGlassIcon } from "@radix-ui/react-icons";
-import { PiAndroidLogoDuotone, PiArrowDown, PiArrowsClockwise, PiArrowUp, PiLockDuotone, PiLockOpenDuotone, PiTrashDuotone } from "react-icons/pi";
+import {
+    PiAndroidLogoDuotone,
+    PiArrowDown,
+    PiArrowsClockwise,
+    PiArrowUp,
+    PiLockDuotone,
+    PiLockOpenDuotone,
+    PiTrashDuotone,
+} from "react-icons/pi";
 import useDialog, { DialogType } from "@/components/dialog/Dialog";
 import { toast } from "sonner";
 import { SingleUserOrAll } from "@yume-chan/android-bin/esm/utils";
@@ -36,7 +56,17 @@ function sortPackages(
     });
 }
 
-const InstallingApkDialog = ({ files, adb, onDone, config }: { files: File[], adb: Adb, onDone: () => void, config: TConfig }) => {
+const InstallingApkDialog = ({
+    files,
+    adb,
+    onDone,
+    config,
+}: {
+    files: File[];
+    adb: Adb;
+    onDone: () => void;
+    config: TConfig;
+}) => {
     const { t } = useTranslation();
     const [log, setLog] = useState<string[]>([]);
     const [installed, setInstalled] = useState({
@@ -47,7 +77,8 @@ const InstallingApkDialog = ({ files, adb, onDone, config }: { files: File[], ad
     useEffect(() => {
         const pm = new PackageManager(adb);
         (async () => {
-            let installedCount = 0, failedCount = 0;
+            let installedCount = 0,
+                failedCount = 0;
             for (const file of files) {
                 try {
                     //@ts-expect-error broken type
@@ -59,9 +90,7 @@ const InstallingApkDialog = ({ files, adb, onDone, config }: { files: File[], ad
                     installedCount++;
                 } catch (e) {
                     console.error(e);
-                    setLog((prev) => [...prev,
-                    `${file.name}: ${(e instanceof Error ? e.message : "Unknown error")}`
-                    ]);
+                    setLog((prev) => [...prev, `${file.name}: ${e instanceof Error ? e.message : "Unknown error"}`]);
                     setInstalled((prev) => ({ ...prev, failed: prev.failed + 1 }));
                     failedCount++;
                 }
@@ -69,37 +98,52 @@ const InstallingApkDialog = ({ files, adb, onDone, config }: { files: File[], ad
             if (installedCount === files.length) {
                 toast.success(t("installing_files_success"));
             } else {
-                toast.warning(t("installing_files_partially_failed", { installed: installedCount, failed: failedCount }));
+                toast.warning(
+                    t("installing_files_partially_failed", { installed: installedCount, failed: failedCount }),
+                );
             }
         })();
     }, []);
 
     return (
         <>
-            <Text size="2">{t("installing_files", { installed: installed.installed, total: files.length, failed: installed.failed })}</Text>
-            <Progress mt="2" value={installed.installed / files.length * 100} />
-            {installed.failed > 0 &&
-                <Text asChild size="1" mt="2" style={{
-                    background: 'rgba(128,128,128,0.3)',
-                    padding: '0.5rem',
-                    borderRadius: '6px',
-                    overflow: 'auto',
-                    maxHeight: '200px',
-                    whiteSpace: 'pre-wrap',
-                    wordBreak: 'break-all',
-                }}>
+            <Text size="2">
+                {t("installing_files", {
+                    installed: installed.installed,
+                    total: files.length,
+                    failed: installed.failed,
+                })}
+            </Text>
+            <Progress mt="2" value={(installed.installed / files.length) * 100} />
+            {installed.failed > 0 && (
+                <Text
+                    asChild
+                    size="1"
+                    mt="2"
+                    style={{
+                        background: "rgba(128,128,128,0.3)",
+                        padding: "0.5rem",
+                        borderRadius: "6px",
+                        overflow: "auto",
+                        maxHeight: "200px",
+                        whiteSpace: "pre-wrap",
+                        wordBreak: "break-all",
+                    }}
+                >
                     <pre>{log.join("\n")}</pre>
                 </Text>
-            }
+            )}
 
             {installed.installed + installed.failed === files.length && (
-                <Button variant="soft" style={{ width: '100%' }} onClick={onDone} mt="2">{t("close")}</Button>
+                <Button variant="soft" style={{ width: "100%" }} onClick={onDone} mt="2">
+                    {t("close")}
+                </Button>
             )}
         </>
-    )
-}
+    );
+};
 
-export default function ToolsAppManager({ adb, config }: { adb: Adb, config: TConfig }) {
+export default function ToolsAppManager({ adb, config }: { adb: Adb; config: TConfig }) {
     const { t } = useTranslation();
     const dialog = useDialog();
     const fileInputRef = useRef<HTMLInputElement>(null);
@@ -163,95 +207,101 @@ export default function ToolsAppManager({ adb, config }: { adb: Adb, config: TCo
         fileInput.click();
     }, []);
 
-    const handleActionSelected = useCallback(async (action: "uninstall" | "disable" | "enable", user: "all" | "current" | "specific") => {
-        if (selectedPackages.length === 0) return;
-        dialog.confirm(
-            t('confirm_selected_packages_' + action + '_title'),
-            t('confirm_selected_packages_' + action + '_description', { count: selectedPackages.length }),
-            async () => {
-                let userID: SingleUserOrAll = "all";
-                switch (user) {
-                    case "all":
-                        userID = "all";
-                        break;
-                    case "current":
-                        userID = "current";
-                        break;
-                    case "specific": {
-                        const getUid = (await (async () => new Promise<number | false>((res) => {
-                            dialog.prompt(
-                                t("specific_user_id"),
-                                t("specific_user_id_description"),
-                                [{
-                                    label: t("specific_user_id_label"),
-                                    placeholder: "0",
-                                    defaultValue: "0",
-                                    inputProps: {
-                                        type: "number",
-                                    },
-                                    validate: (value) => {
-                                        return !isNaN(Number(value));
-                                    }
-                                }],
-                                (value, close) => {
-                                    res(Number(value[0]));
-                                    close();
-                                },
-                                () => res(false)
-                            );
-                        }))());
-                        if (getUid === false) {
-                            toast.error(t("cancelled"));
-                            return;
-                        };
-                        userID = getUid;
-                        break;
-                    }
-                }
-
-                setIsLoading(true);
-                const pm = new PackageManager(adb);
-                try {
-                    for (const pkg of selectedPackages) {
-                        switch (action) {
-                            case "uninstall":
-                                await pm.uninstall(pkg.packageName, {
-                                    user: userID,
-                                });
-                                break;
-                            case "disable":
-                                if (userID === "all") {
-                                    await runAdbCmd(adb, `pm disable ${pkg.packageName}`);
-                                } else if (userID === "current") {
-                                    await runAdbCmd(adb, `pm disable-user ${pkg.packageName}`);
-                                } else {
-                                    await runAdbCmd(adb, `pm disable-user --user ${userID} ${pkg.packageName}`);
-                                }
-                                break;
-                            case "enable":
-                                if (userID === "all") {
-                                    await runAdbCmd(adb, `pm enable ${pkg.packageName}`);
-                                } else if (userID === "current") {
-                                    await runAdbCmd(adb, `pm enable-user ${pkg.packageName}`);
-                                } else {
-                                    await runAdbCmd(adb, `pm enable-user --user ${userID} ${pkg.packageName}`);
-                                }
-                                break;
-                            default:
-                                break;
+    const handleActionSelected = useCallback(
+        async (action: "uninstall" | "disable" | "enable", user: "all" | "current" | "specific") => {
+            if (selectedPackages.length === 0) return;
+            dialog.confirm(
+                t("confirm_selected_packages_" + action + "_title"),
+                t("confirm_selected_packages_" + action + "_description", { count: selectedPackages.length }),
+                async () => {
+                    let userID: SingleUserOrAll = "all";
+                    switch (user) {
+                        case "all":
+                            userID = "all";
+                            break;
+                        case "current":
+                            userID = "current";
+                            break;
+                        case "specific": {
+                            const getUid = await (async () =>
+                                new Promise<number | false>((res) => {
+                                    dialog.prompt(
+                                        t("specific_user_id"),
+                                        t("specific_user_id_description"),
+                                        [
+                                            {
+                                                label: t("specific_user_id_label"),
+                                                placeholder: "0",
+                                                defaultValue: "0",
+                                                inputProps: {
+                                                    type: "number",
+                                                },
+                                                validate: (value) => {
+                                                    return !isNaN(Number(value));
+                                                },
+                                            },
+                                        ],
+                                        (value, close) => {
+                                            res(Number(value[0]));
+                                            close();
+                                        },
+                                        () => res(false),
+                                    );
+                                }))();
+                            if (getUid === false) {
+                                toast.error(t("cancelled"));
+                                return;
+                            }
+                            userID = getUid;
+                            break;
                         }
                     }
-                    toast.success(t(`${action}_selected_packages_success`));
-                    handleGetPackages();
-                } catch (e) {
-                    console.error(e);
-                    toast.error(t(`error_while_performing_${action}_selected_packages`));
-                } finally {
-                    setIsLoading(false);
-                }
-            }
-        );
-    }, [selectedPackages, handleGetPackages, adb, t, dialog]);
+
+                    setIsLoading(true);
+                    const pm = new PackageManager(adb);
+                    try {
+                        for (const pkg of selectedPackages) {
+                            switch (action) {
+                                case "uninstall":
+                                    await pm.uninstall(pkg.packageName, {
+                                        user: userID,
+                                    });
+                                    break;
+                                case "disable":
+                                    if (userID === "all") {
+                                        await runAdbCmd(adb, `pm disable ${pkg.packageName}`);
+                                    } else if (userID === "current") {
+                                        await runAdbCmd(adb, `pm disable-user ${pkg.packageName}`);
+                                    } else {
+                                        await runAdbCmd(adb, `pm disable-user --user ${userID} ${pkg.packageName}`);
+                                    }
+                                    break;
+                                case "enable":
+                                    if (userID === "all") {
+                                        await runAdbCmd(adb, `pm enable ${pkg.packageName}`);
+                                    } else if (userID === "current") {
+                                        await runAdbCmd(adb, `pm enable-user ${pkg.packageName}`);
+                                    } else {
+                                        await runAdbCmd(adb, `pm enable-user --user ${userID} ${pkg.packageName}`);
+                                    }
+                                    break;
+                                default:
+                                    break;
+                            }
+                        }
+                        toast.success(t(`${action}_selected_packages_success`));
+                        handleGetPackages();
+                    } catch (e) {
+                        console.error(e);
+                        toast.error(t(`error_while_performing_${action}_selected_packages`));
+                    } finally {
+                        setIsLoading(false);
+                    }
+                },
+            );
+        },
+        [selectedPackages, handleGetPackages, adb, t, dialog],
+    );
 
     useEffect(() => {
         const handleChange = (e: Event) => {
@@ -264,12 +314,17 @@ export default function ToolsAppManager({ adb, config }: { adb: Adb, config: TCo
                     dialog.show({
                         type: DialogType.Alert,
                         title: t("installing_apk"),
-                        content: <InstallingApkDialog files={Array.from(files)} adb={adb} onDone={() => {
-                            dialog.close();
-                            handleGetPackages();
-                        }}
-                            config={config}
-                        />,
+                        content: (
+                            <InstallingApkDialog
+                                files={Array.from(files)}
+                                adb={adb}
+                                onDone={() => {
+                                    dialog.close();
+                                    handleGetPackages();
+                                }}
+                                config={config}
+                            />
+                        ),
                         buttons: () => <></>,
                     });
                 },
@@ -278,9 +333,9 @@ export default function ToolsAppManager({ adb, config }: { adb: Adb, config: TCo
                         fileInputRef.current.files = null;
                         fileInputRef.current.value = "";
                     }
-                }
-            )
-        }
+                },
+            );
+        };
 
         if (fileInputRef.current) {
             fileInputRef.current.addEventListener("change", handleChange);
@@ -289,7 +344,7 @@ export default function ToolsAppManager({ adb, config }: { adb: Adb, config: TCo
             if (fileInputRef.current) {
                 fileInputRef.current.removeEventListener("change", handleChange);
             }
-        }
+        };
     }, [adb, handleGetPackages, dialog, t, config]);
 
     useEffect(() => {
@@ -307,12 +362,7 @@ export default function ToolsAppManager({ adb, config }: { adb: Adb, config: TCo
 
     return (
         <div className={cls.pm}>
-            <input
-                type="file"
-                ref={fileInputRef}
-                multiple
-                accept=".apk, .apex, .zip"
-                style={{ display: "none" }} />
+            <input type="file" ref={fileInputRef} multiple accept=".apk, .apex, .zip" style={{ display: "none" }} />
             <Card size="1" variant="surface" className={cls.pmHeader}>
                 <TextField.Root
                     size="1"
@@ -330,7 +380,12 @@ export default function ToolsAppManager({ adb, config }: { adb: Adb, config: TCo
                 </TextField.Root>
                 <DropdownMenu.Root>
                     <DropdownMenu.Trigger disabled={isLoading}>
-                        <IconButton variant="soft" color={selectedPackages.length > 0 ? "cyan" : "gray"} size="1" disabled={isLoading}>
+                        <IconButton
+                            variant="soft"
+                            color={selectedPackages.length > 0 ? "cyan" : "gray"}
+                            size="1"
+                            disabled={isLoading}
+                        >
                             {isLoading ? <Spinner size="2" /> : <HamburgerMenuIcon />}
                         </IconButton>
                     </DropdownMenu.Trigger>
@@ -345,7 +400,7 @@ export default function ToolsAppManager({ adb, config }: { adb: Adb, config: TCo
                         </DropdownMenu.Item>
                         <DropdownMenu.Separator />
                         <DropdownMenu.Item disabled>
-                            {t('selected_count', { count: selectedPackages.length })}
+                            {t("selected_count", { count: selectedPackages.length })}
                         </DropdownMenu.Item>
                         <DropdownMenu.Sub>
                             <DropdownMenu.SubTrigger disabled={selectedPackages.length === 0}>
@@ -353,43 +408,33 @@ export default function ToolsAppManager({ adb, config }: { adb: Adb, config: TCo
                                 {t("uninstall")}
                             </DropdownMenu.SubTrigger>
                             <DropdownMenu.SubContent>
-                                <DropdownMenu.Item
-                                    onClick={() => handleActionSelected("uninstall", "all")}
-                                >
-                                    {t('all_users')}
+                                <DropdownMenu.Item onClick={() => handleActionSelected("uninstall", "all")}>
+                                    {t("all_users")}
                                 </DropdownMenu.Item>
-                                <DropdownMenu.Item
-                                    onClick={() => handleActionSelected("uninstall", "current")}
-                                >
-                                    {t('current_user')}
+                                <DropdownMenu.Item onClick={() => handleActionSelected("uninstall", "current")}>
+                                    {t("current_user")}
                                 </DropdownMenu.Item>
-                                <DropdownMenu.Item
-                                    onClick={() => handleActionSelected("uninstall", "specific")}
-                                >
-                                    {t('specific_user_id')}
+                                <DropdownMenu.Item onClick={() => handleActionSelected("uninstall", "specific")}>
+                                    {t("specific_user_id")}
                                 </DropdownMenu.Item>
                             </DropdownMenu.SubContent>
                         </DropdownMenu.Sub>
                         <DropdownMenu.Sub>
-                            <DropdownMenu.SubTrigger disabled={selectedPackages.length === 0 || tabValue === "disabled"}>
+                            <DropdownMenu.SubTrigger
+                                disabled={selectedPackages.length === 0 || tabValue === "disabled"}
+                            >
                                 <PiLockDuotone size={18} />
                                 {t("disable")}
                             </DropdownMenu.SubTrigger>
                             <DropdownMenu.SubContent>
-                                <DropdownMenu.Item
-                                    onClick={() => handleActionSelected("disable", "all")}
-                                >
-                                    {t('all_users_need_su')}
+                                <DropdownMenu.Item onClick={() => handleActionSelected("disable", "all")}>
+                                    {t("all_users_need_su")}
                                 </DropdownMenu.Item>
-                                <DropdownMenu.Item
-                                    onClick={() => handleActionSelected("disable", "current")}
-                                >
-                                    {t('current_user')}
+                                <DropdownMenu.Item onClick={() => handleActionSelected("disable", "current")}>
+                                    {t("current_user")}
                                 </DropdownMenu.Item>
-                                <DropdownMenu.Item
-                                    onClick={() => handleActionSelected("disable", "specific")}
-                                >
-                                    {t('specific_user_id')}
+                                <DropdownMenu.Item onClick={() => handleActionSelected("disable", "specific")}>
+                                    {t("specific_user_id")}
                                 </DropdownMenu.Item>
                             </DropdownMenu.SubContent>
                         </DropdownMenu.Sub>
@@ -399,20 +444,14 @@ export default function ToolsAppManager({ adb, config }: { adb: Adb, config: TCo
                                 {t("enable")}
                             </DropdownMenu.SubTrigger>
                             <DropdownMenu.SubContent>
-                                <DropdownMenu.Item
-                                    onClick={() => handleActionSelected("enable", "all")}
-                                >
-                                    {t('all_users_need_su')}
+                                <DropdownMenu.Item onClick={() => handleActionSelected("enable", "all")}>
+                                    {t("all_users_need_su")}
                                 </DropdownMenu.Item>
-                                <DropdownMenu.Item
-                                    onClick={() => handleActionSelected("enable", "current")}
-                                >
-                                    {t('current_user')}
+                                <DropdownMenu.Item onClick={() => handleActionSelected("enable", "current")}>
+                                    {t("current_user")}
                                 </DropdownMenu.Item>
-                                <DropdownMenu.Item
-                                    onClick={() => handleActionSelected("enable", "specific")}
-                                >
-                                    {t('specific_user_id')}
+                                <DropdownMenu.Item onClick={() => handleActionSelected("enable", "specific")}>
+                                    {t("specific_user_id")}
                                 </DropdownMenu.Item>
                             </DropdownMenu.SubContent>
                         </DropdownMenu.Sub>
@@ -462,8 +501,8 @@ export default function ToolsAppManager({ adb, config }: { adb: Adb, config: TCo
                                     listPackages.length > 0 && selectedPackages.length === listPackages.length
                                         ? true
                                         : selectedPackages.length > 0
-                                            ? "indeterminate"
-                                            : false
+                                          ? "indeterminate"
+                                          : false
                                 }
                                 onCheckedChange={(checked) => {
                                     if (checked) {

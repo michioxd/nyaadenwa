@@ -130,8 +130,8 @@ const ScreenDevice = observer(
                 usbDetails
                     ? `${usbDetails?.name} (${usbDetails?.serial})`
                     : webSocketURL
-                        ? `${webSocketURL} (WebSocket)`
-                        : "Unknown",
+                      ? `${webSocketURL} (WebSocket)`
+                      : "Unknown",
             [usbDetails, webSocketURL],
         );
 

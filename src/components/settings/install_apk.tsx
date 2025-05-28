@@ -593,7 +593,11 @@ export default function SettingsInstallApk({
                         description={t("install_apk_cfg_user_description")}
                     >
                         <Select.Root
-                            value={typeof config.install_apk.options.user === "number" ? "uid" : config.install_apk.options.user}
+                            value={
+                                typeof config.install_apk.options.user === "number"
+                                    ? "uid"
+                                    : config.install_apk.options.user
+                            }
                             onValueChange={(value) => {
                                 setConfig((p) => ({
                                     ...p,
@@ -601,7 +605,7 @@ export default function SettingsInstallApk({
                                         ...p.install_apk,
                                         options: {
                                             ...p.install_apk.options,
-                                            user: value === "uid" ? 0 : value as SingleUserOrAll,
+                                            user: value === "uid" ? 0 : (value as SingleUserOrAll),
                                         },
                                     },
                                 }));
@@ -624,7 +628,10 @@ export default function SettingsInstallApk({
                                         ...p,
                                         install_apk: {
                                             ...p.install_apk,
-                                            options: { ...p.install_apk.options, user: parseInt(e.target.value) as SingleUserOrAll },
+                                            options: {
+                                                ...p.install_apk.options,
+                                                user: parseInt(e.target.value) as SingleUserOrAll,
+                                            },
                                         },
                                     }));
                                 }}

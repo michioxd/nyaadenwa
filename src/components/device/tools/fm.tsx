@@ -1202,10 +1202,10 @@ function FileManager({ adb, deviceHash, config }: { adb: Adb; deviceHash: string
                                             listFiles.length + listFolders.length <= 0
                                                 ? false
                                                 : selected.length === listFiles.length + listFolders.length
-                                                    ? true
-                                                    : selected.length > 0
-                                                        ? "indeterminate"
-                                                        : false
+                                                  ? true
+                                                  : selected.length > 0
+                                                    ? "indeterminate"
+                                                    : false
                                         }
                                     />
                                 </Table.ColumnHeaderCell>
@@ -1326,10 +1326,10 @@ function FileManager({ adb, deviceHash, config }: { adb: Adb; deviceHash: string
                                             one
                                                 ? setSelected([file])
                                                 : setSelected(
-                                                    selected.includes(file)
-                                                        ? selected.filter((name) => name !== file)
-                                                        : [...selected, file],
-                                                )
+                                                      selected.includes(file)
+                                                          ? selected.filter((name) => name !== file)
+                                                          : [...selected, file],
+                                                  )
                                         }
                                         config={config}
                                     />
@@ -1371,10 +1371,10 @@ function FileManager({ adb, deviceHash, config }: { adb: Adb; deviceHash: string
                                             one
                                                 ? setSelected([file])
                                                 : setSelected(
-                                                    selected.includes(file)
-                                                        ? selected.filter((name) => name !== file)
-                                                        : [...selected, file],
-                                                )
+                                                      selected.includes(file)
+                                                          ? selected.filter((name) => name !== file)
+                                                          : [...selected, file],
+                                                  )
                                         }
                                         config={config}
                                     />

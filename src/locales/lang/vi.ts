@@ -293,7 +293,8 @@ const Locale: LocaleResourcesType = {
         install_apk_cfg_use_options: "Sử dụng tùy chọn nâng cao",
         install_apk_cfg_use_options_description:
             "Sử dụng các tùy chọn này để tùy chỉnh quá trình cài đặt. Nếu bạn không biết các tùy chọn này là gì, hãy để nó là mặc định.",
-        install_apk_cfg_more_info_link: "Thông tin chi tiết về các tùy chọn này có thể được tìm thấy trong <0>tệp này</0>",
+        install_apk_cfg_more_info_link:
+            "Thông tin chi tiết về các tùy chọn này có thể được tìm thấy trong <0>tệp này</0>",
         install_apk_cfg_abi: "ABI",
         install_apk_cfg_abi_description: "Ghi đè ABI mặc định của nền tảng",
         install_apk_cfg_allow_test: "Cho phép gói thử nghiệm",
@@ -360,7 +361,8 @@ const Locale: LocaleResourcesType = {
         disable: "Tắt",
         enable: "Bật",
         confirm_selected_packages_uninstall_title: "Gỡ cài đặt các gói đã chọn",
-        confirm_selected_packages_uninstall_description: "Bạn có chắc chắn muốn gỡ cài đặt {{count}} gói đã chọn này không?",
+        confirm_selected_packages_uninstall_description:
+            "Bạn có chắc chắn muốn gỡ cài đặt {{count}} gói đã chọn này không?",
         confirm_selected_packages_disable_title: "Tắt các gói đã chọn",
         confirm_selected_packages_disable_description: "Bạn có chắc chắn muốn tắt {{count}} gói đã chọn này không?",
         confirm_selected_packages_enable_title: "Bật các gói đã chọn",
@@ -383,7 +385,8 @@ const Locale: LocaleResourcesType = {
         install_apk_from_file_description: "Bạn có chắc chắn muốn cài đặt các tệp đã chọn lên thiết bị này không?",
         installing_file_failed: "Không thể cài đặt tệp {{name}} ({{error}})",
         installing_files_success: "Cài đặt thành công",
-        installing_files_partially_failed: "Cài đặt không thành công. Đã cài đặt {{installed}} tệp, {{failed}} tệp không thành công",
+        installing_files_partially_failed:
+            "Cài đặt không thành công. Đã cài đặt {{installed}} tệp, {{failed}} tệp không thành công",
     },
 };
 

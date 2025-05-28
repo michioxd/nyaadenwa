@@ -358,7 +358,8 @@ const Locale: LocaleResourcesType = {
         disable: "Disable",
         enable: "Enable",
         confirm_selected_packages_uninstall_title: "Uninstall selected packages",
-        confirm_selected_packages_uninstall_description: "Are you sure you want to uninstall {{count}} selected packages?",
+        confirm_selected_packages_uninstall_description:
+            "Are you sure you want to uninstall {{count}} selected packages?",
         confirm_selected_packages_disable_title: "Disable selected packages",
         confirm_selected_packages_disable_description: "Are you sure you want to disable {{count}} selected packages?",
         confirm_selected_packages_enable_title: "Enable selected packages",
@@ -370,8 +371,10 @@ const Locale: LocaleResourcesType = {
         uninstall_selected_packages_success: "Uninstall selected packages successful",
         disable_selected_packages_success: "Disable selected packages successful",
         enable_selected_packages_success: "Enable selected packages successful",
-        error_while_performing_uninstall_selected_packages: "An error occurred while performing uninstall selected packages",
-        error_while_performing_disable_selected_packages: "An error occurred while performing disable selected packages",
+        error_while_performing_uninstall_selected_packages:
+            "An error occurred while performing uninstall selected packages",
+        error_while_performing_disable_selected_packages:
+            "An error occurred while performing disable selected packages",
         error_while_performing_enable_selected_packages: "An error occurred while performing enable selected packages",
         specific_user_id_label: "User ID",
         specific_user_id_description: "Enter the user ID to perform the action on the selected packages",
@@ -381,7 +384,8 @@ const Locale: LocaleResourcesType = {
         install_apk_from_file_description: "Are you sure you want to install the selected files to this device?",
         installing_file_failed: "Failed to install file {{name}} ({{error}})",
         installing_files_success: "Install files successful",
-        installing_files_partially_failed: "Install files partially failed. {{installed}} files installed, {{failed}} files failed",
+        installing_files_partially_failed:
+            "Install files partially failed. {{installed}} files installed, {{failed}} files failed",
     },
 };
 

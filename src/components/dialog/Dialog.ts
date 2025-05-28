@@ -15,11 +15,11 @@ export enum DialogType {
 
 export const DialogContext = createContext<DialogContextType>({
     dialog: {
-        alert: () => { },
-        confirm: () => { },
-        prompt: () => { },
-        show: () => { },
-        close: () => { },
+        alert: () => {},
+        confirm: () => {},
+        prompt: () => {},
+        show: () => {},
+        close: () => {},
     },
 });
 
