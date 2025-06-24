@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2025 michioxd
- * Released under MIT license. See LICENSE for more details.
+ * Released under GNU General Public License 3.0. See LICENSE for more details.
  * Repository: https://github.com/michioxd/nyaadenwa
  */
 
@@ -22,7 +22,7 @@ export default function About() {
                 </Flex>
             </Link>
             <Text color="gray" mt="2" size="1">
-                &copy; 2025 michioxd powered. {t("released_under_mit_license")}.{" "}
+                &copy; 2025 michioxd powered. {t("released_under_gpl_license")}.{" "}
                 <Link color="gray" href="https://github.com/michioxd/nyaadenwa/graphs/contributors" target="_blank">
                     {t("all_contributors")} <ExternalLinkIcon />
                 </Link>

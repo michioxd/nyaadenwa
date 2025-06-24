@@ -49,7 +49,7 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## License
 
-This project is licensed under the terms of the MIT license included in the repository.
+This project is licensed under the terms of the GNU General Public License (GPL) 3.0 license included in the repository.
 
 ## Acknowledgments
 

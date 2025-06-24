@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2025 michioxd
- * Released under MIT license. See LICENSE for more details.
+ * Released under GNU General Public License 3.0. See LICENSE for more details.
  * Repository: https://github.com/michioxd/nyaadenwa
  */
 
@@ -29,7 +29,7 @@ const Locale: LocaleResourcesType = {
         welcome_manual: "Nhấn nút <0></0> để bắt đầu",
         fork_github: "Fork nyaadenwa trên GitHub",
         github_repo: "Kho lưu trữ trên GitHub",
-        released_under_mit_license: "Được phát hành dưới Giấy phép MIT",
+        released_under_gpl_license: "Được phát hành dưới Giấy phép GPL 3.0",
         ok: "OK",
         cancel: "Hủy",
         confirm: "Xác nhận",

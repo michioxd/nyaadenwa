@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2025 michioxd
- * Released under MIT license. See LICENSE for more details.
+ * Released under GNU General Public License 3.0. See LICENSE for more details.
  * Repository: https://github.com/michioxd/nyaadenwa
  */
 
@@ -664,7 +664,10 @@ function FileManager({ adb, deviceHash, config }: { adb: Adb; deviceHash: string
                     close();
                     try {
                         setIsLoading(true);
-                        await runAdbCmd(adb, type === "folder" ? `mkdir -p "${path}/${name}"` : `touch "${path}/${name}"`);
+                        await runAdbCmd(
+                            adb,
+                            type === "folder" ? `mkdir -p "${path}/${name}"` : `touch "${path}/${name}"`,
+                        );
                         handleListFiles();
                     } catch (error) {
                         console.error(error);
@@ -1210,10 +1213,10 @@ function FileManager({ adb, deviceHash, config }: { adb: Adb; deviceHash: string
                                             listFiles.length + listFolders.length <= 0
                                                 ? false
                                                 : selected.length === listFiles.length + listFolders.length
-                                                    ? true
-                                                    : selected.length > 0
-                                                        ? "indeterminate"
-                                                        : false
+                                                  ? true
+                                                  : selected.length > 0
+                                                    ? "indeterminate"
+                                                    : false
                                         }
                                     />
                                 </Table.ColumnHeaderCell>
@@ -1335,10 +1338,10 @@ function FileManager({ adb, deviceHash, config }: { adb: Adb; deviceHash: string
                                             one
                                                 ? setSelected([file])
                                                 : setSelected(
-                                                    selected.includes(file)
-                                                        ? selected.filter((name) => name !== file)
-                                                        : [...selected, file],
-                                                )
+                                                      selected.includes(file)
+                                                          ? selected.filter((name) => name !== file)
+                                                          : [...selected, file],
+                                                  )
                                         }
                                         config={config}
                                     />
@@ -1381,10 +1384,10 @@ function FileManager({ adb, deviceHash, config }: { adb: Adb; deviceHash: string
                                             one
                                                 ? setSelected([file])
                                                 : setSelected(
-                                                    selected.includes(file)
-                                                        ? selected.filter((name) => name !== file)
-                                                        : [...selected, file],
-                                                )
+                                                      selected.includes(file)
+                                                          ? selected.filter((name) => name !== file)
+                                                          : [...selected, file],
+                                                  )
                                         }
                                         config={config}
                                     />

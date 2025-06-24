@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2025 michioxd
- * Released under MIT license. See LICENSE for more details.
+ * Released under GNU General Public License 3.0. See LICENSE for more details.
  * Repository: https://github.com/michioxd/nyaadenwa
  */
 
@@ -29,7 +29,7 @@ const Locale: LocaleResourcesType = {
         welcome_manual: "Click the <0></0> button to get started",
         fork_github: "Fork nyaadenwa on GitHub",
         github_repo: "GitHub repository",
-        released_under_mit_license: "Released under MIT license",
+        released_under_gpl_license: "Released under GPL 3.0 license",
         ok: "OK",
         cancel: "Cancel",
         confirm: "Confirm",

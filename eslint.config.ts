@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2025 michioxd
- * Released under MIT license. See LICENSE for more details.
+ * Released under GNU General Public License 3.0. See LICENSE for more details.
  * Repository: https://github.com/michioxd/nyaadenwa
  */
 
@@ -36,7 +36,7 @@ export default tseslint.config(
                 {
                     text: [
                         "Copyright (c) {year} {author}",
-                        "Released under MIT license. See LICENSE for more details.",
+                        "Released under GNU General Public License 3.0. See LICENSE for more details.",
                         "Repository: https://github.com/michioxd/nyaadenwa",
                     ],
                     templates: { author: [".*", "michioxd"] },
